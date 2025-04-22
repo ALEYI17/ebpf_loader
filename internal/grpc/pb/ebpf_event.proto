@@ -1,0 +1,49 @@
+syntax= "proto3";
+
+package pb;
+
+option go_package = "ebpf_loader/internal/grpc/pb;pb";
+
+message OpenEvent {
+  uint32 pid = 1;
+  uint32 uid = 2;
+  string comm = 3;
+  string filename = 4;
+  int32 flags = 5;
+  int64 return_code = 6;
+  uint64 timestamp_ns = 7;
+  uint64 timestamp_ns_exit = 8;
+  uint64 latency_ns = 9;
+}
+
+message ExecveEvent {
+  uint32 pid = 1;
+  uint32 uid = 2;
+  string comm = 3;
+  string filename = 4;
+  repeated string argv = 5;
+  int64 return_code = 6;
+  uint64 timestamp_ns = 7;
+  uint64 latency_ns = 8;
+}
+
+message EbpfEvent {
+  oneof event {
+    OpenEvent open_event = 1;
+    ExecveEvent execve_event = 2; 
+  }
+  string node_name = 10;
+}
+
+message EbpfEventBatch {
+  repeated EbpfEvent events = 1;
+}
+
+message CollectorAck {
+  string status = 1;
+  string message = 2;
+}
+
+service EventCollector {
+  rpc SendEvents(EbpfEventBatch) returns (CollectorAck);
+}
