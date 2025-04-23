@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/pkg/programs"
+	"fmt"
 	"time"
 
 	"google.golang.org/grpc"
@@ -44,6 +46,18 @@ func (c *Client) SendEventMessage(ctx context.Context, batch *pb.EbpfEvent) (*pb
   return resp,nil
 }
 
-func (c *Client) Run() error{
-  return nil
+func (c *Client) Run(ctx context.Context, loader programs.Load_tracer,nodeName string) error{
+  openLoader:= loader.Run(ctx, nodeName)
+  
+  for{
+    select{
+      case <- ctx.Done():
+        fmt.Printf("Client received cancellation signal")
+        loader.Close()
+        return nil
+
+    case event:= <- openLoader:
+      c.SendEventMessage(ctx, event)
+    }
+  }
 } 

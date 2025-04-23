@@ -22,8 +22,8 @@ import (
 //   }
 // }
 
-func GenerateGrpcMessage(raw OpentracerOpenEvent, nodeName string) pb.EbpfEvent {
-  return pb.EbpfEvent{
+func GenerateGrpcMessage(raw OpentracerOpenEvent, nodeName string) *pb.EbpfEvent {
+  return &pb.EbpfEvent{
     Event: &pb.EbpfEvent_OpenEvent{
       OpenEvent: &pb.OpenEvent{
         Pid:             raw.Pid,
