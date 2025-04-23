@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EventCollectorClient interface {
-	SendEvents(ctx context.Context, in *EbpfEventBatch, opts ...grpc.CallOption) (*CollectorAck, error)
+	SendEvents(ctx context.Context, in *EbpfEvent, opts ...grpc.CallOption) (*CollectorAck, error)
 }
 
 type eventCollectorClient struct {
@@ -37,7 +37,7 @@ func NewEventCollectorClient(cc grpc.ClientConnInterface) EventCollectorClient {
 	return &eventCollectorClient{cc}
 }
 
-func (c *eventCollectorClient) SendEvents(ctx context.Context, in *EbpfEventBatch, opts ...grpc.CallOption) (*CollectorAck, error) {
+func (c *eventCollectorClient) SendEvents(ctx context.Context, in *EbpfEvent, opts ...grpc.CallOption) (*CollectorAck, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CollectorAck)
 	err := c.cc.Invoke(ctx, EventCollector_SendEvents_FullMethodName, in, out, cOpts...)
@@ -51,7 +51,7 @@ func (c *eventCollectorClient) SendEvents(ctx context.Context, in *EbpfEventBatc
 // All implementations must embed UnimplementedEventCollectorServer
 // for forward compatibility.
 type EventCollectorServer interface {
-	SendEvents(context.Context, *EbpfEventBatch) (*CollectorAck, error)
+	SendEvents(context.Context, *EbpfEvent) (*CollectorAck, error)
 	mustEmbedUnimplementedEventCollectorServer()
 }
 
@@ -62,7 +62,7 @@ type EventCollectorServer interface {
 // pointer dereference when methods are called.
 type UnimplementedEventCollectorServer struct{}
 
-func (UnimplementedEventCollectorServer) SendEvents(context.Context, *EbpfEventBatch) (*CollectorAck, error) {
+func (UnimplementedEventCollectorServer) SendEvents(context.Context, *EbpfEvent) (*CollectorAck, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendEvents not implemented")
 }
 func (UnimplementedEventCollectorServer) mustEmbedUnimplementedEventCollectorServer() {}
@@ -87,7 +87,7 @@ func RegisterEventCollectorServer(s grpc.ServiceRegistrar, srv EventCollectorSer
 }
 
 func _EventCollector_SendEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EbpfEventBatch)
+	in := new(EbpfEvent)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func _EventCollector_SendEvents_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: EventCollector_SendEvents_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventCollectorServer).SendEvents(ctx, req.(*EbpfEventBatch))
+		return srv.(EventCollectorServer).SendEvents(ctx, req.(*EbpfEvent))
 	}
 	return interceptor(ctx, in, info, handler)
 }

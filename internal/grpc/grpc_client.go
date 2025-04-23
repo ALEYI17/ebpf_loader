@@ -31,7 +31,7 @@ func (c *Client) Close() error{
   return c.conn.Close()
 }
 
-func (c *Client) SendEventMessage(ctx context.Context, batch *pb.EbpfEventBatch) (*pb.CollectorAck,error){
+func (c *Client) SendEventMessage(ctx context.Context, batch *pb.EbpfEvent) (*pb.CollectorAck,error){
 
   ctx, cancel := context.WithTimeout(ctx, time.Second*5)
   defer cancel()
@@ -44,3 +44,6 @@ func (c *Client) SendEventMessage(ctx context.Context, batch *pb.EbpfEventBatch)
   return resp,nil
 }
 
+func (c *Client) Run() error{
+  return nil
+} 

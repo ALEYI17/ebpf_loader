@@ -131,14 +131,14 @@ func (x *OpenEvent) GetLatencyNs() uint64 {
 
 type ExecveEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pid           uint32                 `protobuf:"varint,1,opt,name=pid,proto3" json:"pid,omitempty"`
-	Uid           uint32                 `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty"`
-	Comm          string                 `protobuf:"bytes,3,opt,name=comm,proto3" json:"comm,omitempty"`
-	Filename      string                 `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
-	Argv          []string               `protobuf:"bytes,5,rep,name=argv,proto3" json:"argv,omitempty"`
-	ReturnCode    int64                  `protobuf:"varint,6,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
-	TimestampNs   uint64                 `protobuf:"varint,7,opt,name=timestamp_ns,json=timestampNs,proto3" json:"timestamp_ns,omitempty"`
-	LatencyNs     uint64                 `protobuf:"varint,8,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
+	Pid           uint32                 `protobuf:"varint,10,opt,name=pid,proto3" json:"pid,omitempty"`
+	Uid           uint32                 `protobuf:"varint,11,opt,name=uid,proto3" json:"uid,omitempty"`
+	Comm          string                 `protobuf:"bytes,12,opt,name=comm,proto3" json:"comm,omitempty"`
+	Filename      string                 `protobuf:"bytes,13,opt,name=filename,proto3" json:"filename,omitempty"`
+	Argv          []string               `protobuf:"bytes,14,rep,name=argv,proto3" json:"argv,omitempty"`
+	ReturnCode    int64                  `protobuf:"varint,15,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	TimestampNs   uint64                 `protobuf:"varint,16,opt,name=timestamp_ns,json=timestampNs,proto3" json:"timestamp_ns,omitempty"`
+	LatencyNs     uint64                 `protobuf:"varint,17,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -236,7 +236,7 @@ type EbpfEvent struct {
 	//	*EbpfEvent_OpenEvent
 	//	*EbpfEvent_ExecveEvent
 	Event         isEbpfEvent_Event `protobuf_oneof:"event"`
-	NodeName      string            `protobuf:"bytes,10,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
+	NodeName      string            `protobuf:"bytes,20,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -308,72 +308,28 @@ type isEbpfEvent_Event interface {
 }
 
 type EbpfEvent_OpenEvent struct {
-	OpenEvent *OpenEvent `protobuf:"bytes,1,opt,name=open_event,json=openEvent,proto3,oneof"`
+	OpenEvent *OpenEvent `protobuf:"bytes,18,opt,name=open_event,json=openEvent,proto3,oneof"`
 }
 
 type EbpfEvent_ExecveEvent struct {
-	ExecveEvent *ExecveEvent `protobuf:"bytes,2,opt,name=execve_event,json=execveEvent,proto3,oneof"`
+	ExecveEvent *ExecveEvent `protobuf:"bytes,19,opt,name=execve_event,json=execveEvent,proto3,oneof"`
 }
 
 func (*EbpfEvent_OpenEvent) isEbpfEvent_Event() {}
 
 func (*EbpfEvent_ExecveEvent) isEbpfEvent_Event() {}
 
-type EbpfEventBatch struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Events        []*EbpfEvent           `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *EbpfEventBatch) Reset() {
-	*x = EbpfEventBatch{}
-	mi := &file_ebpf_event_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *EbpfEventBatch) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EbpfEventBatch) ProtoMessage() {}
-
-func (x *EbpfEventBatch) ProtoReflect() protoreflect.Message {
-	mi := &file_ebpf_event_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use EbpfEventBatch.ProtoReflect.Descriptor instead.
-func (*EbpfEventBatch) Descriptor() ([]byte, []int) {
-	return file_ebpf_event_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *EbpfEventBatch) GetEvents() []*EbpfEvent {
-	if x != nil {
-		return x.Events
-	}
-	return nil
-}
-
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,21,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,22,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CollectorAck) Reset() {
 	*x = CollectorAck{}
-	mi := &file_ebpf_event_proto_msgTypes[4]
+	mi := &file_ebpf_event_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -385,7 +341,7 @@ func (x *CollectorAck) String() string {
 func (*CollectorAck) ProtoMessage() {}
 
 func (x *CollectorAck) ProtoReflect() protoreflect.Message {
-	mi := &file_ebpf_event_proto_msgTypes[4]
+	mi := &file_ebpf_event_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -398,7 +354,7 @@ func (x *CollectorAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CollectorAck.ProtoReflect.Descriptor instead.
 func (*CollectorAck) Descriptor() ([]byte, []int) {
-	return file_ebpf_event_proto_rawDescGZIP(), []int{4}
+	return file_ebpf_event_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CollectorAck) GetStatus() string {
@@ -433,31 +389,29 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
 	"latency_ns\x18\t \x01(\x04R\tlatencyNs\"\xd8\x01\n" +
 	"\vExecveEvent\x12\x10\n" +
-	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
-	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
-	"\x04comm\x18\x03 \x01(\tR\x04comm\x12\x1a\n" +
-	"\bfilename\x18\x04 \x01(\tR\bfilename\x12\x12\n" +
-	"\x04argv\x18\x05 \x03(\tR\x04argv\x12\x1f\n" +
-	"\vreturn_code\x18\x06 \x01(\x03R\n" +
+	"\x03pid\x18\n" +
+	" \x01(\rR\x03pid\x12\x10\n" +
+	"\x03uid\x18\v \x01(\rR\x03uid\x12\x12\n" +
+	"\x04comm\x18\f \x01(\tR\x04comm\x12\x1a\n" +
+	"\bfilename\x18\r \x01(\tR\bfilename\x12\x12\n" +
+	"\x04argv\x18\x0e \x03(\tR\x04argv\x12\x1f\n" +
+	"\vreturn_code\x18\x0f \x01(\x03R\n" +
 	"returnCode\x12!\n" +
-	"\ftimestamp_ns\x18\a \x01(\x04R\vtimestampNs\x12\x1d\n" +
+	"\ftimestamp_ns\x18\x10 \x01(\x04R\vtimestampNs\x12\x1d\n" +
 	"\n" +
-	"latency_ns\x18\b \x01(\x04R\tlatencyNs\"\x97\x01\n" +
+	"latency_ns\x18\x11 \x01(\x04R\tlatencyNs\"\x97\x01\n" +
 	"\tEbpfEvent\x12.\n" +
 	"\n" +
-	"open_event\x18\x01 \x01(\v2\r.pb.OpenEventH\x00R\topenEvent\x124\n" +
-	"\fexecve_event\x18\x02 \x01(\v2\x0f.pb.ExecveEventH\x00R\vexecveEvent\x12\x1b\n" +
-	"\tnode_name\x18\n" +
-	" \x01(\tR\bnodeNameB\a\n" +
-	"\x05event\"7\n" +
-	"\x0eEbpfEventBatch\x12%\n" +
-	"\x06events\x18\x01 \x03(\v2\r.pb.EbpfEventR\x06events\"@\n" +
+	"open_event\x18\x12 \x01(\v2\r.pb.OpenEventH\x00R\topenEvent\x124\n" +
+	"\fexecve_event\x18\x13 \x01(\v2\x0f.pb.ExecveEventH\x00R\vexecveEvent\x12\x1b\n" +
+	"\tnode_name\x18\x14 \x01(\tR\bnodeNameB\a\n" +
+	"\x05event\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2D\n" +
-	"\x0eEventCollector\x122\n" +
+	"\x06status\x18\x15 \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x18\x16 \x01(\tR\amessage2?\n" +
+	"\x0eEventCollector\x12-\n" +
 	"\n" +
-	"SendEvents\x12\x12.pb.EbpfEventBatch\x1a\x10.pb.CollectorAckB!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
+	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAckB!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
 
 var (
 	file_ebpf_event_proto_rawDescOnce sync.Once
@@ -471,25 +425,23 @@ func file_ebpf_event_proto_rawDescGZIP() []byte {
 	return file_ebpf_event_proto_rawDescData
 }
 
-var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_ebpf_event_proto_goTypes = []any{
-	(*OpenEvent)(nil),      // 0: pb.OpenEvent
-	(*ExecveEvent)(nil),    // 1: pb.ExecveEvent
-	(*EbpfEvent)(nil),      // 2: pb.EbpfEvent
-	(*EbpfEventBatch)(nil), // 3: pb.EbpfEventBatch
-	(*CollectorAck)(nil),   // 4: pb.CollectorAck
+	(*OpenEvent)(nil),    // 0: pb.OpenEvent
+	(*ExecveEvent)(nil),  // 1: pb.ExecveEvent
+	(*EbpfEvent)(nil),    // 2: pb.EbpfEvent
+	(*CollectorAck)(nil), // 3: pb.CollectorAck
 }
 var file_ebpf_event_proto_depIdxs = []int32{
 	0, // 0: pb.EbpfEvent.open_event:type_name -> pb.OpenEvent
 	1, // 1: pb.EbpfEvent.execve_event:type_name -> pb.ExecveEvent
-	2, // 2: pb.EbpfEventBatch.events:type_name -> pb.EbpfEvent
-	3, // 3: pb.EventCollector.SendEvents:input_type -> pb.EbpfEventBatch
-	4, // 4: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 2: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
+	3, // 3: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_ebpf_event_proto_init() }
@@ -507,7 +459,7 @@ func file_ebpf_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ebpf_event_proto_rawDesc), len(file_ebpf_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
