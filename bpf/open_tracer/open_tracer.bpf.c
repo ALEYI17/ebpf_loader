@@ -10,7 +10,7 @@
 
 char __license[] SEC("license") = "Dual MIT/GPL";
 
-struct open_event{
+struct Open_event{
   u32 pid;
   u32 uid;
   u8 comm[TASK_COMM_SIZE];
@@ -30,15 +30,15 @@ struct {
 struct{
   __uint(type, BPF_MAP_TYPE_HASH);
   __type(key, u64);
-  __type(value, struct open_event);
+  __type(value, struct Open_event);
   __uint(max_entries, 1024);
 } start_events SEC(".maps");
 
-const struct open_event *unused __attribute__((unused));
+const struct Open_event *unused __attribute__((unused));
 
 SEC("tracepoint/syscalls/sys_enter_openat")
 int handle_enter_openat( struct trace_event_raw_sys_enter *ctx){
-  struct open_event event = {};
+  struct Open_event event = {};
   
   u64 pid_tgid = bpf_get_current_pid_tgid();
 
@@ -67,7 +67,7 @@ int handle_enter_openat( struct trace_event_raw_sys_enter *ctx){
 SEC("tracepoint/syscalls/sys_exit_openat")
 int handle_exit_openat(struct trace_event_raw_sys_exit *ctx){
   
-  struct open_event *event;
+  struct Open_event *event;
 
   u64 pid_tgid = bpf_get_current_pid_tgid();
 
@@ -75,9 +75,9 @@ int handle_exit_openat(struct trace_event_raw_sys_exit *ctx){
   if (!event)
     return 0;
 
-  struct open_event *final_event;
+  struct Open_event *final_event;
 
-  final_event = bpf_ringbuf_reserve(&events,sizeof(struct open_event),0);
+  final_event = bpf_ringbuf_reserve(&events,sizeof(struct Open_event),0);
 
   if(!final_event) return 0;
 
