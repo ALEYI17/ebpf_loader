@@ -27,7 +27,7 @@ func NewExecvetracerLoader() (*Execvetransferloader,error){
   }
 
   objs := execvetracer.ExecvetracerObjects{}
-  if err := execvetracer.LoadExecvetracerObjects(objs, nil);err!=nil{
+  if err := execvetracer.LoadExecvetracerObjects(&objs, nil);err!=nil{
     return nil, err
   } 
   

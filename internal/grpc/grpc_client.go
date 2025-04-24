@@ -40,15 +40,30 @@ func (c *Client) SendEventMessage(ctx context.Context,stream grpc.ClientStreamin
   return nil
 }
 
-func (c *Client) Run(ctx context.Context, loader programs.Load_tracer,nodeName string) error{
+func (c *Client) Run(ctx context.Context, loaders []programs.Load_tracer,nodeName string) error{
 
   stream,err := c.client.SendEvents(ctx)
   if err != nil{
     fmt.Printf("Error creating the stream %s", err)
     return err
   }
+  
+  eventCh := make(chan *pb.EbpfEvent,500)
 
-  openLoader:= loader.Run(ctx, nodeName)
+  for _,loader := range loaders{
+
+    go func (l programs.Load_tracer){
+      tracerChannel := l.Run(ctx, nodeName)
+      for {
+        select{
+        case <-ctx.Done():
+            return
+        case event := <-tracerChannel:
+          eventCh <- event
+        }
+      }
+    }(loader)
+  } 
   
   for{
     select{
@@ -61,7 +76,7 @@ func (c *Client) Run(ctx context.Context, loader programs.Load_tracer,nodeName s
         fmt.Printf("Client received cancellation signal")
         return nil
 
-    case event:= <- openLoader:
+    case event:= <- eventCh:
       err:= c.SendEventMessage(ctx,stream ,event)
       if err !=nil{
         fmt.Printf("error from sending %s", err)

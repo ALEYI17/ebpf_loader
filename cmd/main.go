@@ -4,6 +4,7 @@ import (
 	"context"
 	"ebpf_loader/internal/grpc"
 	"ebpf_loader/internal/loader"
+	"ebpf_loader/pkg/programs"
 	"log"
 	"os"
 	"os/signal"
@@ -29,15 +30,25 @@ func main(){
   }
  
   log.Println("Client created =)")  
-
+  
+  var loaders []programs.Load_tracer
   ol , err := loader.NewOpenTracerLoader()
   if err!=nil{
-    log.Fatalf("Error creating the loader %s",err)
+    log.Fatalf("Error creating the open loader %s",err)
   }
   defer ol.Close()
+  loaders = append(loaders, ol)
+
+  el,err := loader.NewExecvetracerLoader()
+  if err !=nil {
+    log.Fatalf("Error creating the execve loader %s", err)
+  }
+  defer el.Close()
+
+  loaders = append(loaders, el)
 
   log.Println("Loader created =)")
-  if err:= client.Run(ctx, ol, "Casa"); err !=nil{
+  if err:= client.Run(ctx, loaders, "Casa"); err !=nil{
     log.Fatal("Error runing client")
   }
   

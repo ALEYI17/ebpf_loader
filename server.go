@@ -49,17 +49,16 @@ func (s *server) SendEvents(stream pb.EventCollector_SendEventsServer) error {
 			)
 
 		case *pb.EbpfEvent_ExecveEvent:
-			log.Printf("⚙️ ExecveEvent: PID=%d UID=%d COMM=%s FILENAME=%s ARGV=%v RET=%d TS=%d LAT=%d\n",
-				ev.ExecveEvent.Pid,
-				ev.ExecveEvent.Uid,
-				ev.ExecveEvent.Comm,
-				ev.ExecveEvent.Filename,
-				ev.ExecveEvent.Argv,
-				ev.ExecveEvent.ReturnCode,
-				ev.ExecveEvent.TimestampNs,
-				ev.ExecveEvent.LatencyNs,
-			)
-
+			log.Printf("📦 ExecveEvent: PID=%d UID=%d COMM=%s FILENAME=%s RET=%d TS=%d EXIT_TS=%d LAT=%d\n",
+        ev.ExecveEvent.Pid,
+        ev.ExecveEvent.Uid,
+        ev.ExecveEvent.Comm,
+        ev.ExecveEvent.Filename,
+        ev.ExecveEvent.ReturnCode,
+        ev.ExecveEvent.TimestampNs,
+        ev.ExecveEvent.TimestampNsExit,
+        ev.ExecveEvent.LatencyNs,
+	    )
 		default:
 			log.Println("🚨 Unknown event type received")
 		}

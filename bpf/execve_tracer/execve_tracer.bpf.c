@@ -45,7 +45,7 @@ int handle_enter_execve(struct trace_event_raw_sys_enter *ctx){
 
   bpf_get_current_comm(&event.comm,TASK_COMM_SIZE);
 
-  const char *filename = (const char *) ctx->args[1];
+  const char *filename = (const char *) ctx->args[0];
 
   bpf_probe_read_user_str(event.filename,sizeof(event.filename),filename);
 
