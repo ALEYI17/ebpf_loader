@@ -130,17 +130,17 @@ func (x *OpenEvent) GetLatencyNs() uint64 {
 }
 
 type ExecveEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pid           uint32                 `protobuf:"varint,10,opt,name=pid,proto3" json:"pid,omitempty"`
-	Uid           uint32                 `protobuf:"varint,11,opt,name=uid,proto3" json:"uid,omitempty"`
-	Comm          string                 `protobuf:"bytes,12,opt,name=comm,proto3" json:"comm,omitempty"`
-	Filename      string                 `protobuf:"bytes,13,opt,name=filename,proto3" json:"filename,omitempty"`
-	Argv          []string               `protobuf:"bytes,14,rep,name=argv,proto3" json:"argv,omitempty"`
-	ReturnCode    int64                  `protobuf:"varint,15,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
-	TimestampNs   uint64                 `protobuf:"varint,16,opt,name=timestamp_ns,json=timestampNs,proto3" json:"timestamp_ns,omitempty"`
-	LatencyNs     uint64                 `protobuf:"varint,17,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Pid             uint32                 `protobuf:"varint,10,opt,name=pid,proto3" json:"pid,omitempty"`
+	Uid             uint32                 `protobuf:"varint,11,opt,name=uid,proto3" json:"uid,omitempty"`
+	Comm            string                 `protobuf:"bytes,12,opt,name=comm,proto3" json:"comm,omitempty"`
+	Filename        string                 `protobuf:"bytes,13,opt,name=filename,proto3" json:"filename,omitempty"`
+	TimestampNsExit uint64                 `protobuf:"varint,14,opt,name=timestamp_ns_exit,json=timestampNsExit,proto3" json:"timestamp_ns_exit,omitempty"`
+	ReturnCode      int64                  `protobuf:"varint,15,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	TimestampNs     uint64                 `protobuf:"varint,16,opt,name=timestamp_ns,json=timestampNs,proto3" json:"timestamp_ns,omitempty"`
+	LatencyNs       uint64                 `protobuf:"varint,17,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ExecveEvent) Reset() {
@@ -201,11 +201,11 @@ func (x *ExecveEvent) GetFilename() string {
 	return ""
 }
 
-func (x *ExecveEvent) GetArgv() []string {
+func (x *ExecveEvent) GetTimestampNsExit() uint64 {
 	if x != nil {
-		return x.Argv
+		return x.TimestampNsExit
 	}
-	return nil
+	return 0
 }
 
 func (x *ExecveEvent) GetReturnCode() int64 {
@@ -387,14 +387,14 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\ftimestamp_ns\x18\a \x01(\x04R\vtimestampNs\x12*\n" +
 	"\x11timestamp_ns_exit\x18\b \x01(\x04R\x0ftimestampNsExit\x12\x1d\n" +
 	"\n" +
-	"latency_ns\x18\t \x01(\x04R\tlatencyNs\"\xd8\x01\n" +
+	"latency_ns\x18\t \x01(\x04R\tlatencyNs\"\xf0\x01\n" +
 	"\vExecveEvent\x12\x10\n" +
 	"\x03pid\x18\n" +
 	" \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\v \x01(\rR\x03uid\x12\x12\n" +
 	"\x04comm\x18\f \x01(\tR\x04comm\x12\x1a\n" +
-	"\bfilename\x18\r \x01(\tR\bfilename\x12\x12\n" +
-	"\x04argv\x18\x0e \x03(\tR\x04argv\x12\x1f\n" +
+	"\bfilename\x18\r \x01(\tR\bfilename\x12*\n" +
+	"\x11timestamp_ns_exit\x18\x0e \x01(\x04R\x0ftimestampNsExit\x12\x1f\n" +
 	"\vreturn_code\x18\x0f \x01(\x03R\n" +
 	"returnCode\x12!\n" +
 	"\ftimestamp_ns\x18\x10 \x01(\x04R\vtimestampNs\x12\x1d\n" +
