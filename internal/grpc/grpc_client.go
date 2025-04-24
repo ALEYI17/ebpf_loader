@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Client struct{
@@ -17,12 +18,10 @@ type Client struct{
 
 func NewClient(address string) (*Client, error){
 
-  conn, err := grpc.NewClient(address)
+  conn, err := grpc.NewClient(address,grpc.WithTransportCredentials(insecure.NewCredentials()))
   if err != nil {
     return nil,err
   }
-
-  defer conn.Close()
 
   client := pb.NewEventCollectorClient(conn)
 
@@ -53,11 +52,15 @@ func (c *Client) Run(ctx context.Context, loader programs.Load_tracer,nodeName s
     select{
       case <- ctx.Done():
         fmt.Printf("Client received cancellation signal")
-        loader.Close()
         return nil
 
     case event:= <- openLoader:
-      c.SendEventMessage(ctx, event)
+      ack , err:= c.SendEventMessage(ctx, event)
+      if err !=nil{
+        fmt.Printf("error from sending %s", err)
+      }
+      fmt.Printf("Ack:%s", ack)
+      fmt.Println("Send info")
     }
   }
 } 

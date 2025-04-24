@@ -6,6 +6,6 @@ import (
 )
 
 type Load_tracer interface{
-  Close() error
+  Close()
   Run(context.Context,string) <- chan *pb.EbpfEvent
 }
