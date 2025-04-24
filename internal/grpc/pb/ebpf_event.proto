@@ -45,5 +45,5 @@ message CollectorAck {
 }
 
 service EventCollector {
-  rpc SendEvents(EbpfEvent) returns (CollectorAck);
+  rpc SendEvents(stream EbpfEvent) returns (CollectorAck);
 }

@@ -408,10 +408,10 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x05event\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
 	"\x06status\x18\x15 \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\x16 \x01(\tR\amessage2?\n" +
-	"\x0eEventCollector\x12-\n" +
+	"\amessage\x18\x16 \x01(\tR\amessage2A\n" +
+	"\x0eEventCollector\x12/\n" +
 	"\n" +
-	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAckB!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
+	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
 
 var (
 	file_ebpf_event_proto_rawDescOnce sync.Once

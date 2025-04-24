@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EventCollectorClient interface {
-	SendEvents(ctx context.Context, in *EbpfEvent, opts ...grpc.CallOption) (*CollectorAck, error)
+	SendEvents(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[EbpfEvent, CollectorAck], error)
 }
 
 type eventCollectorClient struct {
@@ -37,21 +37,24 @@ func NewEventCollectorClient(cc grpc.ClientConnInterface) EventCollectorClient {
 	return &eventCollectorClient{cc}
 }
 
-func (c *eventCollectorClient) SendEvents(ctx context.Context, in *EbpfEvent, opts ...grpc.CallOption) (*CollectorAck, error) {
+func (c *eventCollectorClient) SendEvents(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[EbpfEvent, CollectorAck], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CollectorAck)
-	err := c.cc.Invoke(ctx, EventCollector_SendEvents_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &EventCollector_ServiceDesc.Streams[0], EventCollector_SendEvents_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[EbpfEvent, CollectorAck]{ClientStream: stream}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EventCollector_SendEventsClient = grpc.ClientStreamingClient[EbpfEvent, CollectorAck]
 
 // EventCollectorServer is the server API for EventCollector service.
 // All implementations must embed UnimplementedEventCollectorServer
 // for forward compatibility.
 type EventCollectorServer interface {
-	SendEvents(context.Context, *EbpfEvent) (*CollectorAck, error)
+	SendEvents(grpc.ClientStreamingServer[EbpfEvent, CollectorAck]) error
 	mustEmbedUnimplementedEventCollectorServer()
 }
 
@@ -62,8 +65,8 @@ type EventCollectorServer interface {
 // pointer dereference when methods are called.
 type UnimplementedEventCollectorServer struct{}
 
-func (UnimplementedEventCollectorServer) SendEvents(context.Context, *EbpfEvent) (*CollectorAck, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendEvents not implemented")
+func (UnimplementedEventCollectorServer) SendEvents(grpc.ClientStreamingServer[EbpfEvent, CollectorAck]) error {
+	return status.Errorf(codes.Unimplemented, "method SendEvents not implemented")
 }
 func (UnimplementedEventCollectorServer) mustEmbedUnimplementedEventCollectorServer() {}
 func (UnimplementedEventCollectorServer) testEmbeddedByValue()                        {}
@@ -86,23 +89,12 @@ func RegisterEventCollectorServer(s grpc.ServiceRegistrar, srv EventCollectorSer
 	s.RegisterService(&EventCollector_ServiceDesc, srv)
 }
 
-func _EventCollector_SendEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EbpfEvent)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(EventCollectorServer).SendEvents(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: EventCollector_SendEvents_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventCollectorServer).SendEvents(ctx, req.(*EbpfEvent))
-	}
-	return interceptor(ctx, in, info, handler)
+func _EventCollector_SendEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(EventCollectorServer).SendEvents(&grpc.GenericServerStream[EbpfEvent, CollectorAck]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EventCollector_SendEventsServer = grpc.ClientStreamingServer[EbpfEvent, CollectorAck]
 
 // EventCollector_ServiceDesc is the grpc.ServiceDesc for EventCollector service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -110,12 +102,13 @@ func _EventCollector_SendEvents_Handler(srv interface{}, ctx context.Context, de
 var EventCollector_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.EventCollector",
 	HandlerType: (*EventCollectorServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "SendEvents",
-			Handler:    _EventCollector_SendEvents_Handler,
+			StreamName:    "SendEvents",
+			Handler:       _EventCollector_SendEvents_Handler,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "ebpf_event.proto",
 }

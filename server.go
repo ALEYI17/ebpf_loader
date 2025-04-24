@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"io"
 	"log"
 	"net"
 
@@ -14,46 +14,60 @@ type server struct {
 	pb.UnimplementedEventCollectorServer
 }
 
-func (s *server) SendEvents(ctx context.Context, event *pb.EbpfEvent) (*pb.CollectorAck, error) {
-	log.Println("📦 Received event from node:", event.GetNodeName())
+func (s *server) SendEvents(stream pb.EventCollector_SendEventsServer) error {
+	log.Println("📡 Receiving streamed events...")
 
-	switch ev := event.GetEvent().(type) {
-	case *pb.EbpfEvent_OpenEvent:
-		log.Printf("🔓 OpenEvent: PID=%d UID=%d COMM=%s FILENAME=%s FLAGS=%d RET=%d TS=%d EXIT_TS=%d LAT=%d\n",
-			ev.OpenEvent.Pid,
-			ev.OpenEvent.Uid,
-			ev.OpenEvent.Comm,
-			ev.OpenEvent.Filename,
-			ev.OpenEvent.Flags,
-			ev.OpenEvent.ReturnCode,
-			ev.OpenEvent.TimestampNs,
-			ev.OpenEvent.TimestampNsExit,
-			ev.OpenEvent.LatencyNs,
-		)
+	for {
+		event, err := stream.Recv()
+		if err == io.EOF {
+			// Client has closed the stream
+			log.Println("✅ Finished receiving all events.")
+			return stream.SendAndClose(&pb.CollectorAck{
+				Status:  "OK",
+				Message: "All events received successfully",
+			})
+		}
+		if err != nil {
+			log.Printf("❌ Error receiving event: %v", err)
+			return err
+		}
 
-	case *pb.EbpfEvent_ExecveEvent:
-		log.Printf("🚀 ExecveEvent: PID=%d UID=%d COMM=%s FILENAME=%s ARGV=%v RET=%d TS=%d LAT=%d\n",
-			ev.ExecveEvent.Pid,
-			ev.ExecveEvent.Uid,
-			ev.ExecveEvent.Comm,
-			ev.ExecveEvent.Filename,
-			ev.ExecveEvent.Argv,
-			ev.ExecveEvent.ReturnCode,
-			ev.ExecveEvent.TimestampNs,
-			ev.ExecveEvent.LatencyNs,
-		)
+		log.Println("🛰️ Event from node:", event.GetNodeName())
 
-	default:
-		log.Println("⚠️ Unknown event type")
+		switch ev := event.GetEvent().(type) {
+		case *pb.EbpfEvent_OpenEvent:
+			log.Printf("📂 OpenEvent: PID=%d UID=%d COMM=%s FILENAME=%s FLAGS=%d RET=%d TS=%d EXIT_TS=%d LAT=%d\n",
+				ev.OpenEvent.Pid,
+				ev.OpenEvent.Uid,
+				ev.OpenEvent.Comm,
+				ev.OpenEvent.Filename,
+				ev.OpenEvent.Flags,
+				ev.OpenEvent.ReturnCode,
+				ev.OpenEvent.TimestampNs,
+				ev.OpenEvent.TimestampNsExit,
+				ev.OpenEvent.LatencyNs,
+			)
+
+		case *pb.EbpfEvent_ExecveEvent:
+			log.Printf("⚙️ ExecveEvent: PID=%d UID=%d COMM=%s FILENAME=%s ARGV=%v RET=%d TS=%d LAT=%d\n",
+				ev.ExecveEvent.Pid,
+				ev.ExecveEvent.Uid,
+				ev.ExecveEvent.Comm,
+				ev.ExecveEvent.Filename,
+				ev.ExecveEvent.Argv,
+				ev.ExecveEvent.ReturnCode,
+				ev.ExecveEvent.TimestampNs,
+				ev.ExecveEvent.LatencyNs,
+			)
+
+		default:
+			log.Println("🚨 Unknown event type received")
+		}
 	}
-
-	return &pb.CollectorAck{
-		Status:  "OK",
-		Message: "Event received successfully",
-	}, nil
 }
+
 func main() {
-	log.Println("Starting server...")
+	log.Println("🚀 Starting gRPC server on :8080...")
 
 	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
@@ -63,7 +77,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	pb.RegisterEventCollectorServer(grpcServer, &server{})
 
-	log.Println("Server ready on :8080")
+	log.Println("✅ Server ready and listening")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
