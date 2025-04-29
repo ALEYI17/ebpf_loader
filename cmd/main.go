@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"ebpf_loader/internal/config"
 	"ebpf_loader/internal/grpc"
 	"ebpf_loader/internal/loader"
 	"ebpf_loader/pkg/programs"
@@ -30,24 +31,35 @@ func main(){
   }
  
   log.Println("Client created =)")  
-  
+
+  conf := config.LoadConfig()
+
   var loaders []programs.Load_tracer
-  ol , err := loader.NewOpenTracerLoader()
-  if err!=nil{
-    log.Fatalf("Error creating the open loader %s",err)
-  }
-  defer ol.Close()
-  loaders = append(loaders, ol)
+  for _, program := range conf.EnableProbes{
+    switch program{
+      case "execve":
+         el,err := loader.NewExecvetracerLoader()
+        if err !=nil {
+          log.Fatalf("Error creating the execve loader %s", err)
+        }
+        defer el.Close()
 
-  el,err := loader.NewExecvetracerLoader()
-  if err !=nil {
-    log.Fatalf("Error creating the execve loader %s", err)
-  }
-  defer el.Close()
+        loaders = append(loaders, el)
 
-  loaders = append(loaders, el)
+      case "open":
+        ol , err := loader.NewOpenTracerLoader()
+        if err!=nil{
+          log.Fatalf("Error creating the open loader %s",err)
+        }
+        defer ol.Close()
+        loaders = append(loaders, ol)
+      default:
+      log.Printf("Unknow program: %s",program)
+    }
+  }
 
   log.Println("Loader created =)")
+
   if err:= client.Run(ctx, loaders, "Casa"); err !=nil{
     log.Fatal("Error runing client")
   }
