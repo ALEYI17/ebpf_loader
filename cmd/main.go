@@ -12,9 +12,8 @@ import (
 	"syscall"
 )
 
-
-func main(){
-  ctx, cancel := context.WithCancel(context.Background())
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Handle graceful shutdown
 	go func() {
@@ -25,45 +24,45 @@ func main(){
 		cancel()
 	}()
 
-  client,err := grpc.NewClient("localhost:8080")
-  if err != nil{
-    log.Fatalf("Error creating the client : %s",err)
-  }
- 
-  log.Println("Client created =)")  
+	client, err := grpc.NewClient("localhost:8080")
+	if err != nil {
+		log.Fatalf("Error creating the client : %s", err)
+	}
 
-  conf := config.LoadConfig()
+	log.Println("Client created =)")
 
-  var loaders []programs.Load_tracer
-  for _, program := range conf.EnableProbes{
-    switch program{
-      case "execve":
-         el,err := loader.NewExecvetracerLoader()
-        if err !=nil {
-          log.Fatalf("Error creating the execve loader %s", err)
-        }
-        defer el.Close()
+	conf := config.LoadConfig()
 
-        loaders = append(loaders, el)
+	var loaders []programs.Load_tracer
+	for _, program := range conf.EnableProbes {
+		switch program {
+		case "execve":
+			el, err := loader.NewExecvetracerLoader()
+			if err != nil {
+				log.Fatalf("Error creating the execve loader %s", err)
+			}
+			defer el.Close()
 
-      case "open":
-        ol , err := loader.NewOpenTracerLoader()
-        if err!=nil{
-          log.Fatalf("Error creating the open loader %s",err)
-        }
-        defer ol.Close()
-        loaders = append(loaders, ol)
-      default:
-      log.Printf("Unknow program: %s",program)
-    }
-  }
+			loaders = append(loaders, el)
 
-  log.Println("Loader created =)")
+		case "open":
+			ol, err := loader.NewOpenTracerLoader()
+			if err != nil {
+				log.Fatalf("Error creating the open loader %s", err)
+			}
+			defer ol.Close()
+			loaders = append(loaders, ol)
+		default:
+			log.Printf("Unknow program: %s", program)
+		}
+	}
 
-  if err:= client.Run(ctx, loaders, "Casa"); err !=nil{
-    log.Fatal("Error runing client")
-  }
-  
-  defer client.Close()
-  log.Println("After run client")
+	log.Println("Loader created =)")
+
+	if err := client.Run(ctx, loaders, "Casa"); err != nil {
+		log.Fatal("Error runing client")
+	}
+
+	defer client.Close()
+	log.Println("After run client")
 }

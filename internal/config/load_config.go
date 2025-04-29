@@ -5,21 +5,21 @@ import (
 	"strings"
 )
 
-type Programsconfig struct{
-  EnableProbes []string
+type Programsconfig struct {
+	EnableProbes []string
 }
 
-func LoadConfig() *Programsconfig{
-  var tracer string
-  flag.StringVar(&tracer, "tracer", "", "Comma-separated list of eBPF probes to enable (e.g. 'execve,open')")
+func LoadConfig() *Programsconfig {
+	var tracer string
+	flag.StringVar(&tracer, "tracer", "", "Comma-separated list of eBPF probes to enable (e.g. 'execve,open')")
 
-  flag.Parse()
+	flag.Parse()
 
-  probeList:= strings.Split(tracer, ",")
+	probeList := strings.Split(tracer, ",")
 
-  for i := range probeList{
-    probeList[i] = strings.TrimSpace(probeList[i]) 
-  }
+	for i := range probeList {
+		probeList[i] = strings.TrimSpace(probeList[i])
+	}
 
-  return &Programsconfig{EnableProbes: probeList}
+	return &Programsconfig{EnableProbes: probeList}
 }

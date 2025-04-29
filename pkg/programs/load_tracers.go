@@ -5,7 +5,7 @@ import (
 	"ebpf_loader/internal/grpc/pb"
 )
 
-type Load_tracer interface{
-  Close()
-  Run(context.Context,string) <- chan *pb.EbpfEvent
+type Load_tracer interface {
+	Close()
+	Run(context.Context, string) <-chan *pb.EbpfEvent
 }
