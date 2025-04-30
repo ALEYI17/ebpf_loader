@@ -9,19 +9,16 @@ import (
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type Exec_event Execvetracer execve_tracer.bpf.c
 
 func GenerateGrpcMessage(raw ExecvetracerExecEvent, nodeName string) *pb.EbpfEvent {
-	return &pb.EbpfEvent{
-		NodeName: nodeName,
-		Event: &pb.EbpfEvent_ExecveEvent{
-			ExecveEvent: &pb.ExecveEvent{
-				Pid:             raw.Pid,
-				Uid:             raw.Uid,
-				Comm:            unix.ByteSliceToString(raw.Comm[:]),
-				Filename:        unix.ByteSliceToString(raw.Filename[:]),
-				TimestampNsExit: raw.TimestampNsExit,
-				ReturnCode:      raw.Ret,
-				TimestampNs:     raw.TimestampNs,
-				LatencyNs:       raw.Latency,
-			},
-		},
+  return &pb.EbpfEvent{
+		Pid:             raw.Pid,
+		Uid:             raw.Uid,
+		Comm:            unix.ByteSliceToString(raw.Comm[:]),
+		Filename:        unix.ByteSliceToString(raw.Filename[:]),
+		ReturnCode:      raw.Ret,
+		TimestampNs:     raw.TimestampNs,
+		TimestampNsExit: raw.TimestampNsExit,
+		LatencyNs:       raw.Latency,
+		EventType:       "execve",
+		NodeName:        nodeName,
 	}
 }

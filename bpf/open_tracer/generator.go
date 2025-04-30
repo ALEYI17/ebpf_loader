@@ -23,20 +23,15 @@ import (
 // }
 
 func GenerateGrpcMessage(raw OpentracerOpenEvent, nodeName string) *pb.EbpfEvent {
-	return &pb.EbpfEvent{
-		Event: &pb.EbpfEvent_OpenEvent{
-			OpenEvent: &pb.OpenEvent{
-				Pid:             raw.Pid,
-				Uid:             raw.Uid,
-				Comm:            unix.ByteSliceToString(raw.Comm[:]),
-				Filename:        unix.ByteSliceToString(raw.Filename[:]),
-				Flags:           raw.Flags,
-				ReturnCode:      raw.Ret,
-				TimestampNs:     raw.TimestampNs,
-				TimestampNsExit: raw.TimestampNsExit,
-				LatencyNs:       raw.Latency,
-			},
-		},
-		NodeName: nodeName,
-	}
-}
+  return &pb.EbpfEvent{
+		Pid:             raw.Pid,
+		Uid:             raw.Uid,
+		Comm:            unix.ByteSliceToString(raw.Comm[:]),
+		Filename:        unix.ByteSliceToString(raw.Filename[:]),
+		ReturnCode:      raw.Ret,
+		TimestampNs:     raw.TimestampNs,
+		TimestampNsExit: raw.TimestampNsExit,
+		LatencyNs:       raw.Latency,
+		EventType:       "open",
+		NodeName:        nodeName,
+	}}

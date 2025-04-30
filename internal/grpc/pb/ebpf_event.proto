@@ -4,44 +4,58 @@ package pb;
 
 option go_package = "ebpf_loader/internal/grpc/pb;pb";
 
-message OpenEvent {
+
+//message OpenEvent {
+//  uint32 pid = 1;
+//  uint32 uid = 2;
+//  string comm = 3;
+//  string filename = 4;
+//  int32 flags = 5;
+//  int64 return_code = 6;
+//  uint64 timestamp_ns = 7;
+//  uint64 timestamp_ns_exit = 8;
+//  uint64 latency_ns = 9;
+//}
+
+//message ExecveEvent {
+// uint32 pid = 10;
+//  uint32 uid = 11;
+//  string comm = 12;
+//  string filename = 13;
+//  uint64 timestamp_ns_exit = 14;
+//  int64 return_code = 15;
+//  uint64 timestamp_ns = 16;
+//  uint64 latency_ns = 17;
+//}
+
+message EbpfEvent {
   uint32 pid = 1;
   uint32 uid = 2;
   string comm = 3;
   string filename = 4;
-  int32 flags = 5;
   int64 return_code = 6;
   uint64 timestamp_ns = 7;
   uint64 timestamp_ns_exit = 8;
   uint64 latency_ns = 9;
-}
-
-message ExecveEvent {
-  uint32 pid = 10;
-  uint32 uid = 11;
-  string comm = 12;
-  string filename = 13;
-  uint64 timestamp_ns_exit = 14;
-  int64 return_code = 15;
-  uint64 timestamp_ns = 16;
-  uint64 latency_ns = 17;
-}
-
-message EbpfEvent {
-  oneof event {
-    OpenEvent open_event = 18;
-    ExecveEvent execve_event = 19; 
-  }
-  string node_name = 20;
+  string event_type = 10;
+  string node_name = 11;
 }
 
 //message EbpfEventBatch {
 //  repeated EbpfEvent events = 1;
 //}
 
+//message EbpfEvent {
+//  oneof event {
+//    OpenEvent open_event = 18;
+//    ExecveEvent execve_event = 19; 
+//  }
+//  string node_name = 20;
+//}
+
 message CollectorAck {
-  string status = 21;
-  string message = 22;
+  string status = 12;
+  string message = 13;
 }
 
 service EventCollector {
