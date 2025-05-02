@@ -33,6 +33,8 @@ type EbpfEvent struct {
 	LatencyNs       uint64                 `protobuf:"varint,9,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
 	EventType       string                 `protobuf:"bytes,10,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"`
 	NodeName        string                 `protobuf:"bytes,11,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
+	User            string                 `protobuf:"bytes,12,opt,name=user,proto3" json:"user,omitempty"`
+	Ppid            uint32                 `protobuf:"varint,13,opt,name=ppid,proto3" json:"ppid,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -137,6 +139,20 @@ func (x *EbpfEvent) GetNodeName() string {
 	return ""
 }
 
+func (x *EbpfEvent) GetUser() string {
+	if x != nil {
+		return x.User
+	}
+	return ""
+}
+
+func (x *EbpfEvent) GetPpid() uint32 {
+	if x != nil {
+		return x.Ppid
+	}
+	return 0
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        string                 `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"`
@@ -193,7 +209,7 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\xaa\x02\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\xd2\x02\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -208,7 +224,9 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
 	"event_type\x18\n" +
 	" \x01(\tR\teventType\x12\x1b\n" +
-	"\tnode_name\x18\v \x01(\tR\bnodeName\"@\n" +
+	"\tnode_name\x18\v \x01(\tR\bnodeName\x12\x12\n" +
+	"\x04user\x18\f \x01(\tR\x04user\x12\x12\n" +
+	"\x04ppid\x18\r \x01(\rR\x04ppid\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
 	"\x06status\x18\f \x01(\tR\x06status\x12\x18\n" +
 	"\amessage\x18\r \x01(\tR\amessage2A\n" +

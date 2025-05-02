@@ -39,6 +39,9 @@ message EbpfEvent {
   uint64 latency_ns = 9;
   string event_type = 10;
   string node_name = 11;
+  string user = 12;
+  uint32 ppid =13;
+
 }
 
 //message EbpfEventBatch {

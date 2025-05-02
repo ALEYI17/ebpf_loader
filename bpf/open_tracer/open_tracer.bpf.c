@@ -13,6 +13,9 @@ char __license[] SEC("license") = "Dual MIT/GPL";
 struct Open_event{
   u32 pid;
   u32 uid;
+  u32 gid;
+  u64 cgroup_id;
+  u32 ppid;
   u8 comm[TASK_COMM_SIZE];
   u8 filename[PATH_MAX];
   int flags;

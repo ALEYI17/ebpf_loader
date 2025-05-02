@@ -2,6 +2,8 @@ package opentracer
 
 import (
 	"ebpf_loader/internal/grpc/pb"
+	"fmt"
+	"os/user"
 
 	"golang.org/x/sys/unix"
 )
@@ -23,6 +25,14 @@ import (
 // }
 
 func GenerateGrpcMessage(raw OpentracerOpenEvent, nodeName string) *pb.EbpfEvent {
+  username := ""
+
+	userInfo, err := user.LookupId(fmt.Sprintf("%d", raw.Uid))
+
+	if err == nil {
+		username = userInfo.Username
+	}
+
   return &pb.EbpfEvent{
 		Pid:             raw.Pid,
 		Uid:             raw.Uid,
@@ -34,4 +44,6 @@ func GenerateGrpcMessage(raw OpentracerOpenEvent, nodeName string) *pb.EbpfEvent
 		LatencyNs:       raw.Latency,
 		EventType:       "open",
 		NodeName:        nodeName,
+    User: username,
+    Ppid: 0,
 	}}
