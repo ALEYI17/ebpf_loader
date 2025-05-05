@@ -2,6 +2,8 @@ package execvetracer
 
 import (
 	"ebpf_loader/internal/grpc/pb"
+	"fmt"
+	"os/user"
 
 	"golang.org/x/sys/unix"
 )
@@ -9,9 +11,22 @@ import (
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type trace_syscall_event  Execvetracer execve_tracer.bpf.c
 
 func GenerateGrpcMessage(raw ExecvetracerTraceSyscallEvent, nodeName string) *pb.EbpfEvent {
-  return &pb.EbpfEvent{
+	username := ""
+
+	userInfo, err := user.LookupId(fmt.Sprintf("%d", raw.Uid))
+	if err == nil {
+		username = userInfo.Username
+	}
+
+	return &pb.EbpfEvent{
 		Pid:             raw.Pid,
 		Uid:             raw.Uid,
+		Gid:             raw.Gid,
+		Ppid:            raw.Ppid,
+		UserPid:         raw.UserPid,
+		UserPpid:        raw.UserPpid,
+		CgroupId:        raw.CgroupId,
+		CgroupName:      unix.ByteSliceToString(raw.CgroupName[:]),
 		Comm:            unix.ByteSliceToString(raw.Comm[:]),
 		Filename:        unix.ByteSliceToString(raw.Filename[:]),
 		ReturnCode:      raw.Ret,
@@ -20,5 +35,6 @@ func GenerateGrpcMessage(raw ExecvetracerTraceSyscallEvent, nodeName string) *pb
 		LatencyNs:       raw.Latency,
 		EventType:       "execve",
 		NodeName:        nodeName,
+		User:            username,
 	}
 }

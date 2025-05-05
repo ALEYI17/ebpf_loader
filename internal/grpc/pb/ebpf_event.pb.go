@@ -35,6 +35,11 @@ type EbpfEvent struct {
 	NodeName        string                 `protobuf:"bytes,11,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
 	User            string                 `protobuf:"bytes,12,opt,name=user,proto3" json:"user,omitempty"`
 	Ppid            uint32                 `protobuf:"varint,13,opt,name=ppid,proto3" json:"ppid,omitempty"`
+	Gid             uint32                 `protobuf:"varint,14,opt,name=gid,proto3" json:"gid,omitempty"`
+	CgroupId        uint64                 `protobuf:"varint,15,opt,name=cgroup_id,json=cgroupId,proto3" json:"cgroup_id,omitempty"`
+	CgroupName      string                 `protobuf:"bytes,16,opt,name=cgroup_name,json=cgroupName,proto3" json:"cgroup_name,omitempty"`
+	UserPid         uint32                 `protobuf:"varint,17,opt,name=user_pid,json=userPid,proto3" json:"user_pid,omitempty"`
+	UserPpid        uint32                 `protobuf:"varint,18,opt,name=user_ppid,json=userPpid,proto3" json:"user_ppid,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -153,6 +158,41 @@ func (x *EbpfEvent) GetPpid() uint32 {
 	return 0
 }
 
+func (x *EbpfEvent) GetGid() uint32 {
+	if x != nil {
+		return x.Gid
+	}
+	return 0
+}
+
+func (x *EbpfEvent) GetCgroupId() uint64 {
+	if x != nil {
+		return x.CgroupId
+	}
+	return 0
+}
+
+func (x *EbpfEvent) GetCgroupName() string {
+	if x != nil {
+		return x.CgroupName
+	}
+	return ""
+}
+
+func (x *EbpfEvent) GetUserPid() uint32 {
+	if x != nil {
+		return x.UserPid
+	}
+	return 0
+}
+
+func (x *EbpfEvent) GetUserPpid() uint32 {
+	if x != nil {
+		return x.UserPpid
+	}
+	return 0
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        string                 `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"`
@@ -209,7 +249,7 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\xd2\x02\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\xda\x03\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -226,7 +266,13 @@ const file_ebpf_event_proto_rawDesc = "" +
 	" \x01(\tR\teventType\x12\x1b\n" +
 	"\tnode_name\x18\v \x01(\tR\bnodeName\x12\x12\n" +
 	"\x04user\x18\f \x01(\tR\x04user\x12\x12\n" +
-	"\x04ppid\x18\r \x01(\rR\x04ppid\"@\n" +
+	"\x04ppid\x18\r \x01(\rR\x04ppid\x12\x10\n" +
+	"\x03gid\x18\x0e \x01(\rR\x03gid\x12\x1b\n" +
+	"\tcgroup_id\x18\x0f \x01(\x04R\bcgroupId\x12\x1f\n" +
+	"\vcgroup_name\x18\x10 \x01(\tR\n" +
+	"cgroupName\x12\x19\n" +
+	"\buser_pid\x18\x11 \x01(\rR\auserPid\x12\x1b\n" +
+	"\tuser_ppid\x18\x12 \x01(\rR\buserPpid\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
 	"\x06status\x18\f \x01(\tR\x06status\x12\x18\n" +
 	"\amessage\x18\r \x01(\tR\amessage2A\n" +

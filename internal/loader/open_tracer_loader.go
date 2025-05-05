@@ -83,7 +83,7 @@ func (ot *OpentracerLoader) Close() {
 }
 
 func (ot *OpentracerLoader) Run(ctx context.Context, nodeName string) <-chan *pb.EbpfEvent {
-	var events opentracer.OpentracerOpenEvent
+	var events opentracer.OpentracerTraceSyscallEvent
 	c := make(chan *pb.EbpfEvent)
 
 	go func() {

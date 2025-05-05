@@ -81,7 +81,7 @@ func (et *Execvetransferloader) Close() {
 
 func (et *Execvetransferloader) Run(ctx context.Context, nodeName string) <-chan *pb.EbpfEvent {
 
-	var events execvetracer.ExecvetracerExecEvent
+	var events execvetracer.ExecvetracerTraceSyscallEvent
 
 	c := make(chan *pb.EbpfEvent)
 

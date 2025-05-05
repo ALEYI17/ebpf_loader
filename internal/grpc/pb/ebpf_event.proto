@@ -41,7 +41,11 @@ message EbpfEvent {
   string node_name = 11;
   string user = 12;
   uint32 ppid =13;
-
+  uint32 gid = 14;
+  uint64 cgroup_id = 15;
+  string cgroup_name = 16;
+  uint32 user_pid = 17;
+  uint32 user_ppid = 18;
 }
 
 //message EbpfEventBatch {

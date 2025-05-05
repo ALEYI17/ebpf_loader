@@ -25,25 +25,30 @@ import (
 // }
 
 func GenerateGrpcMessage(raw OpentracerTraceSyscallEvent, nodeName string) *pb.EbpfEvent {
-  username := ""
+	username := ""
 
 	userInfo, err := user.LookupId(fmt.Sprintf("%d", raw.Uid))
-
 	if err == nil {
 		username = userInfo.Username
 	}
 
-  return &pb.EbpfEvent{
+	return &pb.EbpfEvent{
 		Pid:             raw.Pid,
 		Uid:             raw.Uid,
+		Gid:             raw.Gid,
+		Ppid:            raw.Ppid,
+		UserPid:         raw.UserPid,
+		UserPpid:        raw.UserPpid,
+		CgroupId:        raw.CgroupId,
+		CgroupName:      unix.ByteSliceToString(raw.CgroupName[:]),
 		Comm:            unix.ByteSliceToString(raw.Comm[:]),
 		Filename:        unix.ByteSliceToString(raw.Filename[:]),
 		ReturnCode:      raw.Ret,
 		TimestampNs:     raw.TimestampNs,
 		TimestampNsExit: raw.TimestampNsExit,
 		LatencyNs:       raw.Latency,
-		EventType:       "open",
+		EventType:       "open", 
 		NodeName:        nodeName,
-    User: username,
-    Ppid: 0,
-	}}
+		User:            username,
+	}
+}
