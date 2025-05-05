@@ -6,9 +6,9 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type Exec_event Execvetracer execve_tracer.bpf.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type trace_syscall_event  Execvetracer execve_tracer.bpf.c
 
-func GenerateGrpcMessage(raw ExecvetracerExecEvent, nodeName string) *pb.EbpfEvent {
+func GenerateGrpcMessage(raw ExecvetracerTraceSyscallEvent, nodeName string) *pb.EbpfEvent {
   return &pb.EbpfEvent{
 		Pid:             raw.Pid,
 		Uid:             raw.Uid,

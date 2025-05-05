@@ -12,12 +12,20 @@ import (
 	"github.com/cilium/ebpf"
 )
 
-type ExecvetracerExecEvent struct {
+type ExecvetracerTraceSyscallEvent struct {
 	Pid             uint32
 	Uid             uint32
+	Gid             uint32
+	_               [4]byte
+	CgroupId        uint64
+	Ppid            uint32
+	CgroupName      [150]uint8
+	_               [2]byte
+	UserPid         uint32
+	UserPpid        uint32
 	Comm            [150]uint8
 	Filename        [256]uint8
-	_               [2]byte
+	_               [6]byte
 	TimestampNs     uint64
 	Ret             int64
 	Latency         uint64
@@ -76,6 +84,7 @@ type ExecvetracerProgramSpecs struct {
 type ExecvetracerMapSpecs struct {
 	ExecEvents      *ebpf.MapSpec `ebpf:"exec_events"`
 	ExecStartEvents *ebpf.MapSpec `ebpf:"exec_start_events"`
+	TmpEventMap     *ebpf.MapSpec `ebpf:"tmp_event_map"`
 }
 
 // ExecvetracerVariableSpecs contains global variables before they are loaded into the kernel.
@@ -107,12 +116,14 @@ func (o *ExecvetracerObjects) Close() error {
 type ExecvetracerMaps struct {
 	ExecEvents      *ebpf.Map `ebpf:"exec_events"`
 	ExecStartEvents *ebpf.Map `ebpf:"exec_start_events"`
+	TmpEventMap     *ebpf.Map `ebpf:"tmp_event_map"`
 }
 
 func (m *ExecvetracerMaps) Close() error {
 	return _ExecvetracerClose(
 		m.ExecEvents,
 		m.ExecStartEvents,
+		m.TmpEventMap,
 	)
 }
 

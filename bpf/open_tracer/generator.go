@@ -8,7 +8,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type Open_event Opentracer open_tracer.bpf.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type trace_syscall_event  Opentracer open_tracer.bpf.c
 
 // func GenerateGrpcMessage(raw OpentracerOpenEvent) pb.OpenEvent{
 //   return pb.OpenEvent{
@@ -24,7 +24,7 @@ import (
 //   }
 // }
 
-func GenerateGrpcMessage(raw OpentracerOpenEvent, nodeName string) *pb.EbpfEvent {
+func GenerateGrpcMessage(raw OpentracerTraceSyscallEvent, nodeName string) *pb.EbpfEvent {
   username := ""
 
 	userInfo, err := user.LookupId(fmt.Sprintf("%d", raw.Uid))

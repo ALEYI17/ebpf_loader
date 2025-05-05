@@ -12,14 +12,20 @@ import (
 	"github.com/cilium/ebpf"
 )
 
-type OpentracerOpenEvent struct {
+type OpentracerTraceSyscallEvent struct {
 	Pid             uint32
 	Uid             uint32
+	Gid             uint32
+	_               [4]byte
+	CgroupId        uint64
+	Ppid            uint32
+	CgroupName      [150]uint8
+	_               [2]byte
+	UserPid         uint32
+	UserPpid        uint32
 	Comm            [150]uint8
 	Filename        [256]uint8
-	_               [2]byte
-	Flags           int32
-	_               [4]byte
+	_               [6]byte
 	TimestampNs     uint64
 	Ret             int64
 	Latency         uint64
@@ -78,6 +84,7 @@ type OpentracerProgramSpecs struct {
 type OpentracerMapSpecs struct {
 	Events      *ebpf.MapSpec `ebpf:"events"`
 	StartEvents *ebpf.MapSpec `ebpf:"start_events"`
+	TmpEventMap *ebpf.MapSpec `ebpf:"tmp_event_map"`
 }
 
 // OpentracerVariableSpecs contains global variables before they are loaded into the kernel.
@@ -109,12 +116,14 @@ func (o *OpentracerObjects) Close() error {
 type OpentracerMaps struct {
 	Events      *ebpf.Map `ebpf:"events"`
 	StartEvents *ebpf.Map `ebpf:"start_events"`
+	TmpEventMap *ebpf.Map `ebpf:"tmp_event_map"`
 }
 
 func (m *OpentracerMaps) Close() error {
 	return _OpentracerClose(
 		m.Events,
 		m.StartEvents,
+		m.TmpEventMap,
 	)
 }
 
