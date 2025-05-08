@@ -24,14 +24,15 @@ func main() {
 		cancel()
 	}()
 
-	client, err := grpc.NewClient("localhost:8080")
+	
+	conf := config.LoadConfig()
+
+  client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport)
 	if err != nil {
 		log.Fatalf("Error creating the client : %s", err)
 	}
 
 	log.Println("Client created =)")
-
-	conf := config.LoadConfig()
 
 	var loaders []programs.Load_tracer
 	for _, program := range conf.EnableProbes {

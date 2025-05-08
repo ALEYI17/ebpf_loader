@@ -14,9 +14,9 @@ type Client struct {
 	client pb.EventCollectorClient
 }
 
-func NewClient(address string) (*Client, error) {
-
-	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewClient(address string, port string) (*Client, error) {
+  serverAdress := fmt.Sprintf("%s:%s", address,port)
+	conn, err := grpc.NewClient(serverAdress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
