@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"log"
 	"os"
 	"strings"
 )
@@ -28,6 +29,18 @@ func LoadConfig() *Programsconfig {
 	if serverPort == "" {
 		serverPort = os.Getenv("SERVER_PORT")
 	}
+
+  if serverAddr ==""{
+    log.Fatal("server addr missing")
+  }
+
+  if serverPort ==""{
+    log.Fatal("server port missing")
+  }
+
+  if tracer ==""{
+    log.Fatal("Not specifie any type of program to run")
+  }
 
 	probeList := strings.Split(tracer, ",")
 
