@@ -4,9 +4,14 @@ import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
 	"ebpf_loader/pkg/programs"
+	"errors"
 	"fmt"
+	"io"
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 type Client struct {
@@ -80,6 +85,17 @@ func (c *Client) Run(ctx context.Context, loaders []programs.Load_tracer, nodeNa
 			err := c.SendEventMessage(ctx, stream, event)
 			if err != nil {
 				fmt.Printf("error from sending %s", err)
+
+        status , ok := status.FromError(err)
+        if ok && (status.Code()== codes.Unavailable || status.Code()== codes.Canceled){
+          fmt.Println("Server unavailable. Shutting down client.")
+          return err
+        }
+
+        if errors.Is(err, io.EOF) || errors.Is(err, context.Canceled){
+          fmt.Println("Stream closed. Shutting down client.")
+          return err
+        }
 			}
 			fmt.Println("Send info")
 		}

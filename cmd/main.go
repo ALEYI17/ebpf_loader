@@ -59,11 +59,12 @@ func main() {
 	}
 
 	log.Println("Loader created =)")
-
+  defer client.Close()
 	if err := client.Run(ctx, loaders, "Casa"); err != nil {
-		log.Fatal("Error runing client")
+    log.Printf("Error runing client: %s",err)
+    return
 	}
 
-	defer client.Close()
+
 	log.Println("After run client")
 }
