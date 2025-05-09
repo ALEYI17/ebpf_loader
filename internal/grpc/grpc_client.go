@@ -3,11 +3,13 @@ package grpc
 import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
 	"errors"
 	"fmt"
 	"io"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
@@ -46,10 +48,11 @@ func (c *Client) SendEventMessage(ctx context.Context, stream grpc.ClientStreami
 }
 
 func (c *Client) Run(ctx context.Context, loaders []programs.Load_tracer, nodeName string) error {
+  logger := logutil.GetLogger()
 
 	stream, err := c.client.SendEvents(ctx)
 	if err != nil {
-		fmt.Printf("Error creating the stream %s", err)
+		logger.Error("Error creating the stream", zap.Error(err))
 		return err
 	}
 
@@ -75,29 +78,29 @@ func (c *Client) Run(ctx context.Context, loaders []programs.Load_tracer, nodeNa
 		case <-ctx.Done():
 			ack, err := stream.CloseAndRecv()
 			if err != nil {
-				fmt.Printf("Error , cannot receive ack %s", err)
+				logger.Error("Error, cannot receive ack", zap.Error(err))
 			}
-			fmt.Printf("Ack message: %s", ack)
-			fmt.Printf("Client received cancellation signal")
+			logger.Info("Ack message", zap.String("ack", ack.String()))
+			logger.Info("Client received cancellation signal")
 			return nil
 
 		case event := <-eventCh:
 			err := c.SendEventMessage(ctx, stream, event)
 			if err != nil {
-				fmt.Printf("error from sending %s", err)
+				logger.Error("Error from sending", zap.Error(err))
 
         status , ok := status.FromError(err)
         if ok && (status.Code()== codes.Unavailable || status.Code()== codes.Canceled){
-          fmt.Println("Server unavailable. Shutting down client.")
+          logger.Warn("Server unavailable. Shutting down client.")
           return err
         }
 
         if errors.Is(err, io.EOF) || errors.Is(err, context.Canceled){
-          fmt.Println("Stream closed. Shutting down client.")
+          logger.Warn("Stream closed. Shutting down client.")
           return err
         }
 			}
-			fmt.Println("Send info")
+			//logger.Info("Event sent successfully", zap.String("event", fmt.Sprintf("%v", event)))
 		}
 	}
 

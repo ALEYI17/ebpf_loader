@@ -5,13 +5,14 @@ import (
 	"context"
 	execvetracer "ebpf_loader/bpf/execve_tracer"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/pkg/logutil"
 	"encoding/binary"
 	"errors"
-	"fmt"
 
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/ringbuf"
 	"github.com/cilium/ebpf/rlimit"
+	"go.uber.org/zap"
 )
 
 type Execvetransferloader struct {
@@ -85,6 +86,8 @@ func (et *Execvetransferloader) Run(ctx context.Context, nodeName string) <-chan
 
 	c := make(chan *pb.EbpfEvent)
 
+  logger := logutil.GetLogger()
+
 	go func() {
 		defer close(c)
 
@@ -92,21 +95,21 @@ func (et *Execvetransferloader) Run(ctx context.Context, nodeName string) <-chan
 			select {
 			case <-ctx.Done():
 				// context was cancelled or timed out
-				fmt.Println("Context cancelled, stopping loader...")
+				logger.Info("Context cancelled, stopping loader...")
 				return
 			default:
 				record, err := et.Rd.Read()
 				if err != nil {
 					if errors.Is(err, ringbuf.ErrClosed) {
-						fmt.Println("Ring buffer closed, exiting...")
+						logger.Info("Ring buffer closed, exiting...")
 						return
 					}
-					fmt.Printf("Reading error: %v\n", err)
+					logger.Error("Reading error", zap.Error(err))
 					continue
 				}
 
 				if err := binary.Read(bytes.NewBuffer(record.RawSample), binary.LittleEndian, &events); err != nil {
-					fmt.Printf("Parsing ringbuffer events: %s\n", err)
+					logger.Error("Parsing ringbuffer events", zap.Error(err))
 					continue
 				}
 
@@ -114,7 +117,7 @@ func (et *Execvetransferloader) Run(ctx context.Context, nodeName string) <-chan
 
 				select {
 				case <-ctx.Done():
-					fmt.Println("Context cancelled while sending event...")
+					logger.Info("Context cancelled while sending event...")
 					return
 				case c <- event:
 				}

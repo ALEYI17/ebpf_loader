@@ -5,13 +5,14 @@ import (
 	"context"
 	opentracer "ebpf_loader/bpf/open_tracer"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/pkg/logutil"
 	"encoding/binary"
 	"errors"
-	"fmt"
 
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/ringbuf"
 	"github.com/cilium/ebpf/rlimit"
+	"go.uber.org/zap"
 )
 
 type OpentracerLoader struct {
@@ -85,6 +86,7 @@ func (ot *OpentracerLoader) Close() {
 func (ot *OpentracerLoader) Run(ctx context.Context, nodeName string) <-chan *pb.EbpfEvent {
 	var events opentracer.OpentracerTraceSyscallEvent
 	c := make(chan *pb.EbpfEvent)
+  logger := logutil.GetLogger()
 
 	go func() {
 		defer close(c)
@@ -93,21 +95,21 @@ func (ot *OpentracerLoader) Run(ctx context.Context, nodeName string) <-chan *pb
 			select {
 			case <-ctx.Done():
 				// context was cancelled or timed out
-				fmt.Println("Context cancelled, stopping loader...")
+				logger.Info("Context cancelled, stopping loader...")
 				return
 			default:
 				record, err := ot.Rd.Read()
 				if err != nil {
 					if errors.Is(err, ringbuf.ErrClosed) {
-						fmt.Println("Ring buffer closed, exiting...")
+						logger.Info("Ring buffer closed, exiting...")
 						return
 					}
-					fmt.Printf("Reading error: %v\n", err)
+					logger.Error("Reading error", zap.Error(err))
 					continue
 				}
 
 				if err := binary.Read(bytes.NewBuffer(record.RawSample), binary.LittleEndian, &events); err != nil {
-					fmt.Printf("Parsing ringbuffer events: %s\n", err)
+					logger.Error("Parsing ringbuffer events", zap.Error(err))
 					continue
 				}
 
@@ -115,7 +117,7 @@ func (ot *OpentracerLoader) Run(ctx context.Context, nodeName string) <-chan *pb
 
 				select {
 				case <-ctx.Done():
-					fmt.Println("Context cancelled while sending event...")
+					logger.Info("Context cancelled while sending event...")
 					return
 				case c <- event:
 				}

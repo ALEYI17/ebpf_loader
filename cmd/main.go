@@ -5,22 +5,27 @@ import (
 	"ebpf_loader/internal/config"
 	"ebpf_loader/internal/grpc"
 	"ebpf_loader/internal/loader"
+	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"go.uber.org/zap"
 )
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
+  logutil.InitLogger()
 
-	// Handle graceful shutdown
+  logger := logutil.GetLogger()
+  defer logger.Sync()
+
 	go func() {
 		sigch := make(chan os.Signal, 1)
 		signal.Notify(sigch, syscall.SIGINT, syscall.SIGTERM)
 		sig := <-sigch
-		log.Printf("Received signal: %s. Shutting down...", sig)
+    logger.Info("Received signal, shutting down", zap.String("signal", sig.String()))
 		cancel()
 	}()
 
@@ -29,10 +34,10 @@ func main() {
 
   client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport)
 	if err != nil {
-		log.Fatalf("Error creating the client : %s", err)
+    logger.Fatal("Error creating the client", zap.Error(err))
 	}
 
-	log.Println("Client created =)")
+  logger.Info("Client created successfully")
 
 	var loaders []programs.Load_tracer
 	for _, program := range conf.EnableProbes {
@@ -40,7 +45,7 @@ func main() {
 		case "execve":
 			el, err := loader.NewExecvetracerLoader()
 			if err != nil {
-				log.Fatalf("Error creating the execve loader %s", err)
+        logger.Fatal("Error creating the execve loader", zap.Error(err))
 			}
 			defer el.Close()
 
@@ -49,22 +54,21 @@ func main() {
 		case "open":
 			ol, err := loader.NewOpenTracerLoader()
 			if err != nil {
-				log.Fatalf("Error creating the open loader %s", err)
+        logger.Fatal("Error creating the open loader", zap.Error(err))
 			}
 			defer ol.Close()
 			loaders = append(loaders, ol)
 		default:
-			log.Printf("Unknow program: %s", program)
+      logger.Warn("Unknown program", zap.String("program", program))
 		}
 	}
 
-	log.Println("Loader created =)")
+  logger.Info("Loader(s) created successfully")
   defer client.Close()
 	if err := client.Run(ctx, loaders, "Casa"); err != nil {
-    log.Printf("Error runing client: %s",err)
+    logger.Error("Error running client", zap.Error(err))
     return
 	}
 
-
-	log.Println("After run client")
+  logger.Info("Client finished running")
 }

@@ -1,8 +1,8 @@
 package config
 
 import (
+	"ebpf_loader/pkg/logutil"
 	"flag"
-	"log"
 	"os"
 	"strings"
 )
@@ -14,6 +14,7 @@ type Programsconfig struct {
 }
 
 func LoadConfig() *Programsconfig {
+  logger := logutil.GetLogger()
 	var tracer,serverAddr,serverPort string
 	flag.StringVar(&tracer, "tracer", "", "Comma-separated list of eBPF probes to enable (e.g. 'execve,open')")
 
@@ -31,15 +32,15 @@ func LoadConfig() *Programsconfig {
 	}
 
   if serverAddr ==""{
-    log.Fatal("server addr missing")
+    logger.Fatal("Server address is missing")
   }
 
   if serverPort ==""{
-    log.Fatal("server port missing")
+    logger.Fatal("Server port is missing")
   }
 
   if tracer ==""{
-    log.Fatal("Not specifie any type of program to run")
+    logger.Fatal("No probes specified for the program to run")
   }
 
 	probeList := strings.Split(tracer, ",")
