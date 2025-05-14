@@ -40,6 +40,10 @@ func LoadConfig() *Programsconfig {
   }
 
   if tracer ==""{
+    tracer = os.Getenv("TRACER")
+  }
+  
+  if tracer == ""{
     logger.Fatal("No probes specified for the program to run")
   }
 
