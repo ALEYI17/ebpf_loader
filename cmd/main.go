@@ -63,15 +63,9 @@ func main() {
 		}
 	}
   
-  name , err := os.Hostname()
-
-  if err !=nil{
-    logger.Warn("Unknow host name ", zap.Error(err))
-    name = "unknown-host"
-  }
   logger.Info("Loader(s) created successfully")
   defer client.Close()
-	if err := client.Run(ctx, loaders, name); err != nil {
+	if err := client.Run(ctx, loaders, conf.Nodename); err != nil {
     logger.Error("Error running client", zap.Error(err))
     return
 	}

@@ -5,12 +5,15 @@ import (
 	"flag"
 	"os"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 type Programsconfig struct {
 	EnableProbes []string
   ServerAdress string
   Serverport string
+  Nodename string
 }
 
 func LoadConfig() *Programsconfig {
@@ -47,6 +50,18 @@ func LoadConfig() *Programsconfig {
     logger.Fatal("No probes specified for the program to run")
   }
 
+  nodeName:= os.Getenv("NODE_NAME")
+
+  if nodeName ==""{
+    logger.Warn("NODE_NAME not set, falling back to os.Hostname")
+    var err error
+    nodeName ,err = os.Hostname()
+    if err != nil{
+      logger.Warn("Unknow host name ", zap.Error(err))
+      nodeName = "unknown-host"
+    }
+  }
+
 	probeList := strings.Split(tracer, ",")
 
 	for i := range probeList {
@@ -57,5 +72,6 @@ func LoadConfig() *Programsconfig {
     EnableProbes: probeList,
     ServerAdress: serverAddr,
     Serverport: serverPort,
+    Nodename: nodeName,
   }
 }
