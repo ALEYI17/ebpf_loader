@@ -58,6 +58,13 @@ func main() {
 			}
 			defer ol.Close()
 			loaders = append(loaders, ol)
+    case "chmod":
+      cl , err := loader.NewChmodTracerLoader()
+      if err != nil{
+        logger.Fatal("Error creating the chmod loader", zap.Error(err))
+      }
+      defer cl.Close()
+      loaders = append(loaders, cl)
 		default:
       logger.Warn("Unknown program", zap.String("program", program))
 		}
