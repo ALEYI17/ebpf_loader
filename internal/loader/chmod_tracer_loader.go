@@ -35,14 +35,14 @@ func NewChmodTracerLoader() (*ChmodLoader, error) {
 	}
 	defer objs.Close()
 
-	tc, err := link.Tracepoint("syscalls", "sys_enter_chmod", objs.HandleEnterChmod, nil)
+	tc, err := link.Tracepoint("syscalls", "sys_enter_fchmodat", objs.HandleEnterChmod, nil)
 
 	if err != nil {
 		objs.Close()
 		return nil, err
 	}
 
-	tcr, err := link.Tracepoint("syscalls", "sys_exit_chmod", objs.HandleExitChmod, nil)
+	tcr, err := link.Tracepoint("syscalls", "sys_exit_fchmodat", objs.HandleExitChmod, nil)
 	if err != nil {
 		objs.Close()
 		tc.Close()

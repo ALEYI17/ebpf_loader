@@ -28,7 +28,7 @@ struct{
 
 const struct trace_syscall_event *unused __attribute__((unused));
 
-SEC("tracepoint/syscalls/sys_enter_chmod")
+SEC("tracepoint/syscalls/sys_enter_fchmodat")
 int handle_enter_chmod(struct trace_event_raw_sys_enter *ctx){
 u64 pid_tgid = bpf_get_current_pid_tgid();
   u32 key = 0;
@@ -65,7 +65,7 @@ u64 pid_tgid = bpf_get_current_pid_tgid();
   event->user_ppid = BPF_CORE_READ(parent_task, group_leader, thread_pid, numbers[parent_level].nr);
 
   bpf_get_current_comm(&event->comm, TASK_COMM_SIZE);
-  const char *filename = (const char *) ctx->args[0];
+  const char *filename = (const char *) ctx->args[1];
   bpf_probe_read_user_str(event->filename, sizeof(event->filename), filename);
   event->timestamp_ns = bpf_ktime_get_ns();
 
@@ -74,7 +74,7 @@ u64 pid_tgid = bpf_get_current_pid_tgid();
   return 0;  
 }
 
-SEC("tracepoint/syscalls/sys_exit_execve")
+SEC("tracepoint/syscalls/sys_exit_fchmodat")
 int handle_exit_chmod(struct trace_event_raw_sys_exit *ctx){
   struct trace_syscall_event *event;
 
