@@ -4,6 +4,7 @@ import (
 	"ebpf_loader/internal/grpc/pb"
 	"fmt"
 	"os/user"
+	"time"
 
 	"golang.org/x/sys/unix"
 )
@@ -50,5 +51,6 @@ func GenerateGrpcMessage(raw OpentracerTraceSyscallEvent, nodeName string) *pb.E
 		EventType:       "open", 
 		NodeName:        nodeName,
 		User:            username,
+    TimestampUnixMs: time.Now().UnixMilli(),
 	}
 }

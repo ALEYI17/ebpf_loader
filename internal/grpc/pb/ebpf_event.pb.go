@@ -40,6 +40,7 @@ type EbpfEvent struct {
 	CgroupName      string                 `protobuf:"bytes,16,opt,name=cgroup_name,json=cgroupName,proto3" json:"cgroup_name,omitempty"`
 	UserPid         uint32                 `protobuf:"varint,17,opt,name=user_pid,json=userPid,proto3" json:"user_pid,omitempty"`
 	UserPpid        uint32                 `protobuf:"varint,18,opt,name=user_ppid,json=userPpid,proto3" json:"user_ppid,omitempty"`
+	TimestampUnixMs int64                  `protobuf:"varint,19,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -193,6 +194,13 @@ func (x *EbpfEvent) GetUserPpid() uint32 {
 	return 0
 }
 
+func (x *EbpfEvent) GetTimestampUnixMs() int64 {
+	if x != nil {
+		return x.TimestampUnixMs
+	}
+	return 0
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        string                 `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"`
@@ -249,7 +257,7 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\xda\x03\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\x86\x04\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -272,7 +280,8 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\vcgroup_name\x18\x10 \x01(\tR\n" +
 	"cgroupName\x12\x19\n" +
 	"\buser_pid\x18\x11 \x01(\rR\auserPid\x12\x1b\n" +
-	"\tuser_ppid\x18\x12 \x01(\rR\buserPpid\"@\n" +
+	"\tuser_ppid\x18\x12 \x01(\rR\buserPpid\x12*\n" +
+	"\x11timestamp_unix_ms\x18\x13 \x01(\x03R\x0ftimestampUnixMs\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
 	"\x06status\x18\f \x01(\tR\x06status\x12\x18\n" +
 	"\amessage\x18\r \x01(\tR\amessage2A\n" +
