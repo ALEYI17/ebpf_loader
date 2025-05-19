@@ -16,7 +16,14 @@ const (
 	RuntimePodman     = "podman"
 )
 
-func  DetectRuntimeFromSystem() []string{
+var runtimePriority = []string{
+	RuntimeContainerd,
+	RuntimeCrio,
+  RuntimeDocker,
+	RuntimePodman,
+}
+
+func DetectRuntimeFromSystem() string{
   logger := logutil.GetLogger()
 
   var runtimes []string
@@ -40,8 +47,15 @@ func  DetectRuntimeFromSystem() []string{
     runtimes = detectByPort()
   }
 
-  
-  return runtimes
+  preferred, ok:= selectPreferredRuntime(runtimes)
+
+  if ok {
+	  logger.Info("Selected container runtime", zap.String("runtime", preferred))
+  }else {
+    logger.Warn("No known container runtime found")
+  }
+
+  return preferred
 }
 
 func detectCgroupVersion() (string,error){
@@ -105,4 +119,15 @@ func detectByPort() []string{
   }
   
   return runtimes
+}
+
+func selectPreferredRuntime(detected []string) (string, bool) {
+	for _, preferred := range runtimePriority {
+		for _, r := range detected {
+			if r == preferred {
+				return r, true
+			}
+		}
+	}
+	return "", false
 }

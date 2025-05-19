@@ -31,11 +31,9 @@ func main() {
 	}()
 
 	
-  runtimes :=containers.DetectRuntimeFromSystem()
+  runtimes := containers.DetectRuntimeFromSystem()
 
-  for _,runtime := range runtimes{
-    logger.Info("Runtime detected", zap.String("runtime", runtime))
-  }
+  logger.Info("Runtime selected", zap.String("runtime", runtimes))
   
 	conf := config.LoadConfig()
 
