@@ -5,6 +5,7 @@ import (
 	"ebpf_loader/internal/config"
 	"ebpf_loader/internal/grpc"
 	"ebpf_loader/internal/loader"
+	"ebpf_loader/pkg/containers"
 	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
 	"os"
@@ -30,6 +31,10 @@ func main() {
 	}()
 
 	
+  runtimes := containers.DetectRuntimeFromSystem()
+
+  logger.Info("Runtime selected", zap.String("runtime", runtimes))
+  
 	conf := config.LoadConfig()
 
   client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport)
