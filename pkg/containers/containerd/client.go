@@ -2,7 +2,7 @@ package containerd
 
 import (
 	"context"
-	"ebpf_loader/pkg/containers"
+	"ebpf_loader/pkg/containers/common"
 
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/namespaces"
@@ -14,7 +14,7 @@ type ContainerdClient struct{
   NsName string
 }
 
-func NewContainerdClient(runtime containers.RuntimeDetection , ctx context.Context) (*ContainerdClient,error){
+func NewContainerdClient(runtime common.RuntimeDetection , ctx context.Context) (common.RuntimeClient,error){
 
   client,err := containerd.New(runtime.Socket)
 
@@ -62,14 +62,14 @@ func selectNamespace(client *containerd.Client,ctx context.Context) (string,erro
 }
 
 
-func (c *ContainerdClient) ListContainers(ctx context.Context) ([]containers.ContainerInfo,error){
+func (c *ContainerdClient) ListContainers(ctx context.Context) ([]common.ContainerInfo,error){
   
   containersList , err :=c.Client.Containers(c.Namespace)
   if err != nil {
     return nil, err
   }
 
-  var containersInfo []containers.ContainerInfo
+  var containersInfo []common.ContainerInfo
 
   for _ , container := range containersList{
 
@@ -79,13 +79,13 @@ func (c *ContainerdClient) ListContainers(ctx context.Context) ([]containers.Con
       continue
     }
 
-    containersInfo =append(containersInfo,containers.ContainerInfo{ID: info.ID,Image: info.Image, Labels: info.Labels})
+    containersInfo =append(containersInfo,common.ContainerInfo{ID: info.ID,Image: info.Image, Labels: info.Labels})
   }
   
   return containersInfo,nil
 } 
 
-func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID string) (*containers.ContainerInfo,error){
+func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error){
 
   container , err := c.Client.LoadContainer(ctx, containerID)
   if err != nil {
@@ -97,5 +97,5 @@ func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID stri
     return nil , err
   }
 
-  return &containers.ContainerInfo{ID: info.ID,Image: info.Image,Labels: info.Labels},nil
+  return &common.ContainerInfo{ID: info.ID,Image: info.Image,Labels: info.Labels},nil
 } 

@@ -1,25 +1,28 @@
 package containers
 
 import (
+	"context"
+	"ebpf_loader/pkg/containers/common"
+	"ebpf_loader/pkg/containers/containerd"
 	"ebpf_loader/pkg/logutil"
 	"errors"
-
 )
 
 
-func NewRuntimeClient(runtime RuntimeDetection) (*RuntimeClient,error){
+func NewRuntimeClient(ctx context.Context) (common.RuntimeClient,error){
+  runtime := DetectRuntimeFromSystem() 
   logger := logutil.GetLogger()
   switch runtime.Runtime{
-    case RuntimeContainerd:
+    case common.RuntimeContainerd:
       logger.Info("Creating containerd client")
-      return nil,errors.New("Unsuported or invalid runtime")
-    case RuntimeCrio:
+      return containerd.NewContainerdClient(runtime, ctx) 
+    case common.RuntimeCrio:
       logger.Info("Creating cri-o client ")
       return nil,errors.New("Unsuported or invalid runtime")
-    case RuntimeDocker:
+    case common.RuntimeDocker:
       logger.Info("Creating docker client")
       return nil,errors.New("Unsuported or invalid runtime")
-    case RuntimePodman:
+    case common.RuntimePodman:
       logger.Info("Creating podman client")
       return nil,errors.New("Unsuported or invalid runtime")
     default:

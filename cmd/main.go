@@ -30,8 +30,14 @@ func main() {
 		cancel()
 	}()
 
-	
-  containers.DetectRuntimeFromSystem()
+  runtimeClient,err := containers.NewRuntimeClient(ctx)
+  if err !=nil{
+    logger.Fatal("Error creating the runtime client", zap.Error(err))
+  }
+
+  logger.Info(" runtimeClient Client created successfully")
+
+  defer runtimeClient.Close()
 
 	conf := config.LoadConfig()
 
@@ -40,7 +46,7 @@ func main() {
     logger.Fatal("Error creating the client", zap.Error(err))
 	}
 
-  logger.Info("Client created successfully")
+  logger.Info(" gRPC Client created successfully")
 
 	var loaders []programs.Load_tracer
 	for _, program := range conf.EnableProbes {

@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"ebpf_loader/pkg/containers/common"
 	"ebpf_loader/pkg/logutil"
 	"os"
 
@@ -8,10 +9,10 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func DetectRuntimeFromSystem() RuntimeDetection{
+func DetectRuntimeFromSystem() common.RuntimeDetection{
   logger := logutil.GetLogger()
 
-  var runtimes []RuntimeDetection
+  var runtimes []common.RuntimeDetection
 
   runtimes = detectByPort()
 
@@ -46,10 +47,10 @@ func detectCgroupVersion() (string,error){
   }
 }
 
-func detectByPort() []RuntimeDetection{
-  var results []RuntimeDetection
+func detectByPort() []common.RuntimeDetection{
+  var results []common.RuntimeDetection
 
-  for runtime,sockets := range RuntimeSockets {
+  for runtime,sockets := range common.RuntimeSockets {
 
     for _, path := range sockets{
       if info, err := os.Stat(path); err == nil && (info.Mode()&os.ModeSocket != 0){
@@ -59,7 +60,7 @@ func detectByPort() []RuntimeDetection{
         if err !=nil{
           cgroup = "unknow"
         }
-        results = append(results, RuntimeDetection{Runtime: runtime,Socket: path,CgroupVersion:cgroup })
+        results = append(results, common.RuntimeDetection{Runtime: runtime,Socket: path,CgroupVersion:cgroup })
       }
     }
   }
@@ -67,9 +68,9 @@ func detectByPort() []RuntimeDetection{
   return results
 }
 
-func selectPreferredRuntime(detected []RuntimeDetection) (RuntimeDetection, bool) {
-	for _, preferred := range runtimePriority {
-    var candidates []RuntimeDetection
+func selectPreferredRuntime(detected []common.RuntimeDetection) (common.RuntimeDetection, bool) {
+	for _, preferred := range common.RuntimePriority {
+    var candidates []common.RuntimeDetection
 		for _, r := range detected {
 			if r.Runtime == preferred {
         candidates = append(candidates,r )
@@ -80,7 +81,7 @@ func selectPreferredRuntime(detected []RuntimeDetection) (RuntimeDetection, bool
       continue
     }
 
-    for _, preferredSocket := range RuntimeSockets[preferred] {
+    for _, preferredSocket := range common.RuntimeSockets[preferred] {
 			for _, c := range candidates {
 				if c.Socket == preferredSocket {
 					return c, true
@@ -90,5 +91,5 @@ func selectPreferredRuntime(detected []RuntimeDetection) (RuntimeDetection, bool
 
     return candidates[0], true
 	}
-	return RuntimeDetection{}, false
+	return common.RuntimeDetection{}, false
 }

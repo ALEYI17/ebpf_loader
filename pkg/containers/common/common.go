@@ -1,4 +1,4 @@
-package containers
+package common
 
 import (
 	"context"
@@ -24,7 +24,7 @@ const (
 	RuntimePodman     = "podman"
 )
 
-var runtimePriority = []string{
+var RuntimePriority = []string{
 	RuntimeContainerd,
 	RuntimeCrio,
   RuntimeDocker,
