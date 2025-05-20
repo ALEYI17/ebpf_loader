@@ -3,54 +3,23 @@ package containers
 import (
 	"ebpf_loader/pkg/logutil"
 	"os"
-	"strings"
 
 	"go.uber.org/zap"
 	"golang.org/x/sys/unix"
 )
 
-const (
-	RuntimeDocker     = "docker"
-	RuntimeContainerd = "containerd"
-	RuntimeCrio       = "crio"
-	RuntimePodman     = "podman"
-)
-
-var runtimePriority = []string{
-	RuntimeContainerd,
-	RuntimeCrio,
-  RuntimeDocker,
-	RuntimePodman,
-}
-
-func DetectRuntimeFromSystem() string{
+func DetectRuntimeFromSystem() RuntimeDetection{
   logger := logutil.GetLogger()
 
-  var runtimes []string
+  var runtimes []RuntimeDetection
 
-  cgroupVersion , err:= detectCgroupVersion()
-
-  if err != nil{
-    logger.Warn("Cannot detect cgroup version", zap.Error(err))
-  }
-
-  logger.Info("Cgroup version is ", zap.String("cgroupVersion", cgroupVersion))
-
-  if cgroupVersion == "cgroup1"{
-    runtimes,err = detectByPath()
-    if err != nil || len(runtimes) == 0{
-      logger.Info("Detecting by port")
-      runtimes = detectByPort()
-    }
-  }else{
-    logger.Info("Detecting by port")
-    runtimes = detectByPort()
-  }
+  runtimes = detectByPort()
 
   preferred, ok:= selectPreferredRuntime(runtimes)
 
   if ok {
-	  logger.Info("Selected container runtime", zap.String("runtime", preferred))
+	  logger.Info("Selected container runtime", zap.String("runtime", preferred.Runtime))
+    logger.Info("Selected container runtime socket", zap.String("socket", preferred.Socket))
   }else {
     logger.Warn("No known container runtime found")
   }
@@ -77,57 +46,49 @@ func detectCgroupVersion() (string,error){
   }
 }
 
-func detectByPath() ([]string,error){
-  var runtimes []string
-  data, err := os.ReadFile("/proc/self/cgroup")
+func detectByPort() []RuntimeDetection{
+  var results []RuntimeDetection
 
-  if err == nil{
-    content := string(data)
+  for runtime,sockets := range RuntimeSockets {
 
-    if strings.Contains(content, RuntimeDocker){
-      runtimes = append(runtimes, RuntimeDocker)
+    for _, path := range sockets{
+      if info, err := os.Stat(path); err == nil && (info.Mode()&os.ModeSocket != 0){
+        var cgroup string
+        var err error
+        cgroup, err = detectCgroupVersion()
+        if err !=nil{
+          cgroup = "unknow"
+        }
+        results = append(results, RuntimeDetection{Runtime: runtime,Socket: path,CgroupVersion:cgroup })
+      }
     }
-
-    if strings.Contains(content, RuntimeContainerd){
-      runtimes = append(runtimes, RuntimeContainerd)
-    }
-
-    if strings.Contains(content, RuntimeCrio) {
-		  runtimes = append(runtimes, RuntimeCrio)
-		}
-
-    return runtimes,nil
   }
-  return runtimes,err
+  
+  return results
 }
 
-func detectByPort() []string{
-  var runtimes []string
-
-  sockets := map[string]string{
-    RuntimeDocker : "/var/run/docker.sock",
-    RuntimeContainerd : "/run/containerd/containerd.sock",
-    RuntimeCrio:        "/var/run/crio/crio.sock",
-    RuntimePodman:      "/run/podman/podman.sock",
-  }
-  
-  
-  for runtime,sockets := range sockets{
-    if info, err := os.Stat(sockets); err ==nil && (info.Mode() & os.ModeSocket != 0) {
-      runtimes = append(runtimes, runtime)
-    }
-  }
-  
-  return runtimes
-}
-
-func selectPreferredRuntime(detected []string) (string, bool) {
+func selectPreferredRuntime(detected []RuntimeDetection) (RuntimeDetection, bool) {
 	for _, preferred := range runtimePriority {
+    var candidates []RuntimeDetection
 		for _, r := range detected {
-			if r == preferred {
-				return r, true
+			if r.Runtime == preferred {
+        candidates = append(candidates,r )
 			}
 		}
+
+    if len(candidates)==0{
+      continue
+    }
+
+    for _, preferredSocket := range RuntimeSockets[preferred] {
+			for _, c := range candidates {
+				if c.Socket == preferredSocket {
+					return c, true
+				}
+			}
+		}
+
+    return candidates[0], true
 	}
-	return "", false
+	return RuntimeDetection{}, false
 }

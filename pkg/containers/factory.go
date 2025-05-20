@@ -7,9 +7,9 @@ import (
 )
 
 
-func NewRuntimeClient(runtime string) (*RuntimeClient,error){
+func NewRuntimeClient(runtime RuntimeDetection) (*RuntimeClient,error){
   logger := logutil.GetLogger()
-  switch runtime{
+  switch runtime.Runtime{
     case RuntimeContainerd:
       logger.Info("Creating containerd client")
       return nil,errors.New("Unsuported or invalid runtime")

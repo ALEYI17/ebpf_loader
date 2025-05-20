@@ -31,10 +31,8 @@ func main() {
 	}()
 
 	
-  runtimes := containers.DetectRuntimeFromSystem()
+  containers.DetectRuntimeFromSystem()
 
-  logger.Info("Runtime selected", zap.String("runtime", runtimes))
-  
 	conf := config.LoadConfig()
 
   client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport)
