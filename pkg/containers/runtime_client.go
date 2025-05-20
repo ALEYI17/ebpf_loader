@@ -6,7 +6,7 @@ import (
 )
 
 type RuntimeClient interface{
-  ListContsiners(ctx context.Context) ([]ContainerInfo,error)
+  ListContainers(ctx context.Context) ([]ContainerInfo,error)
   GetContainerInfo(ctx context.Context,containerID string) (*ContainerInfo,error)
   Close()
 }
@@ -51,8 +51,6 @@ var RuntimeSockets = map[string][]string{
 
 type ContainerInfo struct {
 	ID     string
-	Name   string
 	Image  string
-	PID    int
 	Labels map[string]string
 }
