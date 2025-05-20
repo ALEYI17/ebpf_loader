@@ -84,3 +84,18 @@ func (c *ContainerdClient) ListContainers(ctx context.Context) ([]containers.Con
   
   return containersInfo,nil
 } 
+
+func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID string) (*containers.ContainerInfo,error){
+
+  container , err := c.Client.LoadContainer(ctx, containerID)
+  if err != nil {
+    return nil , err
+  }
+
+  info,err := container.Info(ctx)
+  if err != nil {
+    return nil , err
+  }
+
+  return &containers.ContainerInfo{ID: info.ID,Image: info.Image,Labels: info.Labels},nil
+} 
