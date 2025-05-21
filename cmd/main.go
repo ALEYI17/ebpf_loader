@@ -52,8 +52,8 @@ func main() {
 	var loaders []programs.Load_tracer
 	for _, program := range conf.EnableProbes {
 		switch program {
-		case "execve":
-			el, err := loader.NewExecvetracerLoader()
+		case programs.Loaderexecve:
+			el, err := loader.NewEbpfLoader(program)
 			if err != nil {
         logger.Fatal("Error creating the execve loader", zap.Error(err))
 			}
@@ -61,15 +61,15 @@ func main() {
 
 			loaders = append(loaders, el)
 
-		case "open":
-			ol, err := loader.NewOpenTracerLoader()
+		case programs.LoaderOpen:
+			ol, err := loader.NewEbpfLoader(program)
 			if err != nil {
         logger.Fatal("Error creating the open loader", zap.Error(err))
 			}
 			defer ol.Close()
 			loaders = append(loaders, ol)
-    case "chmod":
-      cl , err := loader.NewChmodTracerLoader()
+    case programs.LoaderChmod:
+      cl , err := loader.NewEbpfLoader(program)
       if err != nil{
         logger.Fatal("Error creating the chmod loader", zap.Error(err))
       }
