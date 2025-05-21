@@ -47,6 +47,8 @@ message EbpfEvent {
   uint32 user_pid = 17;
   uint32 user_ppid = 18;
   int64 timestamp_unix_ms = 19;
+  string container_id = 20;
+  string container_image = 21;
 }
 
 //message EbpfEventBatch {

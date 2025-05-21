@@ -9,3 +9,10 @@ type Load_tracer interface {
 	Close()
 	Run(context.Context, string) <-chan *pb.EbpfEvent
 }
+
+const (
+	LoaderOpen     = "open"
+	Loaderexecve = "execve"
+  LoaderChmod = "chmod"
+)
+

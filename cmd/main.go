@@ -6,6 +6,7 @@ import (
 	"ebpf_loader/internal/grpc"
 	"ebpf_loader/internal/loader"
 	"ebpf_loader/pkg/containers"
+	"ebpf_loader/pkg/enrichers"
 	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
 	"os"
@@ -31,55 +32,39 @@ func main() {
 	}()
 
   runtimeClient,err := containers.NewRuntimeClient(ctx)
+
   if err !=nil{
     logger.Fatal("Error creating the runtime client", zap.Error(err))
   }
 
   logger.Info(" runtimeClient Client created successfully")
 
+  enricher := enrichers.NewContainerenricher(runtimeClient)
   defer runtimeClient.Close()
 
 	conf := config.LoadConfig()
 
-  client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport)
+	var loaders []programs.Load_tracer
+	for _, program := range conf.EnableProbes {
+    loaderInstance , err := loader.NewEbpfLoader(program)
+    if err != nil {
+      logger.Warn("Unsupported or unknown program", zap.String("program", program), zap.Error(err))
+      continue
+    }
+
+    defer loaderInstance.Close()
+    loaders = append(loaders, loaderInstance)
+  }
+  
+  logger.Info("Loader(s) created successfully")
+
+  client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport,enricher)
 	if err != nil {
     logger.Fatal("Error creating the client", zap.Error(err))
 	}
 
   logger.Info(" gRPC Client created successfully")
 
-	var loaders []programs.Load_tracer
-	for _, program := range conf.EnableProbes {
-		switch program {
-		case "execve":
-			el, err := loader.NewExecvetracerLoader()
-			if err != nil {
-        logger.Fatal("Error creating the execve loader", zap.Error(err))
-			}
-			defer el.Close()
-
-			loaders = append(loaders, el)
-
-		case "open":
-			ol, err := loader.NewOpenTracerLoader()
-			if err != nil {
-        logger.Fatal("Error creating the open loader", zap.Error(err))
-			}
-			defer ol.Close()
-			loaders = append(loaders, ol)
-    case "chmod":
-      cl , err := loader.NewChmodTracerLoader()
-      if err != nil{
-        logger.Fatal("Error creating the chmod loader", zap.Error(err))
-      }
-      defer cl.Close()
-      loaders = append(loaders, cl)
-		default:
-      logger.Warn("Unknown program", zap.String("program", program))
-		}
-	}
-  
-  logger.Info("Loader(s) created successfully")
   defer client.Close()
 	if err := client.Run(ctx, loaders, conf.Nodename); err != nil {
     logger.Error("Error running client", zap.Error(err))

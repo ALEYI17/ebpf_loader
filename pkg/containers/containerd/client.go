@@ -3,9 +3,11 @@ package containerd
 import (
 	"context"
 	"ebpf_loader/pkg/containers/common"
+	"ebpf_loader/pkg/logutil"
 
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/namespaces"
+	"go.uber.org/zap"
 )
 
 type ContainerdClient struct{
@@ -15,6 +17,8 @@ type ContainerdClient struct{
 }
 
 func NewContainerdClient(runtime common.RuntimeDetection , ctx context.Context) (common.RuntimeClient,error){
+
+  logger := logutil.GetLogger()
 
   client,err := containerd.New(runtime.Socket)
 
@@ -26,6 +30,7 @@ func NewContainerdClient(runtime common.RuntimeDetection , ctx context.Context) 
 
   namespace := namespaces.WithNamespace(ctx, ns)
 
+  logger.Info("The namespace is", zap.String("ns",ns ))
   return &ContainerdClient{Client: client,Namespace: namespace,NsName: ns},err
 }
 
@@ -73,7 +78,7 @@ func (c *ContainerdClient) ListContainers(ctx context.Context) ([]common.Contain
 
   for _ , container := range containersList{
 
-    info, err := container.Info(ctx)
+    info, err := container.Info(c.Namespace)
 
     if err != nil{
       continue
@@ -87,15 +92,15 @@ func (c *ContainerdClient) ListContainers(ctx context.Context) ([]common.Contain
 
 func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error){
 
-  container , err := c.Client.LoadContainer(ctx, containerID)
+  container , err := c.Client.LoadContainer(c.Namespace, containerID)
   if err != nil {
     return nil , err
   }
 
-  info,err := container.Info(ctx)
+  info,err := container.Info(c.Namespace)
   if err != nil {
     return nil , err
   }
 
   return &common.ContainerInfo{ID: info.ID,Image: info.Image,Labels: info.Labels},nil
-} 
+}

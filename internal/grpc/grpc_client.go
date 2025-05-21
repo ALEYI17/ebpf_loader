@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/pkg/enrichers"
 	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
 	"errors"
@@ -19,9 +20,10 @@ import (
 type Client struct {
 	conn   *grpc.ClientConn
 	client pb.EventCollectorClient
+  enricher enrichers.Enricher
 }
 
-func NewClient(address string, port string) (*Client, error) {
+func NewClient(address string, port string,enricher enrichers.Enricher) (*Client, error) {
   serverAdress := fmt.Sprintf("%s:%s", address,port)
 	conn, err := grpc.NewClient(serverAdress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -30,7 +32,7 @@ func NewClient(address string, port string) (*Client, error) {
 
 	client := pb.NewEventCollectorClient(conn)
 
-	return &Client{conn: conn, client: client}, nil
+	return &Client{conn: conn, client: client,enricher: enricher}, nil
 }
 
 func (c *Client) Close() error {
@@ -38,8 +40,14 @@ func (c *Client) Close() error {
 }
 
 func (c *Client) SendEventMessage(ctx context.Context, stream grpc.ClientStreamingClient[pb.EbpfEvent, pb.CollectorAck], batch *pb.EbpfEvent) error {
+  logger:= logutil.GetLogger()
+  err := c.enricher.Enrich(ctx, batch)
 
-	err := stream.Send(batch)
+  if err != nil{
+    logger.Warn("Failed to enrich event", zap.Error(err))
+  }
+
+	err = stream.Send(batch)
 	if err != nil {
 		return err
 	}
