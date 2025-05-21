@@ -31,6 +31,7 @@ func main() {
 	}()
 
   runtimeClient,err := containers.NewRuntimeClient(ctx)
+
   if err !=nil{
     logger.Fatal("Error creating the runtime client", zap.Error(err))
   }

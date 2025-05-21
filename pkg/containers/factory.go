@@ -4,6 +4,7 @@ import (
 	"context"
 	"ebpf_loader/pkg/containers/common"
 	"ebpf_loader/pkg/containers/containerd"
+	"ebpf_loader/pkg/containers/docker"
 	"ebpf_loader/pkg/logutil"
 	"errors"
 )
@@ -21,7 +22,7 @@ func NewRuntimeClient(ctx context.Context) (common.RuntimeClient,error){
       return nil,errors.New("Unsuported or invalid runtime")
     case common.RuntimeDocker:
       logger.Info("Creating docker client")
-      return nil,errors.New("Unsuported or invalid runtime")
+      return docker.NewDockerClient() 
     case common.RuntimePodman:
       logger.Info("Creating podman client")
       return nil,errors.New("Unsuported or invalid runtime")
