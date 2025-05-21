@@ -6,6 +6,7 @@ import (
 	"ebpf_loader/internal/grpc"
 	"ebpf_loader/internal/loader"
 	"ebpf_loader/pkg/containers"
+	"ebpf_loader/pkg/enrichers"
 	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
 	"os"
@@ -38,6 +39,7 @@ func main() {
 
   logger.Info(" runtimeClient Client created successfully")
 
+  enricher := enrichers.NewContainerenricher(runtimeClient)
   defer runtimeClient.Close()
 
 	conf := config.LoadConfig()
@@ -56,7 +58,7 @@ func main() {
   
   logger.Info("Loader(s) created successfully")
 
-  client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport)
+  client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport,enricher)
 	if err != nil {
     logger.Fatal("Error creating the client", zap.Error(err))
 	}
