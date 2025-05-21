@@ -92,12 +92,12 @@ func (c *ContainerdClient) ListContainers(ctx context.Context) ([]common.Contain
 
 func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error){
 
-  container , err := c.Client.LoadContainer(ctx, containerID)
+  container , err := c.Client.LoadContainer(c.Namespace, containerID)
   if err != nil {
     return nil , err
   }
 
-  info,err := container.Info(ctx)
+  info,err := container.Info(c.Namespace)
   if err != nil {
     return nil , err
   }
