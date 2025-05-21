@@ -40,8 +40,14 @@ func (c *Client) Close() error {
 }
 
 func (c *Client) SendEventMessage(ctx context.Context, stream grpc.ClientStreamingClient[pb.EbpfEvent, pb.CollectorAck], batch *pb.EbpfEvent) error {
+  logger:= logutil.GetLogger()
+  err := c.enricher.Enrich(ctx, batch)
 
-	err := stream.Send(batch)
+  if err != nil{
+    logger.Warn("Failed to enrich event", zap.Error(err))
+  }
+
+	err = stream.Send(batch)
 	if err != nil {
 		return err
 	}

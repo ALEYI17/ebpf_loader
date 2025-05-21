@@ -25,9 +25,9 @@ const (
 )
 
 var RuntimePriority = []string{
+  RuntimeDocker,
 	RuntimeContainerd,
 	RuntimeCrio,
-  RuntimeDocker,
 	RuntimePodman,
 }
 

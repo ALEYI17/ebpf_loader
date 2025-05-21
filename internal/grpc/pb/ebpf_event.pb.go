@@ -41,6 +41,8 @@ type EbpfEvent struct {
 	UserPid         uint32                 `protobuf:"varint,17,opt,name=user_pid,json=userPid,proto3" json:"user_pid,omitempty"`
 	UserPpid        uint32                 `protobuf:"varint,18,opt,name=user_ppid,json=userPpid,proto3" json:"user_ppid,omitempty"`
 	TimestampUnixMs int64                  `protobuf:"varint,19,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
+	ContainerId     string                 `protobuf:"bytes,20,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	ContainerImage  string                 `protobuf:"bytes,21,opt,name=container_image,json=containerImage,proto3" json:"container_image,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -201,6 +203,20 @@ func (x *EbpfEvent) GetTimestampUnixMs() int64 {
 	return 0
 }
 
+func (x *EbpfEvent) GetContainerId() string {
+	if x != nil {
+		return x.ContainerId
+	}
+	return ""
+}
+
+func (x *EbpfEvent) GetContainerImage() string {
+	if x != nil {
+		return x.ContainerImage
+	}
+	return ""
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        string                 `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"`
@@ -257,7 +273,7 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\x86\x04\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\xd2\x04\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -281,7 +297,9 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"cgroupName\x12\x19\n" +
 	"\buser_pid\x18\x11 \x01(\rR\auserPid\x12\x1b\n" +
 	"\tuser_ppid\x18\x12 \x01(\rR\buserPpid\x12*\n" +
-	"\x11timestamp_unix_ms\x18\x13 \x01(\x03R\x0ftimestampUnixMs\"@\n" +
+	"\x11timestamp_unix_ms\x18\x13 \x01(\x03R\x0ftimestampUnixMs\x12!\n" +
+	"\fcontainer_id\x18\x14 \x01(\tR\vcontainerId\x12'\n" +
+	"\x0fcontainer_image\x18\x15 \x01(\tR\x0econtainerImage\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
 	"\x06status\x18\f \x01(\tR\x06status\x12\x18\n" +
 	"\amessage\x18\r \x01(\tR\amessage2A\n" +
