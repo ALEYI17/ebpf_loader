@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -31,7 +32,7 @@ func main() {
 		cancel()
 	}()
 
-  runtimeClient,err := containers.NewRuntimeClient(ctx)
+  runtimeClient,err := containers.NewRuntimeClientWithCache(ctx, 2*time.Minute, 30*time.Second)
 
   if err !=nil{
     logger.Fatal("Error creating the runtime client", zap.Error(err))

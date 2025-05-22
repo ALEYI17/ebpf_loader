@@ -64,10 +64,21 @@ func (c *DockerClient) ListContainers(ctx context.Context) ([]common.ContainerIn
 
 func (c *DockerClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error) {
 
+  if c.cache != nil{
+    if info , ok := c.cache.Get(containerID); ok {
+      return info, nil
+    } 
+
+  }
   inspect,err:= c. client.ContainerInspect(ctx, containerID)
   if err != nil {
     return nil, err
   }
 
-  return &common.ContainerInfo{ID: inspect.ID,Image: inspect.Config.Image,Labels: inspect.Config.Labels},nil
+  info := &common.ContainerInfo{ID: inspect.ID,Image: inspect.Config.Image,Labels: inspect.Config.Labels}
+
+  if c.cache != nil {
+    c.cache.Set(containerID, info)
+  }
+  return info ,nil
 }

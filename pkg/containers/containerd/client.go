@@ -116,6 +116,11 @@ func (c *ContainerdClient) ListContainers(ctx context.Context) ([]common.Contain
 
 func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error){
 
+  if c.cache !=nil{
+    if info,ok := c.cache.Get(containerID);ok{
+      return info,nil
+    }
+  }
   container , err := c.Client.LoadContainer(c.Namespace, containerID)
   if err != nil {
     return nil , err
@@ -126,5 +131,10 @@ func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID stri
     return nil , err
   }
 
-  return &common.ContainerInfo{ID: info.ID,Image: info.Image,Labels: info.Labels},nil
+  contInfo := &common.ContainerInfo{ID: info.ID,Image: info.Image,Labels: info.Labels}
+
+  if c.cache !=nil {
+    c.cache.Set(containerID, contInfo)
+  }
+  return contInfo,nil
 }
