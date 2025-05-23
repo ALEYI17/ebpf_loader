@@ -49,6 +49,7 @@ message EbpfEvent {
   int64 timestamp_unix_ms = 19;
   string container_id = 20;
   string container_image = 21;
+  string container_labels_json=22;
 }
 
 //message EbpfEventBatch {
