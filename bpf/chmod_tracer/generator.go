@@ -2,8 +2,6 @@ package chmodtracer
 
 import (
 	"ebpf_loader/internal/grpc/pb"
-	"fmt"
-	"os/user"
 	"time"
 
 	"golang.org/x/sys/unix"
@@ -12,12 +10,7 @@ import (
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type trace_syscall_event  Chmodtracer chmod_tracer.bpf.c
 
 func GenerateGrpcMessage(raw ChmodtracerTraceSyscallEvent , nodeName string) *pb.EbpfEvent{
-  username := ""
-
-	userInfo, err := user.LookupId(fmt.Sprintf("%d", raw.Uid))
-	if err == nil {
-		username = userInfo.Username
-	}
+ 
 
 	return &pb.EbpfEvent{
 		Pid:             raw.Pid,
@@ -36,7 +29,6 @@ func GenerateGrpcMessage(raw ChmodtracerTraceSyscallEvent , nodeName string) *pb
 		LatencyNs:       raw.Latency,
 		EventType:       "chmod",
 		NodeName:        nodeName,
-		User:            username,
     TimestampUnixMs: time.Now().UnixMilli(),
 	}
 
