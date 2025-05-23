@@ -38,10 +38,9 @@ func main() {
     logger.Fatal("Error creating the runtime client", zap.Error(err))
   }
 
-  logger.Info(" runtimeClient Client created successfully")
-
-  enricher := enrichers.NewContainerenricher(runtimeClient)
   defer runtimeClient.Close()
+
+  logger.Info(" runtimeClient Client created successfully")
 
 	conf := config.LoadConfig()
 
@@ -58,6 +57,12 @@ func main() {
   }
   
   logger.Info("Loader(s) created successfully")
+
+  containerEnricher := enrichers.NewContainerenricher(runtimeClient)
+
+  userEnricher := enrichers.NewUserEnriche()
+
+  enricher := enrichers.NewMultiEnricher(containerEnricher,userEnricher)
 
   client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport,enricher)
 	if err != nil {
