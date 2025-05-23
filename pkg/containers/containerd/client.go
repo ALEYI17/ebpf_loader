@@ -2,8 +2,10 @@ package containerd
 
 import (
 	"context"
+	"ebpf_loader/pkg/containerCache"
 	"ebpf_loader/pkg/containers/common"
 	"ebpf_loader/pkg/logutil"
+	"time"
 
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/namespaces"
@@ -13,7 +15,8 @@ import (
 type ContainerdClient struct{
   Client *containerd.Client
   Namespace context.Context
-  NsName string
+  NsName string 
+  cache *containercache.Cache
 }
 
 func NewContainerdClient(runtime common.RuntimeDetection , ctx context.Context) (common.RuntimeClient,error){
@@ -32,6 +35,27 @@ func NewContainerdClient(runtime common.RuntimeDetection , ctx context.Context) 
 
   logger.Info("The namespace is", zap.String("ns",ns ))
   return &ContainerdClient{Client: client,Namespace: namespace,NsName: ns},err
+}
+
+func NewContainerdClientWithCache(runtime common.RuntimeDetection , ctx context.Context,ttl ,ci time.Duration) (common.RuntimeClient,error){
+
+  logger := logutil.GetLogger()
+
+  client,err := containerd.New(runtime.Socket)
+
+  if err != nil{
+    return nil , err
+  }
+
+  ns , err:= selectNamespace(client,ctx)
+
+  namespace := namespaces.WithNamespace(ctx, ns)
+
+  logger.Info("The namespace is", zap.String("ns",ns ))
+
+  cache := containercache.NewCache(ttl, ci)
+
+  return &ContainerdClient{Client: client,Namespace: namespace,NsName: ns,cache: cache},err
 }
 
 func (c *ContainerdClient) Close(){
@@ -92,6 +116,11 @@ func (c *ContainerdClient) ListContainers(ctx context.Context) ([]common.Contain
 
 func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error){
 
+  if c.cache !=nil{
+    if info,ok := c.cache.Get(containerID);ok{
+      return info,nil
+    }
+  }
   container , err := c.Client.LoadContainer(c.Namespace, containerID)
   if err != nil {
     return nil , err
@@ -102,5 +131,10 @@ func (c *ContainerdClient) GetContainerInfo(ctx context.Context,containerID stri
     return nil , err
   }
 
-  return &common.ContainerInfo{ID: info.ID,Image: info.Image,Labels: info.Labels},nil
+  contInfo := &common.ContainerInfo{ID: info.ID,Image: info.Image,Labels: info.Labels}
+
+  if c.cache !=nil {
+    c.cache.Set(containerID, contInfo)
+  }
+  return contInfo,nil
 }
