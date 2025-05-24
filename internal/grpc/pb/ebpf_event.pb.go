@@ -22,29 +22,30 @@ const (
 )
 
 type EbpfEvent struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Pid             uint32                 `protobuf:"varint,1,opt,name=pid,proto3" json:"pid,omitempty"`
-	Uid             uint32                 `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty"`
-	Comm            string                 `protobuf:"bytes,3,opt,name=comm,proto3" json:"comm,omitempty"`
-	Filename        string                 `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
-	ReturnCode      int64                  `protobuf:"varint,6,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
-	TimestampNs     uint64                 `protobuf:"varint,7,opt,name=timestamp_ns,json=timestampNs,proto3" json:"timestamp_ns,omitempty"`
-	TimestampNsExit uint64                 `protobuf:"varint,8,opt,name=timestamp_ns_exit,json=timestampNsExit,proto3" json:"timestamp_ns_exit,omitempty"`
-	LatencyNs       uint64                 `protobuf:"varint,9,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
-	EventType       string                 `protobuf:"bytes,10,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"`
-	NodeName        string                 `protobuf:"bytes,11,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
-	User            string                 `protobuf:"bytes,12,opt,name=user,proto3" json:"user,omitempty"`
-	Ppid            uint32                 `protobuf:"varint,13,opt,name=ppid,proto3" json:"ppid,omitempty"`
-	Gid             uint32                 `protobuf:"varint,14,opt,name=gid,proto3" json:"gid,omitempty"`
-	CgroupId        uint64                 `protobuf:"varint,15,opt,name=cgroup_id,json=cgroupId,proto3" json:"cgroup_id,omitempty"`
-	CgroupName      string                 `protobuf:"bytes,16,opt,name=cgroup_name,json=cgroupName,proto3" json:"cgroup_name,omitempty"`
-	UserPid         uint32                 `protobuf:"varint,17,opt,name=user_pid,json=userPid,proto3" json:"user_pid,omitempty"`
-	UserPpid        uint32                 `protobuf:"varint,18,opt,name=user_ppid,json=userPpid,proto3" json:"user_ppid,omitempty"`
-	TimestampUnixMs int64                  `protobuf:"varint,19,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
-	ContainerId     string                 `protobuf:"bytes,20,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
-	ContainerImage  string                 `protobuf:"bytes,21,opt,name=container_image,json=containerImage,proto3" json:"container_image,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Pid                 uint32                 `protobuf:"varint,1,opt,name=pid,proto3" json:"pid,omitempty"`
+	Uid                 uint32                 `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty"`
+	Comm                string                 `protobuf:"bytes,3,opt,name=comm,proto3" json:"comm,omitempty"`
+	Filename            string                 `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
+	ReturnCode          int64                  `protobuf:"varint,6,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	TimestampNs         uint64                 `protobuf:"varint,7,opt,name=timestamp_ns,json=timestampNs,proto3" json:"timestamp_ns,omitempty"`
+	TimestampNsExit     uint64                 `protobuf:"varint,8,opt,name=timestamp_ns_exit,json=timestampNsExit,proto3" json:"timestamp_ns_exit,omitempty"`
+	LatencyNs           uint64                 `protobuf:"varint,9,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
+	EventType           string                 `protobuf:"bytes,10,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"`
+	NodeName            string                 `protobuf:"bytes,11,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
+	User                string                 `protobuf:"bytes,12,opt,name=user,proto3" json:"user,omitempty"`
+	Ppid                uint32                 `protobuf:"varint,13,opt,name=ppid,proto3" json:"ppid,omitempty"`
+	Gid                 uint32                 `protobuf:"varint,14,opt,name=gid,proto3" json:"gid,omitempty"`
+	CgroupId            uint64                 `protobuf:"varint,15,opt,name=cgroup_id,json=cgroupId,proto3" json:"cgroup_id,omitempty"`
+	CgroupName          string                 `protobuf:"bytes,16,opt,name=cgroup_name,json=cgroupName,proto3" json:"cgroup_name,omitempty"`
+	UserPid             uint32                 `protobuf:"varint,17,opt,name=user_pid,json=userPid,proto3" json:"user_pid,omitempty"`
+	UserPpid            uint32                 `protobuf:"varint,18,opt,name=user_ppid,json=userPpid,proto3" json:"user_ppid,omitempty"`
+	TimestampUnixMs     int64                  `protobuf:"varint,19,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
+	ContainerId         string                 `protobuf:"bytes,20,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	ContainerImage      string                 `protobuf:"bytes,21,opt,name=container_image,json=containerImage,proto3" json:"container_image,omitempty"`
+	ContainerLabelsJson string                 `protobuf:"bytes,22,opt,name=container_labels_json,json=containerLabelsJson,proto3" json:"container_labels_json,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *EbpfEvent) Reset() {
@@ -217,6 +218,13 @@ func (x *EbpfEvent) GetContainerImage() string {
 	return ""
 }
 
+func (x *EbpfEvent) GetContainerLabelsJson() string {
+	if x != nil {
+		return x.ContainerLabelsJson
+	}
+	return ""
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Status        string                 `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"`
@@ -273,7 +281,7 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\xd2\x04\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\x86\x05\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -299,7 +307,8 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\tuser_ppid\x18\x12 \x01(\rR\buserPpid\x12*\n" +
 	"\x11timestamp_unix_ms\x18\x13 \x01(\x03R\x0ftimestampUnixMs\x12!\n" +
 	"\fcontainer_id\x18\x14 \x01(\tR\vcontainerId\x12'\n" +
-	"\x0fcontainer_image\x18\x15 \x01(\tR\x0econtainerImage\"@\n" +
+	"\x0fcontainer_image\x18\x15 \x01(\tR\x0econtainerImage\x122\n" +
+	"\x15container_labels_json\x18\x16 \x01(\tR\x13containerLabelsJson\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
 	"\x06status\x18\f \x01(\tR\x06status\x12\x18\n" +
 	"\amessage\x18\r \x01(\tR\amessage2A\n" +
