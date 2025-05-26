@@ -4,12 +4,9 @@ import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
 	"ebpf_loader/pkg/containers/common"
-	"ebpf_loader/pkg/logutil"
-	"encoding/json"
 	"fmt"
 	"regexp"
 
-	"go.uber.org/zap"
 )
 
 type ContainerEnricher struct{
@@ -27,12 +24,10 @@ func NewContainerenricher(client common.RuntimeClient) *ContainerEnricher{
 
 func (e *ContainerEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) error{
 
-  logger := logutil.GetLogger()
-
   if event.CgroupName == "" {
 		event.ContainerId = ""
 		event.ContainerImage = ""
-    event.ContainerLabelsJson = ""
+    event.ContainerLabelsJson = nil
 		return nil // Not an error!
 	}
 
@@ -40,7 +35,7 @@ func (e *ContainerEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) er
 	if err != nil {
 		event.ContainerId = ""
 		event.ContainerImage = ""
-    event.ContainerLabelsJson = ""
+    event.ContainerLabelsJson = nil
 		return nil // Still not an error — just not containerized
 	}
 
@@ -51,13 +46,7 @@ func (e *ContainerEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) er
 
   event.ContainerId = containerInfo.ID
   event.ContainerImage = containerInfo.Image
-  data ,err := json.Marshal(containerInfo.Labels); 
-  if err != nil{
-    event.ContainerLabelsJson = ""
-    logger.Warn("Could not marshall labels", zap.Error(err))
-    return err
-  }
-  event.ContainerLabelsJson = string(data)
+  event.ContainerLabelsJson = containerInfo.Labels
   return nil
 }
 
