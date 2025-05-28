@@ -43,7 +43,7 @@ const struct trace_syscall_event *unused __attribute__((unused));
 
 SEC("tracepoint/syscalls/sys_enter_execve")
 int handle_enter_execve(struct trace_event_raw_sys_enter *ctx){
-u64 pid_tgid = bpf_get_current_pid_tgid();
+  u64 pid_tgid = bpf_get_current_pid_tgid();
   u32 key = 0;
 
   struct trace_syscall_event *event = bpf_map_lookup_elem(&tmp_event_map, &key);

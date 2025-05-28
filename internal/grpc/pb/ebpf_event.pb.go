@@ -43,7 +43,7 @@ type EbpfEvent struct {
 	TimestampUnixMs     int64                  `protobuf:"varint,19,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
 	ContainerId         string                 `protobuf:"bytes,20,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
 	ContainerImage      string                 `protobuf:"bytes,21,opt,name=container_image,json=containerImage,proto3" json:"container_image,omitempty"`
-	ContainerLabelsJson string                 `protobuf:"bytes,22,opt,name=container_labels_json,json=containerLabelsJson,proto3" json:"container_labels_json,omitempty"`
+	ContainerLabelsJson map[string]string      `protobuf:"bytes,22,rep,name=container_labels_json,json=containerLabelsJson,proto3" json:"container_labels_json,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -218,11 +218,11 @@ func (x *EbpfEvent) GetContainerImage() string {
 	return ""
 }
 
-func (x *EbpfEvent) GetContainerLabelsJson() string {
+func (x *EbpfEvent) GetContainerLabelsJson() map[string]string {
 	if x != nil {
 		return x.ContainerLabelsJson
 	}
-	return ""
+	return nil
 }
 
 type CollectorAck struct {
@@ -281,7 +281,7 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\x86\x05\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\xf6\x05\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -307,8 +307,11 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\tuser_ppid\x18\x12 \x01(\rR\buserPpid\x12*\n" +
 	"\x11timestamp_unix_ms\x18\x13 \x01(\x03R\x0ftimestampUnixMs\x12!\n" +
 	"\fcontainer_id\x18\x14 \x01(\tR\vcontainerId\x12'\n" +
-	"\x0fcontainer_image\x18\x15 \x01(\tR\x0econtainerImage\x122\n" +
-	"\x15container_labels_json\x18\x16 \x01(\tR\x13containerLabelsJson\"@\n" +
+	"\x0fcontainer_image\x18\x15 \x01(\tR\x0econtainerImage\x12Z\n" +
+	"\x15container_labels_json\x18\x16 \x03(\v2&.pb.EbpfEvent.ContainerLabelsJsonEntryR\x13containerLabelsJson\x1aF\n" +
+	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
 	"\x06status\x18\f \x01(\tR\x06status\x12\x18\n" +
 	"\amessage\x18\r \x01(\tR\amessage2A\n" +
@@ -328,19 +331,21 @@ func file_ebpf_event_proto_rawDescGZIP() []byte {
 	return file_ebpf_event_proto_rawDescData
 }
 
-var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_ebpf_event_proto_goTypes = []any{
 	(*EbpfEvent)(nil),    // 0: pb.EbpfEvent
 	(*CollectorAck)(nil), // 1: pb.CollectorAck
+	nil,                  // 2: pb.EbpfEvent.ContainerLabelsJsonEntry
 }
 var file_ebpf_event_proto_depIdxs = []int32{
-	0, // 0: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
-	1, // 1: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
+	0, // 1: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
+	1, // 2: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_ebpf_event_proto_init() }
@@ -354,7 +359,7 @@ func file_ebpf_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ebpf_event_proto_rawDesc), len(file_ebpf_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
