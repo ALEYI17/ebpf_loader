@@ -10,6 +10,16 @@
 #define PATH_MAX 256
 #endif
 
+#ifndef AF_INET
+#define AF_INET  2
+#endif
+
+#ifndef AF_INET6
+#define AF_INET6 10
+#endif
+
+
+
 struct trace_syscall_event {
     u32 pid;
     u32 uid;
