@@ -26,26 +26,29 @@ type EbpfEvent struct {
 	Pid                 uint32                 `protobuf:"varint,1,opt,name=pid,proto3" json:"pid,omitempty"`
 	Uid                 uint32                 `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty"`
 	Comm                string                 `protobuf:"bytes,3,opt,name=comm,proto3" json:"comm,omitempty"`
-	Filename            string                 `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
-	ReturnCode          int64                  `protobuf:"varint,6,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
-	TimestampNs         uint64                 `protobuf:"varint,7,opt,name=timestamp_ns,json=timestampNs,proto3" json:"timestamp_ns,omitempty"`
-	TimestampNsExit     uint64                 `protobuf:"varint,8,opt,name=timestamp_ns_exit,json=timestampNsExit,proto3" json:"timestamp_ns_exit,omitempty"`
-	LatencyNs           uint64                 `protobuf:"varint,9,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
-	EventType           string                 `protobuf:"bytes,10,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"`
-	NodeName            string                 `protobuf:"bytes,11,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
-	User                string                 `protobuf:"bytes,12,opt,name=user,proto3" json:"user,omitempty"`
-	Ppid                uint32                 `protobuf:"varint,13,opt,name=ppid,proto3" json:"ppid,omitempty"`
-	Gid                 uint32                 `protobuf:"varint,14,opt,name=gid,proto3" json:"gid,omitempty"`
-	CgroupId            uint64                 `protobuf:"varint,15,opt,name=cgroup_id,json=cgroupId,proto3" json:"cgroup_id,omitempty"`
-	CgroupName          string                 `protobuf:"bytes,16,opt,name=cgroup_name,json=cgroupName,proto3" json:"cgroup_name,omitempty"`
-	UserPid             uint32                 `protobuf:"varint,17,opt,name=user_pid,json=userPid,proto3" json:"user_pid,omitempty"`
-	UserPpid            uint32                 `protobuf:"varint,18,opt,name=user_ppid,json=userPpid,proto3" json:"user_ppid,omitempty"`
-	TimestampUnixMs     int64                  `protobuf:"varint,19,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
-	ContainerId         string                 `protobuf:"bytes,20,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
-	ContainerImage      string                 `protobuf:"bytes,21,opt,name=container_image,json=containerImage,proto3" json:"container_image,omitempty"`
-	ContainerLabelsJson map[string]string      `protobuf:"bytes,22,rep,name=container_labels_json,json=containerLabelsJson,proto3" json:"container_labels_json,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	TimestampNs         uint64                 `protobuf:"varint,4,opt,name=timestamp_ns,json=timestampNs,proto3" json:"timestamp_ns,omitempty"`
+	TimestampNsExit     uint64                 `protobuf:"varint,5,opt,name=timestamp_ns_exit,json=timestampNsExit,proto3" json:"timestamp_ns_exit,omitempty"`
+	LatencyNs           uint64                 `protobuf:"varint,6,opt,name=latency_ns,json=latencyNs,proto3" json:"latency_ns,omitempty"`
+	EventType           string                 `protobuf:"bytes,7,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"`
+	NodeName            string                 `protobuf:"bytes,8,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
+	User                string                 `protobuf:"bytes,9,opt,name=user,proto3" json:"user,omitempty"`
+	Ppid                uint32                 `protobuf:"varint,10,opt,name=ppid,proto3" json:"ppid,omitempty"`
+	Gid                 uint32                 `protobuf:"varint,11,opt,name=gid,proto3" json:"gid,omitempty"`
+	CgroupId            uint64                 `protobuf:"varint,12,opt,name=cgroup_id,json=cgroupId,proto3" json:"cgroup_id,omitempty"`
+	CgroupName          string                 `protobuf:"bytes,13,opt,name=cgroup_name,json=cgroupName,proto3" json:"cgroup_name,omitempty"`
+	UserPid             uint32                 `protobuf:"varint,14,opt,name=user_pid,json=userPid,proto3" json:"user_pid,omitempty"`
+	UserPpid            uint32                 `protobuf:"varint,15,opt,name=user_ppid,json=userPpid,proto3" json:"user_ppid,omitempty"`
+	TimestampUnixMs     int64                  `protobuf:"varint,16,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
+	ContainerId         string                 `protobuf:"bytes,17,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	ContainerImage      string                 `protobuf:"bytes,18,opt,name=container_image,json=containerImage,proto3" json:"container_image,omitempty"`
+	ContainerLabelsJson map[string]string      `protobuf:"bytes,19,rep,name=container_labels_json,json=containerLabelsJson,proto3" json:"container_labels_json,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Types that are valid to be assigned to Payload:
+	//
+	//	*EbpfEvent_Snoop
+	//	*EbpfEvent_Network
+	Payload       isEbpfEvent_Payload `protobuf_oneof:"payload"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *EbpfEvent) Reset() {
@@ -97,20 +100,6 @@ func (x *EbpfEvent) GetComm() string {
 		return x.Comm
 	}
 	return ""
-}
-
-func (x *EbpfEvent) GetFilename() string {
-	if x != nil {
-		return x.Filename
-	}
-	return ""
-}
-
-func (x *EbpfEvent) GetReturnCode() int64 {
-	if x != nil {
-		return x.ReturnCode
-	}
-	return 0
 }
 
 func (x *EbpfEvent) GetTimestampNs() uint64 {
@@ -225,17 +214,194 @@ func (x *EbpfEvent) GetContainerLabelsJson() map[string]string {
 	return nil
 }
 
+func (x *EbpfEvent) GetPayload() isEbpfEvent_Payload {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *EbpfEvent) GetSnoop() *SnooperEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*EbpfEvent_Snoop); ok {
+			return x.Snoop
+		}
+	}
+	return nil
+}
+
+func (x *EbpfEvent) GetNetwork() *NetworkEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*EbpfEvent_Network); ok {
+			return x.Network
+		}
+	}
+	return nil
+}
+
+type isEbpfEvent_Payload interface {
+	isEbpfEvent_Payload()
+}
+
+type EbpfEvent_Snoop struct {
+	Snoop *SnooperEvent `protobuf:"bytes,20,opt,name=snoop,proto3,oneof"`
+}
+
+type EbpfEvent_Network struct {
+	Network *NetworkEvent `protobuf:"bytes,21,opt,name=network,proto3,oneof"`
+}
+
+func (*EbpfEvent_Snoop) isEbpfEvent_Payload() {}
+
+func (*EbpfEvent_Network) isEbpfEvent_Payload() {}
+
+type SnooperEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Filename      string                 `protobuf:"bytes,22,opt,name=filename,proto3" json:"filename,omitempty"`
+	ReturnCode    int64                  `protobuf:"varint,23,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SnooperEvent) Reset() {
+	*x = SnooperEvent{}
+	mi := &file_ebpf_event_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SnooperEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SnooperEvent) ProtoMessage() {}
+
+func (x *SnooperEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_ebpf_event_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SnooperEvent.ProtoReflect.Descriptor instead.
+func (*SnooperEvent) Descriptor() ([]byte, []int) {
+	return file_ebpf_event_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SnooperEvent) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+func (x *SnooperEvent) GetReturnCode() int64 {
+	if x != nil {
+		return x.ReturnCode
+	}
+	return 0
+}
+
+type NetworkEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReturnCode    int64                  `protobuf:"varint,24,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	Saddr         string                 `protobuf:"bytes,25,opt,name=saddr,proto3" json:"saddr,omitempty"`                       // e.g., "192.168.1.100" or "::1"
+	Daddr         string                 `protobuf:"bytes,26,opt,name=daddr,proto3" json:"daddr,omitempty"`                       // e.g., "8.8.8.8"
+	Sport         string                 `protobuf:"bytes,27,opt,name=sport,proto3" json:"sport,omitempty"`                       // e.g., "443"
+	Dport         string                 `protobuf:"bytes,28,opt,name=dport,proto3" json:"dport,omitempty"`                       // e.g., "12345"
+	SaFamily      string                 `protobuf:"bytes,29,opt,name=sa_family,json=saFamily,proto3" json:"sa_family,omitempty"` // e.g., "AF_INET", "AF_INET6"
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NetworkEvent) Reset() {
+	*x = NetworkEvent{}
+	mi := &file_ebpf_event_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkEvent) ProtoMessage() {}
+
+func (x *NetworkEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_ebpf_event_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NetworkEvent.ProtoReflect.Descriptor instead.
+func (*NetworkEvent) Descriptor() ([]byte, []int) {
+	return file_ebpf_event_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *NetworkEvent) GetReturnCode() int64 {
+	if x != nil {
+		return x.ReturnCode
+	}
+	return 0
+}
+
+func (x *NetworkEvent) GetSaddr() string {
+	if x != nil {
+		return x.Saddr
+	}
+	return ""
+}
+
+func (x *NetworkEvent) GetDaddr() string {
+	if x != nil {
+		return x.Daddr
+	}
+	return ""
+}
+
+func (x *NetworkEvent) GetSport() string {
+	if x != nil {
+		return x.Sport
+	}
+	return ""
+}
+
+func (x *NetworkEvent) GetDport() string {
+	if x != nil {
+		return x.Dport
+	}
+	return ""
+}
+
+func (x *NetworkEvent) GetSaFamily() string {
+	if x != nil {
+		return x.SaFamily
+	}
+	return ""
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,13,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,30,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,31,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CollectorAck) Reset() {
 	*x = CollectorAck{}
-	mi := &file_ebpf_event_proto_msgTypes[1]
+	mi := &file_ebpf_event_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -247,7 +413,7 @@ func (x *CollectorAck) String() string {
 func (*CollectorAck) ProtoMessage() {}
 
 func (x *CollectorAck) ProtoReflect() protoreflect.Message {
-	mi := &file_ebpf_event_proto_msgTypes[1]
+	mi := &file_ebpf_event_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -260,7 +426,7 @@ func (x *CollectorAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CollectorAck.ProtoReflect.Descriptor instead.
 func (*CollectorAck) Descriptor() ([]byte, []int) {
-	return file_ebpf_event_proto_rawDescGZIP(), []int{1}
+	return file_ebpf_event_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CollectorAck) GetStatus() string {
@@ -281,40 +447,52 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\xf6\x05\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\x9c\x06\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
-	"\x04comm\x18\x03 \x01(\tR\x04comm\x12\x1a\n" +
-	"\bfilename\x18\x04 \x01(\tR\bfilename\x12\x1f\n" +
-	"\vreturn_code\x18\x06 \x01(\x03R\n" +
-	"returnCode\x12!\n" +
-	"\ftimestamp_ns\x18\a \x01(\x04R\vtimestampNs\x12*\n" +
-	"\x11timestamp_ns_exit\x18\b \x01(\x04R\x0ftimestampNsExit\x12\x1d\n" +
+	"\x04comm\x18\x03 \x01(\tR\x04comm\x12!\n" +
+	"\ftimestamp_ns\x18\x04 \x01(\x04R\vtimestampNs\x12*\n" +
+	"\x11timestamp_ns_exit\x18\x05 \x01(\x04R\x0ftimestampNsExit\x12\x1d\n" +
 	"\n" +
-	"latency_ns\x18\t \x01(\x04R\tlatencyNs\x12\x1d\n" +
+	"latency_ns\x18\x06 \x01(\x04R\tlatencyNs\x12\x1d\n" +
 	"\n" +
-	"event_type\x18\n" +
-	" \x01(\tR\teventType\x12\x1b\n" +
-	"\tnode_name\x18\v \x01(\tR\bnodeName\x12\x12\n" +
-	"\x04user\x18\f \x01(\tR\x04user\x12\x12\n" +
-	"\x04ppid\x18\r \x01(\rR\x04ppid\x12\x10\n" +
-	"\x03gid\x18\x0e \x01(\rR\x03gid\x12\x1b\n" +
-	"\tcgroup_id\x18\x0f \x01(\x04R\bcgroupId\x12\x1f\n" +
-	"\vcgroup_name\x18\x10 \x01(\tR\n" +
+	"event_type\x18\a \x01(\tR\teventType\x12\x1b\n" +
+	"\tnode_name\x18\b \x01(\tR\bnodeName\x12\x12\n" +
+	"\x04user\x18\t \x01(\tR\x04user\x12\x12\n" +
+	"\x04ppid\x18\n" +
+	" \x01(\rR\x04ppid\x12\x10\n" +
+	"\x03gid\x18\v \x01(\rR\x03gid\x12\x1b\n" +
+	"\tcgroup_id\x18\f \x01(\x04R\bcgroupId\x12\x1f\n" +
+	"\vcgroup_name\x18\r \x01(\tR\n" +
 	"cgroupName\x12\x19\n" +
-	"\buser_pid\x18\x11 \x01(\rR\auserPid\x12\x1b\n" +
-	"\tuser_ppid\x18\x12 \x01(\rR\buserPpid\x12*\n" +
-	"\x11timestamp_unix_ms\x18\x13 \x01(\x03R\x0ftimestampUnixMs\x12!\n" +
-	"\fcontainer_id\x18\x14 \x01(\tR\vcontainerId\x12'\n" +
-	"\x0fcontainer_image\x18\x15 \x01(\tR\x0econtainerImage\x12Z\n" +
-	"\x15container_labels_json\x18\x16 \x03(\v2&.pb.EbpfEvent.ContainerLabelsJsonEntryR\x13containerLabelsJson\x1aF\n" +
+	"\buser_pid\x18\x0e \x01(\rR\auserPid\x12\x1b\n" +
+	"\tuser_ppid\x18\x0f \x01(\rR\buserPpid\x12*\n" +
+	"\x11timestamp_unix_ms\x18\x10 \x01(\x03R\x0ftimestampUnixMs\x12!\n" +
+	"\fcontainer_id\x18\x11 \x01(\tR\vcontainerId\x12'\n" +
+	"\x0fcontainer_image\x18\x12 \x01(\tR\x0econtainerImage\x12Z\n" +
+	"\x15container_labels_json\x18\x13 \x03(\v2&.pb.EbpfEvent.ContainerLabelsJsonEntryR\x13containerLabelsJson\x12(\n" +
+	"\x05snoop\x18\x14 \x01(\v2\x10.pb.SnooperEventH\x00R\x05snoop\x12,\n" +
+	"\anetwork\x18\x15 \x01(\v2\x10.pb.NetworkEventH\x00R\anetwork\x1aF\n" +
 	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"@\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\t\n" +
+	"\apayload\"K\n" +
+	"\fSnooperEvent\x12\x1a\n" +
+	"\bfilename\x18\x16 \x01(\tR\bfilename\x12\x1f\n" +
+	"\vreturn_code\x18\x17 \x01(\x03R\n" +
+	"returnCode\"\xa4\x01\n" +
+	"\fNetworkEvent\x12\x1f\n" +
+	"\vreturn_code\x18\x18 \x01(\x03R\n" +
+	"returnCode\x12\x14\n" +
+	"\x05saddr\x18\x19 \x01(\tR\x05saddr\x12\x14\n" +
+	"\x05daddr\x18\x1a \x01(\tR\x05daddr\x12\x14\n" +
+	"\x05sport\x18\x1b \x01(\tR\x05sport\x12\x14\n" +
+	"\x05dport\x18\x1c \x01(\tR\x05dport\x12\x1b\n" +
+	"\tsa_family\x18\x1d \x01(\tR\bsaFamily\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x18\f \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\r \x01(\tR\amessage2A\n" +
+	"\x06status\x18\x1e \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x18\x1f \x01(\tR\amessage2A\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
@@ -331,21 +509,25 @@ func file_ebpf_event_proto_rawDescGZIP() []byte {
 	return file_ebpf_event_proto_rawDescData
 }
 
-var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_ebpf_event_proto_goTypes = []any{
 	(*EbpfEvent)(nil),    // 0: pb.EbpfEvent
-	(*CollectorAck)(nil), // 1: pb.CollectorAck
-	nil,                  // 2: pb.EbpfEvent.ContainerLabelsJsonEntry
+	(*SnooperEvent)(nil), // 1: pb.SnooperEvent
+	(*NetworkEvent)(nil), // 2: pb.NetworkEvent
+	(*CollectorAck)(nil), // 3: pb.CollectorAck
+	nil,                  // 4: pb.EbpfEvent.ContainerLabelsJsonEntry
 }
 var file_ebpf_event_proto_depIdxs = []int32{
-	2, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
-	0, // 1: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
-	1, // 2: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	4, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
+	1, // 1: pb.EbpfEvent.snoop:type_name -> pb.SnooperEvent
+	2, // 2: pb.EbpfEvent.network:type_name -> pb.NetworkEvent
+	0, // 3: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
+	3, // 4: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
+	4, // [4:5] is the sub-list for method output_type
+	3, // [3:4] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_ebpf_event_proto_init() }
@@ -353,13 +535,17 @@ func file_ebpf_event_proto_init() {
 	if File_ebpf_event_proto != nil {
 		return
 	}
+	file_ebpf_event_proto_msgTypes[0].OneofWrappers = []any{
+		(*EbpfEvent_Snoop)(nil),
+		(*EbpfEvent_Network)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ebpf_event_proto_rawDesc), len(file_ebpf_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
