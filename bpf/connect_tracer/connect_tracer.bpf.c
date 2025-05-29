@@ -61,13 +61,13 @@ SEC("kprobe/tcp_v4_connect")
 int BPF_KPROBE(handle_tcp_v4_connect , struct sock *sk ){
   u64 pid_tgid = bpf_get_current_pid_tgid();
   u64 ts = bpf_ktime_get_ns();
-  bpf_map_update_elem(&connect_start_events,&pid_tgid,sk,BPF_ANY);
+  bpf_map_update_elem(&connect_start_events,&pid_tgid,&sk,BPF_ANY);
   bpf_map_update_elem(&connect_events_ts,&pid_tgid,&ts,BPF_ANY);
   return 0;
 }
 
 SEC("kretprobe/tcp_v4_connect")
-int BPF_KPROBE(handle_tcp_v4_connect_ret, int ret){
+int BPF_KRETPROBE(handle_tcp_v4_connect_ret, int ret){
   struct sock **skpp; 
   u64 pid_tgid = bpf_get_current_pid_tgid();
   struct sock *sk;
