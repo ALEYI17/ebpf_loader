@@ -38,8 +38,8 @@ func GenerateGrpcMessage(raw ConnecttracerSocketEventT, nodeName string) *pb.Ebp
 				Sport:      strconv.Itoa(int(raw.Sport)),
 				Dport:      strconv.Itoa(int(raw.Dport)),
 				SaFamily:   saFamilyToString(raw.SaFamily),
-        Saddrv6: uint8ToIpv6(raw.SaddrV6,int(raw.SaFamily)),
-        Daddrv6: uint8ToIpv6(raw.DaddrV6,int(raw.SaFamily)),
+        Saddrv6: uint8ToIpv6(raw.SaddrV6),
+        Daddrv6: uint8ToIpv6(raw.DaddrV6),
 			},
 		},
 	}
@@ -50,7 +50,7 @@ func uint32ToIPv4(ipUint32 uint32) string {
 	return ip.String()
 }
 
-func uint8ToIpv6 (ipUint8 [16]uint8,family int) string{
+func uint8ToIpv6 (ipUint8 [16]uint8) string{
   ip := net.IP(ipUint8[:])  
   return ip.String()
 }
