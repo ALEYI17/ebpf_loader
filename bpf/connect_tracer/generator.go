@@ -33,11 +33,13 @@ func GenerateGrpcMessage(raw ConnecttracerSocketEventT, nodeName string) *pb.Ebp
 		Payload: &pb.EbpfEvent_Network{ // oneof for NetworkEvent
 			Network: &pb.NetworkEvent{
 				ReturnCode: raw.Ret,
-				Saddr:      uint32ToIPv4(raw.Saddr),
-				Daddr:      uint32ToIPv4(raw.Daddr),
+				Saddrv4:      uint32ToIPv4(raw.SaddrV4),
+				Daddrv4:      uint32ToIPv4(raw.DaddrV4),
 				Sport:      strconv.Itoa(int(raw.Sport)),
 				Dport:      strconv.Itoa(int(raw.Dport)),
 				SaFamily:   saFamilyToString(raw.SaFamily),
+        Saddrv6: uint8ToIpv6(raw.SaddrV6),
+        Daddrv6: uint8ToIpv6(raw.DaddrV6),
 			},
 		},
 	}
@@ -46,6 +48,11 @@ func uint32ToIPv4(ipUint32 uint32) string {
 	ip := make(net.IP, 4)
 	binary.LittleEndian.PutUint32(ip, ipUint32)
 	return ip.String()
+}
+
+func uint8ToIpv6 (ipUint8 [16]uint8) string{
+  ip := net.IP(ipUint8[:])  
+  return ip.String()
 }
 
 func saFamilyToString(family uint16) string {

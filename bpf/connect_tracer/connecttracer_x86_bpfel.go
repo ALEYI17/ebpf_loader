@@ -29,8 +29,10 @@ type ConnecttracerSocketEventT struct {
 	Ret              int64
 	SaFamily         uint16
 	_                [2]byte
-	Saddr            uint32
-	Daddr            uint32
+	SaddrV4          uint32
+	DaddrV4          uint32
+	SaddrV6          [16]uint8
+	DaddrV6          [16]uint8
 	Sport            uint16
 	Dport            uint16
 }
@@ -79,6 +81,8 @@ type ConnecttracerSpecs struct {
 type ConnecttracerProgramSpecs struct {
 	HandleTcpV4Connect    *ebpf.ProgramSpec `ebpf:"handle_tcp_v4_connect"`
 	HandleTcpV4ConnectRet *ebpf.ProgramSpec `ebpf:"handle_tcp_v4_connect_ret"`
+	HandleTcpV6Connect    *ebpf.ProgramSpec `ebpf:"handle_tcp_v6_connect"`
+	HandleTcpV6ConnectRet *ebpf.ProgramSpec `ebpf:"handle_tcp_v6_connect_ret"`
 }
 
 // ConnecttracerMapSpecs contains maps before they are loaded into the kernel.
@@ -143,12 +147,16 @@ type ConnecttracerVariables struct {
 type ConnecttracerPrograms struct {
 	HandleTcpV4Connect    *ebpf.Program `ebpf:"handle_tcp_v4_connect"`
 	HandleTcpV4ConnectRet *ebpf.Program `ebpf:"handle_tcp_v4_connect_ret"`
+	HandleTcpV6Connect    *ebpf.Program `ebpf:"handle_tcp_v6_connect"`
+	HandleTcpV6ConnectRet *ebpf.Program `ebpf:"handle_tcp_v6_connect_ret"`
 }
 
 func (p *ConnecttracerPrograms) Close() error {
 	return _ConnecttracerClose(
 		p.HandleTcpV4Connect,
 		p.HandleTcpV4ConnectRet,
+		p.HandleTcpV6Connect,
+		p.HandleTcpV6ConnectRet,
 	)
 }
 

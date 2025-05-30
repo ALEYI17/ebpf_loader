@@ -38,16 +38,18 @@ message SnooperEvent {
 
 message NetworkEvent {
   int64 return_code = 24;
-  string saddr = 25;       // e.g., "192.168.1.100" or "::1"
-  string daddr = 26;       // e.g., "8.8.8.8"
+  string saddrv4 = 25;       // e.g., "192.168.1.100" or "::1"
+  string daddrv4 = 26;       // e.g., "8.8.8.8"
   string sport = 27;       // e.g., "443"
   string dport = 28;       // e.g., "12345"
   string sa_family = 29;   // e.g., "AF_INET", "AF_INET6"
+  string saddrv6 =30;
+  string daddrv6=31;
 }
 
 message CollectorAck {
-  string status = 30;
-  string message = 31;
+  string status = 32;
+  string message = 33;
 }
 
 service EventCollector {
