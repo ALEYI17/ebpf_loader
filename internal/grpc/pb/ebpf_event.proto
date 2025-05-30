@@ -8,29 +8,48 @@ message EbpfEvent {
   uint32 pid = 1;
   uint32 uid = 2;
   string comm = 3;
-  string filename = 4;
-  int64 return_code = 6;
-  uint64 timestamp_ns = 7;
-  uint64 timestamp_ns_exit = 8;
-  uint64 latency_ns = 9;
-  string event_type = 10;
-  string node_name = 11;
-  string user = 12;
-  uint32 ppid =13;
-  uint32 gid = 14;
-  uint64 cgroup_id = 15;
-  string cgroup_name = 16;
-  uint32 user_pid = 17;
-  uint32 user_ppid = 18;
-  int64 timestamp_unix_ms = 19;
-  string container_id = 20;
-  string container_image = 21;
-  map<string,string> container_labels_json=22;
+  uint64 timestamp_ns = 4;
+  uint64 timestamp_ns_exit = 5;
+  uint64 latency_ns = 6;
+  string event_type = 7;
+  string node_name = 8;
+  string user = 9;
+  uint32 ppid =10;
+  uint32 gid = 11;
+  uint64 cgroup_id = 12;
+  string cgroup_name = 13;
+  uint32 user_pid = 14;
+  uint32 user_ppid = 15;
+  int64 timestamp_unix_ms = 16;
+  string container_id = 17;
+  string container_image = 18;
+  map<string,string> container_labels_json=19;
+
+  oneof payload {
+    SnooperEvent snoop = 20;
+    NetworkEvent network = 21;
+  }
+}
+
+message SnooperEvent {
+  string filename = 22;
+  int64 return_code = 23;
+}
+
+message NetworkEvent {
+  int64 return_code = 24;
+  string saddrv4 = 25;       // e.g., "192.168.1.100" or "::1"
+  string daddrv4 = 26;       // e.g., "8.8.8.8"
+  string sport = 27;       // e.g., "443"
+  string dport = 28;       // e.g., "12345"
+  string sa_family = 29;   // e.g., "AF_INET", "AF_INET6"
+  string saddrv6 =30;
+  string daddrv6=31;
 }
 
 message CollectorAck {
-  string status = 12;
-  string message = 13;
+  string status = 32;
+  string message = 33;
 }
 
 service EventCollector {

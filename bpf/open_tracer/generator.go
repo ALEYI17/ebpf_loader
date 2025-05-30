@@ -22,13 +22,17 @@ func GenerateGrpcMessage(raw OpentracerTraceSyscallEvent, nodeName string) *pb.E
 		CgroupId:        raw.CgroupId,
 		CgroupName:      unix.ByteSliceToString(raw.CgroupName[:]),
 		Comm:            unix.ByteSliceToString(raw.Comm[:]),
-		Filename:        unix.ByteSliceToString(raw.Filename[:]),
-		ReturnCode:      raw.Ret,
 		TimestampNs:     raw.TimestampNs,
 		TimestampNsExit: raw.TimestampNsExit,
 		LatencyNs:       raw.Latency,
 		EventType:       "open", 
 		NodeName:        nodeName,
     TimestampUnixMs: time.Now().UnixMilli(),
+    Payload: &pb.EbpfEvent_Snoop{
+      Snoop: &pb.SnooperEvent{
+        Filename: unix.ByteSliceToString(raw.Filename[:]),
+        ReturnCode: raw.Ret,
+      },
+    },
 	}
 }

@@ -15,6 +15,8 @@ func NewEbpfLoader(program string) (programs.Load_tracer,error){
     return NewOpenTracerLoader()
   case programs.LoaderChmod:
     return NewChmodTracerLoader()
+  case programs.LoaderConnect:
+    return NewConnectTracer()
   default:
     return nil,errors.New("Unsuported or unknow program")
   }

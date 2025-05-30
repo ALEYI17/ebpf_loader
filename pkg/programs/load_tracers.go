@@ -14,5 +14,6 @@ const (
 	LoaderOpen     = "open"
 	Loaderexecve = "execve"
   LoaderChmod = "chmod"
+  LoaderConnect = "connect"
 )
 
