@@ -222,8 +222,8 @@ int BPF_KRETPROBE(handle_tcp_v6_connect_ret, int ret){
       event->daddrV4 = 0;
       event->sport = BPF_CORE_READ(sk, __sk_common.skc_num);
       event->dport = bpf_ntohs(BPF_CORE_READ(sk, __sk_common.skc_dport)); 
-      BPF_CORE_READ_INTO(event->saddrV6,sk,__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr32);
-      BPF_CORE_READ_INTO(event->daddrV6,sk,__sk_common.skc_v6_daddr.in6_u.u6_addr32);
+      BPF_CORE_READ_INTO(&event->saddrV6,sk,__sk_common.skc_v6_rcv_saddr.in6_u.u6_addr32);
+      BPF_CORE_READ_INTO(&event->daddrV6,sk,__sk_common.skc_v6_daddr.in6_u.u6_addr32);
     }
     else{
       event->saddrV4 = 0;

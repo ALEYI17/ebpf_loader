@@ -19,6 +19,8 @@ type ConnectLoader struct{
   Objs *connecttracer.ConnecttracerObjects
   Kp   link.Link
 	Kpr  link.Link
+  Kpv6 link.Link
+  Kprv6 link.Link
   Rd   *ringbuf.Reader
 }
 
@@ -47,11 +49,31 @@ func NewConnectTracer() (*ConnectLoader,error){
     return nil,err
   }
 
+  kp6,err := link.Kprobe("tcp_v6_connect", objs.HandleTcpV6Connect, nil)
+  if err != nil {
+    objs.Close()
+    kp.Close()
+    kpr.Close()
+    return nil, err
+  }
+
+  kpr6,err := link.Kretprobe("tcp_v6_connect", objs.HandleTcpV6ConnectRet,nil)
+  if err != nil {
+    objs.Close()
+    kp.Close()
+    kpr.Close()
+    kp6.Close()
+    return nil, err
+  }
+
+
   rd,err := ringbuf.NewReader(objs.ConnectEvents)
   if err !=nil{
     objs.Close()
     kp.Close()
     kpr.Close()
+    kp6.Close()
+    kpr6.Close()
     return nil,err
   }
 
@@ -59,6 +81,8 @@ func NewConnectTracer() (*ConnectLoader,error){
     Objs: &objs,
     Kp: kp,
     Kpr: kpr,
+    Kpv6: kp6,
+    Kprv6: kpr6,
     Rd: rd,
   },nil
 
@@ -76,6 +100,14 @@ func (ct *ConnectLoader) Close() {
 	if ct.Kp != nil {
 		ct.Kp.Close()
 	}
+
+  if ct.Kpv6 !=nil{
+    ct.Kpv6.Close()
+  }
+
+  if ct.Kpv6 !=nil{
+    ct.Kprv6.Close()
+  }
 
 	if ct.Objs != nil {
 		ct.Objs.Close()
