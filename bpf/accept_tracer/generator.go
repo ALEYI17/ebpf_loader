@@ -1,4 +1,5 @@
 package accepttracer
+
 import (
 	"ebpf_loader/internal/grpc/pb"
 	"encoding/binary"
@@ -25,7 +26,7 @@ func GenerateGrpcMessage(raw AccepttracerSocketEventT, nodeName string) *pb.Ebpf
 		TimestampNs:     raw.TimestampNsEnter,
 		TimestampNsExit: raw.TimestampNsExit,
 		LatencyNs:       raw.LatencyNs,
-		EventType:       "connect",
+		EventType:       "accept",
 		NodeName:        nodeName,
 		TimestampUnixMs: time.Now().UnixMilli(),
 		Payload: &pb.EbpfEvent_Network{ // oneof for NetworkEvent

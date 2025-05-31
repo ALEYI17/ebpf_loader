@@ -51,7 +51,7 @@ func main() {
       logger.Warn("Unsupported or unknown program", zap.String("program", program), zap.Error(err))
       continue
     }
-
+    logger.Info("Load successfully loader:", zap.String("Loader", program))
     defer loaderInstance.Close()
     loaders = append(loaders, loaderInstance)
   }

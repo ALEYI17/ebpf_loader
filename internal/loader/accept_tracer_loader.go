@@ -41,7 +41,7 @@ func NewAcceptLoader() (*AcceptLoader,error){
     return nil,err
   }
 
-  kpr,err := link.Kretprobe("tcp_v4_connect", objs.HandleAcceptExit,nil )
+  kpr,err := link.Kretprobe("inet_csk_accept", objs.HandleAcceptExit,nil )
   if err !=nil{
     objs.Close()
     kp.Close()
