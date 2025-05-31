@@ -1,4 +1,4 @@
-package connecttracer
+package accepttracer
 
 import (
 	"ebpf_loader/internal/grpc/pb"
@@ -10,10 +10,9 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type socket_event_t   Connecttracer connect_tracer.bpf.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 -type socket_event_t Accepttracer accept_tracer.bpf.c
 
-
-func GenerateGrpcMessage(raw ConnecttracerSocketEventT, nodeName string) *pb.EbpfEvent {
+func GenerateGrpcMessage(raw AccepttracerSocketEventT, nodeName string) *pb.EbpfEvent {
 	return &pb.EbpfEvent{
 		Pid:             raw.Pid,
 		Uid:             raw.Uid,
@@ -27,7 +26,7 @@ func GenerateGrpcMessage(raw ConnecttracerSocketEventT, nodeName string) *pb.Ebp
 		TimestampNs:     raw.TimestampNsEnter,
 		TimestampNsExit: raw.TimestampNsExit,
 		LatencyNs:       raw.LatencyNs,
-		EventType:       "connect",
+		EventType:       "accept",
 		NodeName:        nodeName,
 		TimestampUnixMs: time.Now().UnixMilli(),
 		Payload: &pb.EbpfEvent_Network{ // oneof for NetworkEvent

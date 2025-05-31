@@ -87,6 +87,7 @@ int BPF_KRETPROBE(handle_tcp_v4_connect_ret, int ret){
   event = bpf_ringbuf_reserve(&connect_events,sizeof(struct socket_event_t),0);
   if (!event){
     bpf_map_delete_elem(&connect_start_events,&pid_tgid);
+    bpf_map_delete_elem(&connect_events_ts,&pid_tgid);
     return 0;
   }
   
@@ -152,6 +153,7 @@ int BPF_KRETPROBE(handle_tcp_v4_connect_ret, int ret){
   event->timestamp_ns_exit = bpf_ktime_get_ns();
   event->latency_ns = event->timestamp_ns_exit - event->timestamp_ns_enter;
 
+  bpf_map_delete_elem(&connect_events_ts,&pid_tgid);
   bpf_map_delete_elem(&connect_start_events,&pid_tgid);
   bpf_ringbuf_submit(event,0);
   return 0;
@@ -184,6 +186,7 @@ int BPF_KRETPROBE(handle_tcp_v6_connect_ret, int ret){
 
   event = bpf_ringbuf_reserve(&connect_events,sizeof(struct socket_event_t),0);
   if (!event){
+    bpf_map_delete_elem(&connect_events_ts,&pid_tgid);
     bpf_map_delete_elem(&connect_start_events,&pid_tgid);
     return 0;
   }
@@ -250,6 +253,7 @@ int BPF_KRETPROBE(handle_tcp_v6_connect_ret, int ret){
   event->timestamp_ns_exit = bpf_ktime_get_ns();
   event->latency_ns = event->timestamp_ns_exit - event->timestamp_ns_enter;
 
+  bpf_map_delete_elem(&connect_events_ts,&pid_tgid);
   bpf_map_delete_elem(&connect_start_events,&pid_tgid);
   bpf_ringbuf_submit(event,0);
   return 0;
