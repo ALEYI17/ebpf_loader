@@ -8,36 +8,6 @@
 
 char __license[] SEC("license") = "Dual MIT/GPL";
 
-struct socket_event_t{
-  // Process and user info
-    u32 pid;
-    u32 uid;
-    u32 gid;
-    u64 cgroup_id;
-    u32 ppid;
-    u8 comm[TASK_COMM_SIZE];             
-    u8 cgroup_name[TASK_COMM_SIZE];
-    u32 user_pid;
-    u32 user_ppid;
-
-    // Timestamps
-    u64 timestamp_ns_enter;
-    u64 timestamp_ns_exit;
-    u64 latency_ns;
-
-    // Return value from syscall
-    long ret;
-
-    // Syscall-specific info
-    u16 sa_family;
-    u32 saddrV4;
-    u32 daddrV4;
-    __u8 saddrV6[16];
-	  __u8 daddrV6[16];
-    u16 sport;
-    u16 dport;
-};
-
 struct {
 	__uint(type, BPF_MAP_TYPE_RINGBUF);
 	__uint(max_entries, 1 << 24);
