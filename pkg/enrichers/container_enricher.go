@@ -6,11 +6,11 @@ import (
 	"ebpf_loader/pkg/containers/common"
 	"fmt"
 	"regexp"
-
+	"strings"
 )
 
 type ContainerEnricher struct{
-  common.RuntimeClient
+  RuntimeClients []common.RuntimeClient
 }
 
 var (
@@ -18,8 +18,8 @@ var (
 	cgroupScopeRegex      = regexp.MustCompile(`(?i)(docker|cri-containerd|crio|cri-o|podman)[-:]([a-f0-9]{12,64})(?:\.scope)?`)
 	systemdScopeRegex     = regexp.MustCompile(`([a-f0-9]{12,64})\.scope`)
 )
-func NewContainerenricher(client common.RuntimeClient) *ContainerEnricher{
-  return &ContainerEnricher{RuntimeClient: client}
+func NewContainerenricher(client []common.RuntimeClient) *ContainerEnricher{
+  return &ContainerEnricher{RuntimeClients: client}
 }
 
 func (e *ContainerEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) error{
@@ -67,4 +67,22 @@ func extractContainerID(cgroupName string) (string, error) {
 	}
 
 	return "", fmt.Errorf("could not extract container ID from cgroup name: %s", cgroupName)
+}
+
+func (e *ContainerEnricher) GetContainerInfo(ctx context.Context, containerID string) (*common.ContainerInfo,error){
+
+  var errorList []string
+
+  for _,client := range e.RuntimeClients{
+    info,err := client.GetContainerInfo(ctx, containerID)
+    if err ==nil && info!=nil{
+      return info,nil
+    }
+    if err !=nil{
+      errorList = append(errorList, err.Error())
+    }
+
+  }
+
+  return nil, fmt.Errorf("container %s not found in any runtime. Errors: [%s]", containerID, strings.Join(errorList, "; "))
 }
