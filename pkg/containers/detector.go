@@ -9,23 +9,28 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func DetectRuntimeFromSystem() common.RuntimeDetection{
+func DetectRuntimeFromSystem() []common.RuntimeDetection{
   logger := logutil.GetLogger()
 
   var runtimes []common.RuntimeDetection
 
   runtimes = detectByPort()
-
-  preferred, ok:= selectPreferredRuntime(runtimes)
-
-  if ok {
-	  logger.Info("Selected container runtime", zap.String("runtime", preferred.Runtime))
-    logger.Info("Selected container runtime socket", zap.String("socket", preferred.Socket))
-  }else {
+  
+  if len(runtimes) == 0 {
     logger.Warn("No known container runtime found")
+  }else{
+
+    for _,r := range runtimes{
+      logger.Info("Detected container runtime",
+                zap.String("runtime", r.Runtime),
+                zap.String("socket", r.Socket),
+                zap.String("cgroup", r.CgroupVersion),
+                )
+      }
+
   }
 
-  return preferred
+  return runtimes
 }
 
 func detectCgroupVersion() (string,error){
