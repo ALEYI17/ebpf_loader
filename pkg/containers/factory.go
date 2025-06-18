@@ -28,8 +28,16 @@ func NewRuntimeClient(ctx context.Context) ([]common.RuntimeClient,error){
       }
       result = append(result, c)
     case common.RuntimeCrio:
+      // not yet tested so i will put a continue 
       logger.Warn("Unsupported container runtime", zap.String("runtime", runtime.Runtime), zap.String("socket", runtime.Socket))
       continue
+      //logger.Info("creating cri-o client", zap.String("socket", runtime.Socket))
+      //c,err := crio.NewCrioClient(runtime, ctx)
+      //if err !=nil{
+      //  logger.Warn("Failed to create cri-o client", zap.Error(err))
+      //  continue
+      //}
+      //result = append(result, c)
     case common.RuntimeDocker:
       logger.Info("Creating docker client", zap.String("socket", runtime.Socket))
       c,err :=docker.NewDockerClient() 
@@ -69,8 +77,16 @@ func NewRuntimeClientWithCache(ctx context.Context,ttl , ci time.Duration) ([]co
       }
       result = append(result, c)
     case common.RuntimeCrio:
+      // not yet tested so i will put a continue
       logger.Warn("Unsupported container runtime", zap.String("runtime", runtime.Runtime), zap.String("socket", runtime.Socket))
       continue
+      //logger.Info("creating cri-o client", zap.String("socket", runtime.Socket))
+      //c,err := crio.NewcrioClientWithCache(runtime, ctx, ttl, ci)
+      //if err !=nil{
+      //  logger.Warn("Failed to create cri-o client", zap.Error(err))
+      //  continue
+      //}
+      //result = append(result, c)
     case common.RuntimeDocker:
       logger.Info("Creating docker client", zap.String("socket", runtime.Socket))
       c,err := docker.NewDockerClientWithCache(ttl, ci) 
