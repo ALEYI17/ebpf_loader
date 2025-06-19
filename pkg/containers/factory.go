@@ -48,8 +48,6 @@ func NewRuntimeClient(ctx context.Context) ([]common.RuntimeClient,error){
       }
       result = append(result, c)
     case common.RuntimePodman:
-      //logger.Warn("Unsupported container runtime", zap.String("runtime", runtime.Runtime), zap.String("socket", runtime.Socket))
-      //continue
       logger.Info("Creating podman client", zap.String("socket", runtime.Socket))
       c,err := podman.NewPodmanClient(runtime, ctx)
       if err != nil {
@@ -104,8 +102,6 @@ func NewRuntimeClientWithCache(ctx context.Context,ttl , ci time.Duration) ([]co
       }
       result = append(result, c)
     case common.RuntimePodman:
-      //logger.Warn("Unsupported container runtime", zap.String("runtime", runtime.Runtime), zap.String("socket", runtime.Socket))
-      //continue
       logger.Info("Creating podman client", zap.String("socket", runtime.Socket))
       c,err := podman.NewPodmanClientWithCache(runtime, ctx, ttl, ci)
       if err != nil {
