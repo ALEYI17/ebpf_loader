@@ -15,7 +15,7 @@ type ContainerEnricher struct{
 
 var (
 	dockerIDRegex         = regexp.MustCompile(`^[a-f0-9]{12,64}$`)
-	cgroupScopeRegex      = regexp.MustCompile(`(?i)(docker|cri-containerd|crio|cri-o|podman)[-:]([a-f0-9]{12,64})(?:\.scope)?`)
+	cgroupScopeRegex      = regexp.MustCompile(`(?i)(docker|cri-containerd|crio|cri-o|podman|libpod)[-:]([a-f0-9]{12,64})(?:\.scope)?`)
 	systemdScopeRegex     = regexp.MustCompile(`([a-f0-9]{12,64})\.scope`)
 )
 func NewContainerenricher(client []common.RuntimeClient) *ContainerEnricher{

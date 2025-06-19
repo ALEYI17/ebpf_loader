@@ -11,16 +11,12 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"syscall"
 	"time"
 
 	"go.uber.org/zap"
 )
 
 
-const(
-  maxUnixSocketPathSize = len(syscall.RawSockaddrUnix{}.Path)
-)
 type CrioClient struct{
   Client *http.Client
   Cache *containercache.Cache
@@ -34,7 +30,7 @@ type crioContainerInfoResponse struct {
 
 func configureUnixTransport(tr *http.Transport, proto, addr string) error{
 
-  if len(addr) > maxUnixSocketPathSize{
+  if len(addr) > common.MaxUnixSocketPathSize{
     return errors.New(fmt.Sprintf("unix socket path %s is too long", addr))
   }
 
