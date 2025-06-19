@@ -5,6 +5,7 @@ import (
 	"ebpf_loader/pkg/containers/common"
 	"ebpf_loader/pkg/containers/containerd"
 	"ebpf_loader/pkg/containers/docker"
+	"ebpf_loader/pkg/containers/podman"
 	"ebpf_loader/pkg/logutil"
 	"errors"
 	"time"
@@ -47,8 +48,15 @@ func NewRuntimeClient(ctx context.Context) ([]common.RuntimeClient,error){
       }
       result = append(result, c)
     case common.RuntimePodman:
-      logger.Warn("Unsupported container runtime", zap.String("runtime", runtime.Runtime), zap.String("socket", runtime.Socket))
-      continue
+      //logger.Warn("Unsupported container runtime", zap.String("runtime", runtime.Runtime), zap.String("socket", runtime.Socket))
+      //continue
+      logger.Info("Creating podman client", zap.String("socket", runtime.Socket))
+      c,err := podman.NewPodmanClient(runtime, ctx)
+      if err != nil {
+        logger.Warn("Failed to create podman client", zap.Error(err))
+        continue
+      }
+      result = append(result, c)
     default:
       logger.Warn("Unknown container runtime", zap.String("runtime", runtime.Runtime))
       continue
@@ -96,8 +104,15 @@ func NewRuntimeClientWithCache(ctx context.Context,ttl , ci time.Duration) ([]co
       }
       result = append(result, c)
     case common.RuntimePodman:
-      logger.Warn("Unsupported container runtime", zap.String("runtime", runtime.Runtime), zap.String("socket", runtime.Socket))
-      continue
+      //logger.Warn("Unsupported container runtime", zap.String("runtime", runtime.Runtime), zap.String("socket", runtime.Socket))
+      //continue
+      logger.Info("Creating podman client", zap.String("socket", runtime.Socket))
+      c,err := podman.NewPodmanClientWithCache(runtime, ctx, ttl, ci)
+      if err != nil {
+        logger.Warn("failed to create podman client", zap.Error(err))
+        continue
+      }
+      result = append(result, c)
     default:
       logger.Warn("Unknown container runtime", zap.String("runtime", runtime.Runtime))
       continue

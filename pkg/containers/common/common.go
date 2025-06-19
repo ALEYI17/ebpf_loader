@@ -2,7 +2,7 @@ package common
 
 import (
 	"context"
-
+	"syscall"
 )
 
 type RuntimeClient interface{
@@ -22,6 +22,9 @@ const (
 	RuntimeContainerd = "containerd"
 	RuntimeCrio       = "crio"
 	RuntimePodman     = "podman"
+)
+const(
+  MaxUnixSocketPathSize = len(syscall.RawSockaddrUnix{}.Path)
 )
 
 var RuntimePriority = []string{
