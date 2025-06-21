@@ -160,12 +160,17 @@ func (c *PodamnClient) GetContainerInfo(ctx context.Context,containerID string) 
   labels := make(map[string]string)
   maps.Copy(labels, podmanInfo.Config.Labels)
   maps.Copy(labels, podmanInfo.Config.Annotations)
-
-  return &common.ContainerInfo{
+  
+  contInfo:= &common.ContainerInfo{
     Image: podmanInfo.Image,
     ID: podmanInfo.ID,
     Labels: labels,
-  },nil
+  }
+
+  if c.Cache !=nil{
+    c.Cache.Set(containerID, contInfo)
+  }
+  return contInfo,nil
 }
 
 
