@@ -130,12 +130,17 @@ func (c *CrioClient) GetContainerInfo(ctx context.Context,containerID string) (*
   if err := json.NewDecoder(resp.Body).Decode(&crioInfo); err !=nil{
     return nil , err
   }
-
-  return &common.ContainerInfo{
+  
+  contInfo:= &common.ContainerInfo{
     ID: crioInfo.ID,
     Image: crioInfo.Image,
     Labels: crioInfo.Labels,
-  },nil
+  }
+
+  if c.Cache != nil {
+    c.Cache.Set(containerID, contInfo)
+  }
+  return contInfo,nil
 }
 
 
