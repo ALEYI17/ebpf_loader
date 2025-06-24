@@ -3,6 +3,7 @@ package enrichers
 import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
+	containercache "ebpf_loader/pkg/containerCache"
 	"ebpf_loader/pkg/containers/common"
 	"fmt"
 	"regexp"
@@ -11,6 +12,7 @@ import (
 
 type ContainerEnricher struct{
   RuntimeClients []common.RuntimeClient
+  cache *containercache.Cache
 }
 
 var (
@@ -31,7 +33,7 @@ func (e *ContainerEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) er
 		return nil // Not an error!
 	}
 
-	containerID, err := extractContainerID(event.CgroupName)
+  containerID, err := extractContainerID(event.CgroupName)
 	if err != nil {
 		event.ContainerId = ""
 		event.ContainerImage = ""
@@ -39,9 +41,24 @@ func (e *ContainerEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) er
 		return nil // Still not an error — just not containerized
 	}
 
+  if e.cache != nil {
+    containerInfo , ok := e.cache.Get(containerID)
+    if ok{
+      event.ContainerId = containerInfo.ID
+      event.ContainerImage = containerInfo.Image
+      event.ContainerLabelsJson = containerInfo.Labels
+      return nil
+    }
+  }
+
+
   containerInfo,err:=e.GetContainerInfo(ctx, containerID)
   if err != nil {
     return err
+  }
+
+  if e.cache !=nil{
+    e.cache.Set(containerID, containerInfo)
   }
 
   event.ContainerId = containerInfo.ID
