@@ -2,7 +2,6 @@ package crio
 
 import (
 	"context"
-	containercache "ebpf_loader/pkg/containerCache"
 	"ebpf_loader/pkg/containers/common"
 	"ebpf_loader/pkg/logutil"
 	"encoding/json"
@@ -19,7 +18,6 @@ import (
 
 type CrioClient struct{
   Client *http.Client
-  Cache *containercache.Cache
 }
 
 type crioContainerInfoResponse struct {
@@ -61,29 +59,6 @@ func NewCrioClient(runtime common.RuntimeDetection,ctx context.Context) (common.
 
 }
 
-func NewcrioClientWithCache(runtime common.RuntimeDetection , ctx context.Context,ttl ,ci time.Duration) (common.RuntimeClient,error){
-
-  logger := logutil.GetLogger()
-  
-  tr := new(http.Transport)
-
-  if clientErr := configureUnixTransport(tr, "unix", runtime.Socket); clientErr != nil{
-    logger.Warn("Error creating crio client", zap.Error(clientErr))
-    return nil, clientErr
-  }
-
-  cache := containercache.NewCache(ttl, ci)
-
-  return &CrioClient{
-    Client: &http.Client{
-      Transport: tr,
-      Timeout: 1 * time.Second,
-    },
-    Cache: cache,
-  },nil
-
-}
-
 
 func (c *CrioClient) Close(){
   if c.Client !=nil{
@@ -100,11 +75,6 @@ func (c * CrioClient) ListContainers(ctx context.Context) ([]common.ContainerInf
 
 func (c *CrioClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error){
 
-  if c.Cache != nil{
-    if info,ok := c.Cache.Get(containerID);ok{
-      return info,nil
-    }
-  }
   req,err := createRequest("/containers/" + containerID)
 
   if err != nil {
@@ -137,9 +107,6 @@ func (c *CrioClient) GetContainerInfo(ctx context.Context,containerID string) (*
     Labels: crioInfo.Labels,
   }
 
-  if c.Cache != nil {
-    c.Cache.Set(containerID, contInfo)
-  }
   return contInfo,nil
 }
 

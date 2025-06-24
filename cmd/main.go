@@ -32,7 +32,7 @@ func main() {
 		cancel()
 	}()
 
-  runtimeClients,err := containers.NewRuntimeClientWithCache(ctx, 2*time.Minute, 30*time.Second)
+  runtimeClients,err := containers.NewRuntimeClient(ctx)
 
   if err !=nil{
     logger.Fatal("Error creating the runtime client", zap.Error(err))
@@ -60,7 +60,13 @@ func main() {
   
   logger.Info("Loader(s) created successfully")
 
-  containerEnricher := enrichers.NewContainerenricher(runtimeClients)
+  containerEnricher := enrichers.NewContainerenricher(runtimeClients,2*time.Minute, 30*time.Second)
+
+  logger.Info("starting warm up of container enricher")
+
+  containerEnricher.Warmup(ctx)
+
+  logger.Info("End warm up of container enricher")
 
   userEnricher := enrichers.NewUserEnriche()
 
