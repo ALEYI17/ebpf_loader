@@ -9,11 +9,13 @@ import (
 	"ebpf_loader/pkg/enrichers"
 	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +33,10 @@ func main() {
     logger.Info("Received signal, shutting down", zap.String("signal", sig.String()))
 		cancel()
 	}()
+
+  http.Handle("/metrics", promhttp.Handler())
+  http.ListenAndServe("9090", nil)
+  logger.Info("serving prometheus metrics on the port 9090")
 
   runtimeClients,err := containers.NewRuntimeClient(ctx)
 
