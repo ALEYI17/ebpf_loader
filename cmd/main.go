@@ -62,6 +62,12 @@ func main() {
 
   containerEnricher := enrichers.NewContainerenricher(runtimeClients,2*time.Minute, 30*time.Second)
 
+  logger.Info("starting warm up of container enricher")
+
+  containerEnricher.Warmup(ctx)
+
+  logger.Info("End warm up of container enricher")
+
   userEnricher := enrichers.NewUserEnriche()
 
   enricher := enrichers.NewMultiEnricher(containerEnricher,userEnricher)

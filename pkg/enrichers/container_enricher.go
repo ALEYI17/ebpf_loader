@@ -5,10 +5,13 @@ import (
 	"ebpf_loader/internal/grpc/pb"
 	containercache "ebpf_loader/pkg/containerCache"
 	"ebpf_loader/pkg/containers/common"
+	"ebpf_loader/pkg/logutil"
 	"fmt"
 	"regexp"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type ContainerEnricher struct{
@@ -104,4 +107,21 @@ func (e *ContainerEnricher) GetContainerInfo(ctx context.Context, containerID st
   }
 
   return nil, fmt.Errorf("container %s not found in any runtime. Errors: [%s]", containerID, strings.Join(errorList, "; "))
+}
+
+func (e *ContainerEnricher) Warmup(ctx context.Context){
+  logger := logutil.GetLogger()
+  for _ , c := range e.RuntimeClients{
+    containers , err := c.ListContainers(ctx)
+
+    if err != nil{
+      logger.Warn("Failed to list containers during warmup ", zap.Error(err))
+      continue
+    }
+
+    for _, contInfo := range containers{
+      e.cache.Set(contInfo.ID, &contInfo)
+    }
+
+  }
 }
