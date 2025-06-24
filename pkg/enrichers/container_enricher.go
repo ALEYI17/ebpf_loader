@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type ContainerEnricher struct{
@@ -20,8 +21,9 @@ var (
 	cgroupScopeRegex      = regexp.MustCompile(`(?i)(docker|cri-containerd|crio|cri-o|podman|libpod)[-:]([a-f0-9]{12,64})(?:\.scope)?`)
 	systemdScopeRegex     = regexp.MustCompile(`([a-f0-9]{12,64})\.scope`)
 )
-func NewContainerenricher(client []common.RuntimeClient) *ContainerEnricher{
-  return &ContainerEnricher{RuntimeClients: client}
+func NewContainerenricher(client []common.RuntimeClient, ttl,ci time.Duration) *ContainerEnricher{
+  cache := containercache.NewCache(ttl, ci )
+  return &ContainerEnricher{RuntimeClients: client,cache: cache}
 }
 
 func (e *ContainerEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) error{

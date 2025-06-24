@@ -2,9 +2,7 @@ package docker
 
 import (
 	"context"
-	"ebpf_loader/pkg/containerCache"
 	"ebpf_loader/pkg/containers/common"
-	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -12,7 +10,6 @@ import (
 
 type DockerClient struct{
   client *client.Client
-  cache *containercache.Cache
 }
 
 func NewDockerClient() (common.RuntimeClient,error){
@@ -30,18 +27,6 @@ func (c *DockerClient) Close(){
   if c.client !=nil{
     c.client.Close()
   }
-}
-
-func NewDockerClientWithCache(ttl,ci time.Duration) (common.RuntimeClient,error){
-
-  client, err := client.NewClientWithOpts(client.FromEnv,client.WithAPIVersionNegotiation())
-
-  if err != nil {
-    return nil, err
-  }
-
-  cache := containercache.NewCache(ttl, ci)
-  return &DockerClient{client: client,cache: cache},nil
 }
 
 
@@ -64,12 +49,6 @@ func (c *DockerClient) ListContainers(ctx context.Context) ([]common.ContainerIn
 
 func (c *DockerClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error) {
 
-  if c.cache != nil{
-    if info , ok := c.cache.Get(containerID); ok {
-      return info, nil
-    } 
-
-  }
   inspect,err:= c. client.ContainerInspect(ctx, containerID)
   if err != nil {
     return nil, err
@@ -77,8 +56,5 @@ func (c *DockerClient) GetContainerInfo(ctx context.Context,containerID string) 
 
   info := &common.ContainerInfo{ID: inspect.ID,Image: inspect.Config.Image,Labels: inspect.Config.Labels}
 
-  if c.cache != nil {
-    c.cache.Set(containerID, info)
-  }
   return info ,nil
 }

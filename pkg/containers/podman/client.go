@@ -2,7 +2,6 @@ package podman
 
 import (
 	"context"
-	containercache "ebpf_loader/pkg/containerCache"
 	"ebpf_loader/pkg/containers/common"
 	"encoding/json"
 	"errors"
@@ -32,7 +31,6 @@ type podmanInspectData struct{
 
 type PodamnClient struct{
   Client *http.Client
-  Cache *containercache.Cache
 }
 
 func configureUnixTransport(tr *http.Transport, proto, addr string) error{
@@ -63,22 +61,6 @@ func NewPodmanClient(runtime common.RuntimeDetection , ctx context.Context) (com
   }},nil
 }
 
-func NewPodmanClientWithCache(runtime common.RuntimeDetection , ctx context.Context,ttl,ci time.Duration)(common.RuntimeClient,error){
-  tr := new(http.Transport)
-
-  if clientErr := configureUnixTransport(tr, "unix", runtime.Socket); clientErr != nil{
-    return nil, clientErr
-  }
-
-  cache := containercache.NewCache(ttl, ci)
-
-  return &PodamnClient{Client: &http.Client{
-    Transport: tr,
-    Timeout: 1 * time.Second,
-  },
-    Cache: cache,
-  },nil
-}
 
 func (c *PodamnClient) Close(){
   if c.Client !=nil{
@@ -126,11 +108,7 @@ func (c *PodamnClient) ListContainers(ctx context.Context) ([]common.ContainerIn
 }
 
 func (c *PodamnClient) GetContainerInfo(ctx context.Context,containerID string) (*common.ContainerInfo,error){
-  if c.Cache != nil{
-    if info,ok := c.Cache.Get(containerID);ok{
-      return info,nil
-    }
-  }
+  
   req,err := createRequest("/v4.0.0/libpod/containers/" + containerID + "/json")
   if err != nil {
     return nil, err
@@ -167,9 +145,6 @@ func (c *PodamnClient) GetContainerInfo(ctx context.Context,containerID string) 
     Labels: labels,
   }
 
-  if c.Cache !=nil{
-    c.Cache.Set(containerID, contInfo)
-  }
   return contInfo,nil
 }
 

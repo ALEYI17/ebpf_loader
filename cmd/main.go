@@ -32,7 +32,7 @@ func main() {
 		cancel()
 	}()
 
-  runtimeClients,err := containers.NewRuntimeClientWithCache(ctx, 2*time.Minute, 30*time.Second)
+  runtimeClients,err := containers.NewRuntimeClient(ctx)
 
   if err !=nil{
     logger.Fatal("Error creating the runtime client", zap.Error(err))
@@ -60,7 +60,7 @@ func main() {
   
   logger.Info("Loader(s) created successfully")
 
-  containerEnricher := enrichers.NewContainerenricher(runtimeClients)
+  containerEnricher := enrichers.NewContainerenricher(runtimeClients,2*time.Minute, 30*time.Second)
 
   userEnricher := enrichers.NewUserEnriche()
 
