@@ -45,11 +45,12 @@ message NetworkEvent {
   string sa_family = 29;   // e.g., "AF_INET", "AF_INET6"
   string saddrv6 =30;
   string daddrv6=31;
+  string resolved_domain=32;
 }
 
 message CollectorAck {
-  string status = 32;
-  string message = 33;
+  string status = 33;
+  string message = 34;
 }
 
 service EventCollector {
