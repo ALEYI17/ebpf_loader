@@ -3,6 +3,7 @@ package enrichers
 import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/internal/metrics"
 	containercache "ebpf_loader/pkg/containerCache"
 	"ebpf_loader/pkg/containers/common"
 	"ebpf_loader/pkg/logutil"
@@ -49,11 +50,13 @@ func (e *ContainerEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) er
   if e.cache != nil {
     containerInfo , ok := e.cache.Get(containerID)
     if ok{
+      metrics.CacheHits.WithLabelValues("container enricher").Inc()
       event.ContainerId = containerInfo.ID
       event.ContainerImage = containerInfo.Image
       event.ContainerLabelsJson = containerInfo.Labels
       return nil
     }
+    metrics.CacheMisses.WithLabelValues("container enricher").Inc()
   }
 
 

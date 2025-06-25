@@ -5,15 +5,18 @@ import (
 	"ebpf_loader/internal/config"
 	"ebpf_loader/internal/grpc"
 	"ebpf_loader/internal/loader"
+	"ebpf_loader/internal/metrics"
 	"ebpf_loader/pkg/containers"
 	"ebpf_loader/pkg/enrichers"
 	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +34,19 @@ func main() {
     logger.Info("Received signal, shutting down", zap.String("signal", sig.String()))
 		cancel()
 	}()
+
+  go func() {
+    metrics.RegisterAll()
+
+    mux:= http.NewServeMux()
+    mux.Handle("/metrics", promhttp.Handler())
+    logger := logutil.GetLogger()
+    logger.Info("Serving Prometheus metrics on port 9090")
+
+    if err := http.ListenAndServe(":9090", mux); err != nil {
+        logger.Warn("Prometheus metrics cannot be served", zap.Error(err))
+    }
+  }()
 
   runtimeClients,err := containers.NewRuntimeClient(ctx)
 
