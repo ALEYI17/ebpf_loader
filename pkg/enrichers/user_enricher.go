@@ -3,6 +3,7 @@ package enrichers
 import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/internal/metrics"
 	"fmt"
 	"os/user"
 	"sync"
@@ -23,11 +24,14 @@ func (e *UserEnricher) Enrich (ctx context.Context, event *pb.EbpfEvent) error{
 
   e.mu.RLock()
   if user , ok := e.Users[key];ok{
+    metrics.CacheHits.WithLabelValues("user enricher").Inc()
     e.mu.RUnlock()
     event.User = user
     return nil
   }
   e.mu.RUnlock()
+
+  metrics.CacheMisses.WithLabelValues("user enricher").Inc()
 
   userInfo , err := user.LookupId(key)
 	if err != nil {

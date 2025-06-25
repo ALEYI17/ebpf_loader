@@ -5,6 +5,7 @@ import (
 	"context"
 	opentracer "ebpf_loader/bpf/open_tracer"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/internal/metrics"
 	"ebpf_loader/pkg/logutil"
 	"encoding/binary"
 	"errors"
@@ -110,10 +111,12 @@ func (ot *OpentracerLoader) Run(ctx context.Context, nodeName string) <-chan *pb
 
 				if err := binary.Read(bytes.NewBuffer(record.RawSample), binary.LittleEndian, &events); err != nil {
 					logger.Error("Parsing ringbuffer events", zap.Error(err))
+          metrics.ErrorsTotal.WithLabelValues("open","decode").Inc()
 					continue
 				}
 
 				event := opentracer.GenerateGrpcMessage(events, nodeName)
+        metrics.EventsTotal.WithLabelValues("open").Inc()
 
 				select {
 				case <-ctx.Done():

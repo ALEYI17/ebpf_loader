@@ -3,12 +3,14 @@ package grpc
 import (
 	"context"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/internal/metrics"
 	"ebpf_loader/pkg/enrichers"
 	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
 	"errors"
 	"fmt"
 	"io"
+	"time"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -41,16 +43,30 @@ func (c *Client) Close() error {
 
 func (c *Client) SendEventMessage(ctx context.Context, stream grpc.ClientStreamingClient[pb.EbpfEvent, pb.CollectorAck], batch *pb.EbpfEvent) error {
   logger:= logutil.GetLogger()
+  start := time.Now()
+
   err := c.enricher.Enrich(ctx, batch)
 
   if err != nil{
     logger.Warn("Failed to enrich event", zap.Error(err))
   }
+  
+  tracer := batch.EventType
 
 	err = stream.Send(batch)
+
+  metrics.SendLatency.WithLabelValues(tracer).Observe(float64(time.Since(start).Seconds()))
+
 	if err != nil {
+    if s, ok := status.FromError(err); ok {
+      metrics.MessagesSent.WithLabelValues(tracer,s.Code().String()).Inc()
+    }else{
+      metrics.MessagesSent.WithLabelValues(tracer,"unknown_error").Inc()
+    }
 		return err
 	}
+
+  metrics.MessagesSent.WithLabelValues(tracer,"succes").Inc()
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"context"
 	accepttracer "ebpf_loader/bpf/accept_tracer"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/internal/metrics"
 	"ebpf_loader/pkg/logutil"
 	"encoding/binary"
 	"errors"
@@ -109,11 +110,12 @@ func (at *AcceptLoader) Run(ctx context.Context, nodeName string) <-chan *pb.Ebp
 
 				if err := binary.Read(bytes.NewBuffer(record.RawSample), binary.LittleEndian, &events); err != nil {
 					logger.Error("Parsing ringbuffer events", zap.Error(err))
+          metrics.ErrorsTotal.WithLabelValues("accept","decode").Inc()
 					continue
 				}
 
 				event := accepttracer.GenerateGrpcMessage(events, nodeName)
-
+        metrics.EventsTotal.WithLabelValues("accept").Inc()
 				select {
 				case <-ctx.Done():
 					logger.Info("Context cancelled while sending event...")

@@ -5,6 +5,7 @@ import (
 	"context"
 	chmodtracer "ebpf_loader/bpf/chmod_tracer"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/internal/metrics"
 	"ebpf_loader/pkg/logutil"
 	"encoding/binary"
 	"errors"
@@ -110,10 +111,12 @@ func (ct *ChmodLoader) Run(ctx context.Context, nodeName string) <-chan *pb.Ebpf
 
 				if err := binary.Read(bytes.NewBuffer(record.RawSample), binary.LittleEndian, &events); err != nil {
 					logger.Error("Parsing ringbuffer events", zap.Error(err))
+          metrics.ErrorsTotal.WithLabelValues("chmod","decode").Inc()
 					continue
 				}
 
 				event := chmodtracer.GenerateGrpcMessage(events, nodeName)
+        metrics.EventsTotal.WithLabelValues("chmod").Inc()
 
 				select {
 				case <-ctx.Done():

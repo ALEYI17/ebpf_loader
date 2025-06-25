@@ -5,6 +5,7 @@ import (
 	"context"
 	execvetracer "ebpf_loader/bpf/execve_tracer"
 	"ebpf_loader/internal/grpc/pb"
+	"ebpf_loader/internal/metrics"
 	"ebpf_loader/pkg/logutil"
 	"encoding/binary"
 	"errors"
@@ -110,10 +111,12 @@ func (et *Execvetransferloader) Run(ctx context.Context, nodeName string) <-chan
 
 				if err := binary.Read(bytes.NewBuffer(record.RawSample), binary.LittleEndian, &events); err != nil {
 					logger.Error("Parsing ringbuffer events", zap.Error(err))
+          metrics.ErrorsTotal.WithLabelValues("execve","decode").Inc()
 					continue
 				}
 
 				event := execvetracer.GenerateGrpcMessage(events, nodeName)
+        metrics.EventsTotal.WithLabelValues("axecve").Inc()
 
 				select {
 				case <-ctx.Done():
