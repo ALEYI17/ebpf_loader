@@ -83,6 +83,7 @@ func (e *DnsEnricher) Enrich(ctx context.Context, event *pb.EbpfEvent) error{
       }
       
       if !e.isPublicIP(ip){
+        payload.Network.ResolvedDomain = "private ip"
         return nil
       }
       e.mu.RLock()
