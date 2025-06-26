@@ -308,17 +308,18 @@ func (x *SnooperEvent) GetReturnCode() int64 {
 }
 
 type NetworkEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReturnCode    int64                  `protobuf:"varint,24,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
-	Saddrv4       string                 `protobuf:"bytes,25,opt,name=saddrv4,proto3" json:"saddrv4,omitempty"`                   // e.g., "192.168.1.100" or "::1"
-	Daddrv4       string                 `protobuf:"bytes,26,opt,name=daddrv4,proto3" json:"daddrv4,omitempty"`                   // e.g., "8.8.8.8"
-	Sport         string                 `protobuf:"bytes,27,opt,name=sport,proto3" json:"sport,omitempty"`                       // e.g., "443"
-	Dport         string                 `protobuf:"bytes,28,opt,name=dport,proto3" json:"dport,omitempty"`                       // e.g., "12345"
-	SaFamily      string                 `protobuf:"bytes,29,opt,name=sa_family,json=saFamily,proto3" json:"sa_family,omitempty"` // e.g., "AF_INET", "AF_INET6"
-	Saddrv6       string                 `protobuf:"bytes,30,opt,name=saddrv6,proto3" json:"saddrv6,omitempty"`
-	Daddrv6       string                 `protobuf:"bytes,31,opt,name=daddrv6,proto3" json:"daddrv6,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ReturnCode     int64                  `protobuf:"varint,24,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	Saddrv4        string                 `protobuf:"bytes,25,opt,name=saddrv4,proto3" json:"saddrv4,omitempty"`                   // e.g., "192.168.1.100" or "::1"
+	Daddrv4        string                 `protobuf:"bytes,26,opt,name=daddrv4,proto3" json:"daddrv4,omitempty"`                   // e.g., "8.8.8.8"
+	Sport          string                 `protobuf:"bytes,27,opt,name=sport,proto3" json:"sport,omitempty"`                       // e.g., "443"
+	Dport          string                 `protobuf:"bytes,28,opt,name=dport,proto3" json:"dport,omitempty"`                       // e.g., "12345"
+	SaFamily       string                 `protobuf:"bytes,29,opt,name=sa_family,json=saFamily,proto3" json:"sa_family,omitempty"` // e.g., "AF_INET", "AF_INET6"
+	Saddrv6        string                 `protobuf:"bytes,30,opt,name=saddrv6,proto3" json:"saddrv6,omitempty"`
+	Daddrv6        string                 `protobuf:"bytes,31,opt,name=daddrv6,proto3" json:"daddrv6,omitempty"`
+	ResolvedDomain string                 `protobuf:"bytes,32,opt,name=resolved_domain,json=resolvedDomain,proto3" json:"resolved_domain,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *NetworkEvent) Reset() {
@@ -407,10 +408,17 @@ func (x *NetworkEvent) GetDaddrv6() string {
 	return ""
 }
 
+func (x *NetworkEvent) GetResolvedDomain() string {
+	if x != nil {
+		return x.ResolvedDomain
+	}
+	return ""
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,32,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,33,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,33,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,34,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -497,7 +505,7 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\fSnooperEvent\x12\x1a\n" +
 	"\bfilename\x18\x16 \x01(\tR\bfilename\x12\x1f\n" +
 	"\vreturn_code\x18\x17 \x01(\x03R\n" +
-	"returnCode\"\xe0\x01\n" +
+	"returnCode\"\x89\x02\n" +
 	"\fNetworkEvent\x12\x1f\n" +
 	"\vreturn_code\x18\x18 \x01(\x03R\n" +
 	"returnCode\x12\x18\n" +
@@ -507,10 +515,11 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x05dport\x18\x1c \x01(\tR\x05dport\x12\x1b\n" +
 	"\tsa_family\x18\x1d \x01(\tR\bsaFamily\x12\x18\n" +
 	"\asaddrv6\x18\x1e \x01(\tR\asaddrv6\x12\x18\n" +
-	"\adaddrv6\x18\x1f \x01(\tR\adaddrv6\"@\n" +
+	"\adaddrv6\x18\x1f \x01(\tR\adaddrv6\x12'\n" +
+	"\x0fresolved_domain\x18  \x01(\tR\x0eresolvedDomain\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x18  \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18! \x01(\tR\amessage2A\n" +
+	"\x06status\x18! \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x18\" \x01(\tR\amessage2A\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"

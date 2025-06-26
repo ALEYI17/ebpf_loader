@@ -86,7 +86,9 @@ func main() {
 
   userEnricher := enrichers.NewUserEnriche()
 
-  enricher := enrichers.NewMultiEnricher(containerEnricher,userEnricher)
+  dnsEnricher := enrichers.NewDnsenricher()
+
+  enricher := enrichers.NewMultiEnricher(containerEnricher,userEnricher,dnsEnricher)
 
   client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport,enricher)
 	if err != nil {

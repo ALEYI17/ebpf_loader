@@ -146,7 +146,7 @@ func (ct *ConnectLoader) Run(ctx context.Context, nodeName string) <-chan *pb.Eb
 				}
         
         event := connecttracer.GenerateGrpcMessage(events, nodeName)
-        metrics.ErrorsTotal.WithLabelValues("connect").Inc()
+        metrics.EventsTotal.WithLabelValues("connect").Inc()
         select {
 				case <-ctx.Done():
 					logger.Info("Context cancelled while sending event...")
