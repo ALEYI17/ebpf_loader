@@ -82,10 +82,7 @@ func (e *DnsEnricher) Enrich(ctx context.Context, event *pb.EbpfEvent) error{
         return nil
       }
       
-      if !e.isPublicIP(ip){
-        payload.Network.ResolvedDomain = "<private>"
-        return nil
-      }
+      
       e.mu.RLock()
       if dns, ok := e.DnsAddrs[ip]; ok{
         e.mu.RUnlock()
@@ -99,6 +96,13 @@ func (e *DnsEnricher) Enrich(ctx context.Context, event *pb.EbpfEvent) error{
       defer cancel()
       names, err := net.DefaultResolver.LookupAddr(ctx, ip)
       if err != nil || len(names)==0{
+        if !e.isPublicIP(ip){
+          e.mu.Lock()
+          e.DnsAddrs[ip]= "<private>"
+          e.mu.Unlock()
+          payload.Network.ResolvedDomain = "<private>"
+          return nil
+        }
         e.mu.Lock()
         e.DnsAddrs[ip]= "<unresolved>"
         e.mu.Unlock()
