@@ -102,6 +102,24 @@ export SERVER_PORT=8080
 sudo ./ebpf-loader
 ```
 
+## 📈 Prometheus Metrics
+
+The `ebpf_loader` exposes internal metrics on `/metrics` (default port `:9090`) using Prometheus format. These are useful for observability, troubleshooting, and performance monitoring.
+
+> You can scrape this with Prometheus or inspect manually.
+
+### 📊 Available Metrics
+
+| Name                                     | Labels             | Description                                                             |
+| ---------------------------------------- | ------------------ | ----------------------------------------------------------------------- |
+| `infrasight_enricher_cache_hits_total`   | `source`           | Cache hits during enrichment (e.g., `"container"`, `"user"`)            |
+| `infrasight_enricher_cache_misses_total` | `source`           | Cache misses during enrichment                                          |
+| `infrasight_grpc_messages_sent_total`    | `tracer`, `status` | Total gRPC messages sent (`status`: `"success"` or `"error"`)           |
+| `infrasight_grpc_send_latency_seconds`   | `tracer`           | Histogram of gRPC send latencies                                        |
+| `infrasight_tracer_events_total`         | `tracer`           | Total number of events read from each eBPF loader                       |
+| `infrasight_tracer_errors_total`         | `tracer`, `type`   | Errors during event processing (e.g., decode failure, ringbuffer issue) |
+
+
 ## 📚 Related Repositories
 
 This is part of the **[InfraSight](https://github.com/ALEYI17/InfraSight)** platform:
