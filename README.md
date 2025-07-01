@@ -35,6 +35,7 @@ docker run -it \
 --privileged \
 -e TRACER=accept,execve \
 -e NODE_NAME=CASA \
+-p 9090:9090 \
 -v /var/run:/var/run:ro \
 -v /sys/kernel/debug:/sys/kernel/debug:rw \
 ghcr.io/aleyi17/ebpf_loader:latest \
