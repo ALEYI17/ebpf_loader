@@ -8,7 +8,7 @@ var (
 			Namespace: "infrasight",
 			Subsystem: "enricher",
 			Name:      "cache_hits_total",
-			Help:      "Total number of cache hits during container enrichment.",
+			Help:      "Total number of cache hits during enrichment.",
 		},
 		[]string{"source"}, // e.g. "container", "user"
 	)
@@ -18,7 +18,7 @@ var (
 			Namespace: "infrasight",
 			Subsystem: "enricher",
 			Name:      "cache_misses_total",
-			Help:      "Total number of cache misses during container enrichment.",
+			Help:      "Total number of cache misses during enrichment.",
 		},
 		[]string{"source"},
 	)
