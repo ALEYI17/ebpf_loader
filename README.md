@@ -83,6 +83,7 @@ cd internal/grpc/pb && protoc --go_out=. --go_opt=paths=source_relative --go-grp
 | Tracers       | `--tracer`       | `TRACER`       | Comma-separated list of enabled probes (e.g. `execve,open`) |
 | Server Addr   | `--server-addr`  | `SERVER_ADDR`  | Address of gRPC server                    |
 | Server Port   | `--server-port`  | `SERVER_PORT`  | Port of gRPC server                       |
+| Prometheus Port  | `--prometheus-port`    | `PROMETHEUS_PORT`    | Port to expose Prometheus metrics (default: `9090`)                         |
 | Node Name     | _(not a flag)_   | `NODE_NAME`    | Optional. Used for tagging node origin. Falls back to `os.Hostname()` if unset |
 
 ### 💡 Example CLI
