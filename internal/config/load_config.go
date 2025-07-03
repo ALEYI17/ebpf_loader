@@ -13,17 +13,20 @@ type Programsconfig struct {
 	EnableProbes []string
   ServerAdress string
   Serverport string
+  PrometheusPort string
   Nodename string
 }
 
 func LoadConfig() *Programsconfig {
   logger := logutil.GetLogger()
-	var tracer,serverAddr,serverPort string
+	var tracer,serverAddr,serverPort,prometheusPort string
 	flag.StringVar(&tracer, "tracer", "", "Comma-separated list of eBPF probes to enable (e.g. 'execve,open')")
 
   flag.StringVar(&serverAddr, "server-addr", "", "gRPC server address (e.g. 127.0.0.1)")
 
   flag.StringVar(&serverPort, "server-port", "", "gRPC server port (e.g. 50051)")
+
+  flag.StringVar(&prometheusPort, "prometheus-port", "", "prometheus scrape port (e.g. 9090)")
 
 	flag.Parse()
 
@@ -40,6 +43,14 @@ func LoadConfig() *Programsconfig {
 
   if serverPort ==""{
     logger.Fatal("Server port is missing")
+  }
+
+  if prometheusPort == ""{
+    prometheusPort = os.Getenv("PROMETHEUS_PORT")
+  }
+
+  if prometheusPort ==""{
+    logger.Warn("Prometheus scrape port is missing")
   }
 
   if tracer ==""{
@@ -72,6 +83,7 @@ func LoadConfig() *Programsconfig {
     EnableProbes: probeList,
     ServerAdress: serverAddr,
     Serverport: serverPort,
+    PrometheusPort: prometheusPort,
     Nodename: nodeName,
   }
 }

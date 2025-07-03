@@ -35,6 +35,8 @@ func main() {
 		cancel()
 	}()
 
+  conf := config.LoadConfig()
+
   go func() {
     metrics.RegisterAll()
 
@@ -43,7 +45,16 @@ func main() {
     logger := logutil.GetLogger()
     logger.Info("Serving Prometheus metrics on port 9090")
 
-    if err := http.ListenAndServe(":9090", mux); err != nil {
+    port := conf.PrometheusPort
+    if port == ""{
+      port = "9090"
+      logger.Warn("Prometheus port not set, defaulting to :9090")
+    }
+    
+    addr := ":"+ port
+    logger.Info("Serving Prometheus metrics", zap.String("port", port))
+
+    if err := http.ListenAndServe(addr, mux); err != nil {
         logger.Warn("Prometheus metrics cannot be served", zap.Error(err))
     }
   }()
@@ -60,7 +71,7 @@ func main() {
   
   logger.Info(" runtimeClient Client created successfully")
 
-	conf := config.LoadConfig()
+	
 
 	var loaders []programs.Load_tracer
 	for _, program := range conf.EnableProbes {
