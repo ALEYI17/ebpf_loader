@@ -43,7 +43,6 @@ func main() {
     mux:= http.NewServeMux()
     mux.Handle("/metrics", promhttp.Handler())
     logger := logutil.GetLogger()
-    logger.Info("Serving Prometheus metrics on port 9090")
 
     port := conf.PrometheusPort
     if port == ""{
