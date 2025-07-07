@@ -46,6 +46,7 @@ type EbpfEvent struct {
 	//
 	//	*EbpfEvent_Snoop
 	//	*EbpfEvent_Network
+	//	*EbpfEvent_Ptrace
 	Payload       isEbpfEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -239,6 +240,15 @@ func (x *EbpfEvent) GetNetwork() *NetworkEvent {
 	return nil
 }
 
+func (x *EbpfEvent) GetPtrace() *PtraceEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*EbpfEvent_Ptrace); ok {
+			return x.Ptrace
+		}
+	}
+	return nil
+}
+
 type isEbpfEvent_Payload interface {
 	isEbpfEvent_Payload()
 }
@@ -251,9 +261,15 @@ type EbpfEvent_Network struct {
 	Network *NetworkEvent `protobuf:"bytes,21,opt,name=network,proto3,oneof"`
 }
 
+type EbpfEvent_Ptrace struct {
+	Ptrace *PtraceEvent `protobuf:"bytes,39,opt,name=ptrace,proto3,oneof"`
+}
+
 func (*EbpfEvent_Snoop) isEbpfEvent_Payload() {}
 
 func (*EbpfEvent_Network) isEbpfEvent_Payload() {}
+
+func (*EbpfEvent_Ptrace) isEbpfEvent_Payload() {}
 
 type SnooperEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -415,17 +431,101 @@ func (x *NetworkEvent) GetResolvedDomain() string {
 	return ""
 }
 
+type PtraceEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Request       int64                  `protobuf:"varint,33,opt,name=request,proto3" json:"request,omitempty"`
+	TargetPid     int64                  `protobuf:"varint,34,opt,name=target_pid,json=targetPid,proto3" json:"target_pid,omitempty"`
+	Addr          uint64                 `protobuf:"varint,35,opt,name=addr,proto3" json:"addr,omitempty"`
+	Data          uint64                 `protobuf:"varint,36,opt,name=data,proto3" json:"data,omitempty"`
+	ReturnCode    int64                  `protobuf:"varint,37,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	RequestName   string                 `protobuf:"bytes,38,opt,name=request_name,json=requestName,proto3" json:"request_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PtraceEvent) Reset() {
+	*x = PtraceEvent{}
+	mi := &file_ebpf_event_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PtraceEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PtraceEvent) ProtoMessage() {}
+
+func (x *PtraceEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_ebpf_event_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PtraceEvent.ProtoReflect.Descriptor instead.
+func (*PtraceEvent) Descriptor() ([]byte, []int) {
+	return file_ebpf_event_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *PtraceEvent) GetRequest() int64 {
+	if x != nil {
+		return x.Request
+	}
+	return 0
+}
+
+func (x *PtraceEvent) GetTargetPid() int64 {
+	if x != nil {
+		return x.TargetPid
+	}
+	return 0
+}
+
+func (x *PtraceEvent) GetAddr() uint64 {
+	if x != nil {
+		return x.Addr
+	}
+	return 0
+}
+
+func (x *PtraceEvent) GetData() uint64 {
+	if x != nil {
+		return x.Data
+	}
+	return 0
+}
+
+func (x *PtraceEvent) GetReturnCode() int64 {
+	if x != nil {
+		return x.ReturnCode
+	}
+	return 0
+}
+
+func (x *PtraceEvent) GetRequestName() string {
+	if x != nil {
+		return x.RequestName
+	}
+	return ""
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,33,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,34,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,40,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,41,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CollectorAck) Reset() {
 	*x = CollectorAck{}
-	mi := &file_ebpf_event_proto_msgTypes[3]
+	mi := &file_ebpf_event_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -437,7 +537,7 @@ func (x *CollectorAck) String() string {
 func (*CollectorAck) ProtoMessage() {}
 
 func (x *CollectorAck) ProtoReflect() protoreflect.Message {
-	mi := &file_ebpf_event_proto_msgTypes[3]
+	mi := &file_ebpf_event_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -450,7 +550,7 @@ func (x *CollectorAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CollectorAck.ProtoReflect.Descriptor instead.
 func (*CollectorAck) Descriptor() ([]byte, []int) {
-	return file_ebpf_event_proto_rawDescGZIP(), []int{3}
+	return file_ebpf_event_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CollectorAck) GetStatus() string {
@@ -471,7 +571,7 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\x9c\x06\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\xc7\x06\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -497,7 +597,8 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x0fcontainer_image\x18\x12 \x01(\tR\x0econtainerImage\x12Z\n" +
 	"\x15container_labels_json\x18\x13 \x03(\v2&.pb.EbpfEvent.ContainerLabelsJsonEntryR\x13containerLabelsJson\x12(\n" +
 	"\x05snoop\x18\x14 \x01(\v2\x10.pb.SnooperEventH\x00R\x05snoop\x12,\n" +
-	"\anetwork\x18\x15 \x01(\v2\x10.pb.NetworkEventH\x00R\anetwork\x1aF\n" +
+	"\anetwork\x18\x15 \x01(\v2\x10.pb.NetworkEventH\x00R\anetwork\x12)\n" +
+	"\x06ptrace\x18' \x01(\v2\x0f.pb.PtraceEventH\x00R\x06ptrace\x1aF\n" +
 	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\t\n" +
@@ -516,10 +617,19 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\tsa_family\x18\x1d \x01(\tR\bsaFamily\x12\x18\n" +
 	"\asaddrv6\x18\x1e \x01(\tR\asaddrv6\x12\x18\n" +
 	"\adaddrv6\x18\x1f \x01(\tR\adaddrv6\x12'\n" +
-	"\x0fresolved_domain\x18  \x01(\tR\x0eresolvedDomain\"@\n" +
+	"\x0fresolved_domain\x18  \x01(\tR\x0eresolvedDomain\"\xb2\x01\n" +
+	"\vPtraceEvent\x12\x18\n" +
+	"\arequest\x18! \x01(\x03R\arequest\x12\x1d\n" +
+	"\n" +
+	"target_pid\x18\" \x01(\x03R\ttargetPid\x12\x12\n" +
+	"\x04addr\x18# \x01(\x04R\x04addr\x12\x12\n" +
+	"\x04data\x18$ \x01(\x04R\x04data\x12\x1f\n" +
+	"\vreturn_code\x18% \x01(\x03R\n" +
+	"returnCode\x12!\n" +
+	"\frequest_name\x18& \x01(\tR\vrequestName\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x18! \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18\" \x01(\tR\amessage2A\n" +
+	"\x06status\x18( \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x18) \x01(\tR\amessage2A\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
@@ -536,25 +646,27 @@ func file_ebpf_event_proto_rawDescGZIP() []byte {
 	return file_ebpf_event_proto_rawDescData
 }
 
-var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_ebpf_event_proto_goTypes = []any{
 	(*EbpfEvent)(nil),    // 0: pb.EbpfEvent
 	(*SnooperEvent)(nil), // 1: pb.SnooperEvent
 	(*NetworkEvent)(nil), // 2: pb.NetworkEvent
-	(*CollectorAck)(nil), // 3: pb.CollectorAck
-	nil,                  // 4: pb.EbpfEvent.ContainerLabelsJsonEntry
+	(*PtraceEvent)(nil),  // 3: pb.PtraceEvent
+	(*CollectorAck)(nil), // 4: pb.CollectorAck
+	nil,                  // 5: pb.EbpfEvent.ContainerLabelsJsonEntry
 }
 var file_ebpf_event_proto_depIdxs = []int32{
-	4, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
+	5, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
 	1, // 1: pb.EbpfEvent.snoop:type_name -> pb.SnooperEvent
 	2, // 2: pb.EbpfEvent.network:type_name -> pb.NetworkEvent
-	0, // 3: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
-	3, // 4: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	3, // 3: pb.EbpfEvent.ptrace:type_name -> pb.PtraceEvent
+	0, // 4: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
+	4, // 5: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
+	5, // [5:6] is the sub-list for method output_type
+	4, // [4:5] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_ebpf_event_proto_init() }
@@ -565,6 +677,7 @@ func file_ebpf_event_proto_init() {
 	file_ebpf_event_proto_msgTypes[0].OneofWrappers = []any{
 		(*EbpfEvent_Snoop)(nil),
 		(*EbpfEvent_Network)(nil),
+		(*EbpfEvent_Ptrace)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -572,7 +685,7 @@ func file_ebpf_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ebpf_event_proto_rawDesc), len(file_ebpf_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
