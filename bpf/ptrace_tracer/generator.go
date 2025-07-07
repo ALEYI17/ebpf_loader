@@ -25,7 +25,7 @@ func GenerateGrpcMessage(raw PtracetracerPtraceEventT, nodeName string) *pb.Ebpf
 		TimestampNs:     raw.TimestampNs,
 		TimestampNsExit: raw.TimestampNsExit,
 		LatencyNs:       raw.Latency,
-		EventType:       "accept",
+		EventType:       "ptrace",
 		NodeName:        nodeName,
 		TimestampUnixMs: time.Now().UnixMilli(),
 		Payload: &pb.EbpfEvent_Ptrace{ // oneof for NetworkEvent
