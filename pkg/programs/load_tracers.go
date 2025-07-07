@@ -16,5 +16,6 @@ const (
   LoaderChmod = "chmod"
   LoaderConnect = "connect"
   LoaderAccept = "accept"
+  LoaderPtrace = "ptrace"
 )
 
