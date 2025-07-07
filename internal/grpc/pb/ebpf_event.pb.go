@@ -262,7 +262,7 @@ type EbpfEvent_Network struct {
 }
 
 type EbpfEvent_Ptrace struct {
-	Ptrace *PtraceEvent `protobuf:"bytes,38,opt,name=ptrace,proto3,oneof"`
+	Ptrace *PtraceEvent `protobuf:"bytes,39,opt,name=ptrace,proto3,oneof"`
 }
 
 func (*EbpfEvent_Snoop) isEbpfEvent_Payload() {}
@@ -438,6 +438,7 @@ type PtraceEvent struct {
 	Addr          uint64                 `protobuf:"varint,35,opt,name=addr,proto3" json:"addr,omitempty"`
 	Data          uint64                 `protobuf:"varint,36,opt,name=data,proto3" json:"data,omitempty"`
 	ReturnCode    int64                  `protobuf:"varint,37,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	RequestName   string                 `protobuf:"bytes,38,opt,name=request_name,json=requestName,proto3" json:"request_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -507,10 +508,17 @@ func (x *PtraceEvent) GetReturnCode() int64 {
 	return 0
 }
 
+func (x *PtraceEvent) GetRequestName() string {
+	if x != nil {
+		return x.RequestName
+	}
+	return ""
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,39,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,40,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,40,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,41,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -590,7 +598,7 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x15container_labels_json\x18\x13 \x03(\v2&.pb.EbpfEvent.ContainerLabelsJsonEntryR\x13containerLabelsJson\x12(\n" +
 	"\x05snoop\x18\x14 \x01(\v2\x10.pb.SnooperEventH\x00R\x05snoop\x12,\n" +
 	"\anetwork\x18\x15 \x01(\v2\x10.pb.NetworkEventH\x00R\anetwork\x12)\n" +
-	"\x06ptrace\x18& \x01(\v2\x0f.pb.PtraceEventH\x00R\x06ptrace\x1aF\n" +
+	"\x06ptrace\x18' \x01(\v2\x0f.pb.PtraceEventH\x00R\x06ptrace\x1aF\n" +
 	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\t\n" +
@@ -609,7 +617,7 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\tsa_family\x18\x1d \x01(\tR\bsaFamily\x12\x18\n" +
 	"\asaddrv6\x18\x1e \x01(\tR\asaddrv6\x12\x18\n" +
 	"\adaddrv6\x18\x1f \x01(\tR\adaddrv6\x12'\n" +
-	"\x0fresolved_domain\x18  \x01(\tR\x0eresolvedDomain\"\x8f\x01\n" +
+	"\x0fresolved_domain\x18  \x01(\tR\x0eresolvedDomain\"\xb2\x01\n" +
 	"\vPtraceEvent\x12\x18\n" +
 	"\arequest\x18! \x01(\x03R\arequest\x12\x1d\n" +
 	"\n" +
@@ -617,10 +625,11 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x04addr\x18# \x01(\x04R\x04addr\x12\x12\n" +
 	"\x04data\x18$ \x01(\x04R\x04data\x12\x1f\n" +
 	"\vreturn_code\x18% \x01(\x03R\n" +
-	"returnCode\"@\n" +
+	"returnCode\x12!\n" +
+	"\frequest_name\x18& \x01(\tR\vrequestName\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x18' \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18( \x01(\tR\amessage2A\n" +
+	"\x06status\x18( \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x18) \x01(\tR\amessage2A\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
