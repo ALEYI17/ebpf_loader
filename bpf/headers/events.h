@@ -68,5 +68,26 @@ struct socket_event_t{
 };
 
 
+struct ptrace_event_t{
+    u32 pid;
+    u32 uid;
+    u32 gid;
+    u64 cgroup_id;
+    u32 ppid;
+    u8 cgroup_name[TASK_COMM_SIZE];
+    u32 user_pid;
+    u32 user_ppid;
+    u8 comm[TASK_COMM_SIZE];
+    u64 timestamp_ns;
+    long ret;
+    u64 latency;
+    u64 timestamp_ns_exit;
+    // ptrace arguments
+    long request;
+    long pid_ptrace;
+    unsigned long addr;
+    unsigned long data;
+};
+
 #endif /* __EVENTS_H__ */
 

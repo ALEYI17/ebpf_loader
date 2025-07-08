@@ -28,6 +28,7 @@ message EbpfEvent {
   oneof payload {
     SnooperEvent snoop = 20;
     NetworkEvent network = 21;
+    PtraceEvent ptrace = 39;
   }
 }
 
@@ -48,9 +49,18 @@ message NetworkEvent {
   string resolved_domain=32;
 }
 
+message PtraceEvent{
+  int64 request       = 33;
+  int64 target_pid   = 34;
+  uint64 addr         = 35;
+  uint64 data         = 36;
+  int64 return_code   = 37;
+  string request_name = 38;
+}
+
 message CollectorAck {
-  string status = 33;
-  string message = 34;
+  string status = 40;
+  string message = 41;
 }
 
 service EventCollector {
