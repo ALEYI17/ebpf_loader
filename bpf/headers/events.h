@@ -89,5 +89,28 @@ struct ptrace_event_t{
     unsigned long data;
 };
 
+struct mmap_event_t{
+    u32 pid;
+    u32 uid;
+    u32 gid;
+    u64 cgroup_id;
+    u32 ppid;
+    u8 cgroup_name[TASK_COMM_SIZE];
+    u32 user_pid;
+    u32 user_ppid;
+    u8 comm[TASK_COMM_SIZE];
+    u64 timestamp_ns;
+    long ret;
+    u64 latency;
+    u64 timestamp_ns_exit;
+    // mmap arguments
+    unsigned long addr;
+    unsigned long len;
+    unsigned long prot;
+    unsigned long flags;
+    unsigned long fd;
+    unsigned long off;
+};
+
 #endif /* __EVENTS_H__ */
 

@@ -47,6 +47,7 @@ type EbpfEvent struct {
 	//	*EbpfEvent_Snoop
 	//	*EbpfEvent_Network
 	//	*EbpfEvent_Ptrace
+	//	*EbpfEvent_Mmap
 	Payload       isEbpfEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -249,6 +250,15 @@ func (x *EbpfEvent) GetPtrace() *PtraceEvent {
 	return nil
 }
 
+func (x *EbpfEvent) GetMmap() *MmapEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*EbpfEvent_Mmap); ok {
+			return x.Mmap
+		}
+	}
+	return nil
+}
+
 type isEbpfEvent_Payload interface {
 	isEbpfEvent_Payload()
 }
@@ -265,11 +275,17 @@ type EbpfEvent_Ptrace struct {
 	Ptrace *PtraceEvent `protobuf:"bytes,39,opt,name=ptrace,proto3,oneof"`
 }
 
+type EbpfEvent_Mmap struct {
+	Mmap *MmapEvent `protobuf:"bytes,47,opt,name=mmap,proto3,oneof"`
+}
+
 func (*EbpfEvent_Snoop) isEbpfEvent_Payload() {}
 
 func (*EbpfEvent_Network) isEbpfEvent_Payload() {}
 
 func (*EbpfEvent_Ptrace) isEbpfEvent_Payload() {}
+
+func (*EbpfEvent_Mmap) isEbpfEvent_Payload() {}
 
 type SnooperEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -515,17 +531,109 @@ func (x *PtraceEvent) GetRequestName() string {
 	return ""
 }
 
+type MmapEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Addr          uint64                 `protobuf:"varint,40,opt,name=addr,proto3" json:"addr,omitempty"`
+	Len           uint64                 `protobuf:"varint,41,opt,name=len,proto3" json:"len,omitempty"`
+	Prot          uint64                 `protobuf:"varint,42,opt,name=prot,proto3" json:"prot,omitempty"`
+	Flags         uint64                 `protobuf:"varint,43,opt,name=flags,proto3" json:"flags,omitempty"`
+	Fd            uint64                 `protobuf:"varint,44,opt,name=fd,proto3" json:"fd,omitempty"`
+	Off           uint64                 `protobuf:"varint,45,opt,name=off,proto3" json:"off,omitempty"`
+	ReturnCode    int64                  `protobuf:"varint,46,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MmapEvent) Reset() {
+	*x = MmapEvent{}
+	mi := &file_ebpf_event_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MmapEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MmapEvent) ProtoMessage() {}
+
+func (x *MmapEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_ebpf_event_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MmapEvent.ProtoReflect.Descriptor instead.
+func (*MmapEvent) Descriptor() ([]byte, []int) {
+	return file_ebpf_event_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *MmapEvent) GetAddr() uint64 {
+	if x != nil {
+		return x.Addr
+	}
+	return 0
+}
+
+func (x *MmapEvent) GetLen() uint64 {
+	if x != nil {
+		return x.Len
+	}
+	return 0
+}
+
+func (x *MmapEvent) GetProt() uint64 {
+	if x != nil {
+		return x.Prot
+	}
+	return 0
+}
+
+func (x *MmapEvent) GetFlags() uint64 {
+	if x != nil {
+		return x.Flags
+	}
+	return 0
+}
+
+func (x *MmapEvent) GetFd() uint64 {
+	if x != nil {
+		return x.Fd
+	}
+	return 0
+}
+
+func (x *MmapEvent) GetOff() uint64 {
+	if x != nil {
+		return x.Off
+	}
+	return 0
+}
+
+func (x *MmapEvent) GetReturnCode() int64 {
+	if x != nil {
+		return x.ReturnCode
+	}
+	return 0
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,40,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,41,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,48,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,49,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CollectorAck) Reset() {
 	*x = CollectorAck{}
-	mi := &file_ebpf_event_proto_msgTypes[4]
+	mi := &file_ebpf_event_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -537,7 +645,7 @@ func (x *CollectorAck) String() string {
 func (*CollectorAck) ProtoMessage() {}
 
 func (x *CollectorAck) ProtoReflect() protoreflect.Message {
-	mi := &file_ebpf_event_proto_msgTypes[4]
+	mi := &file_ebpf_event_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -550,7 +658,7 @@ func (x *CollectorAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CollectorAck.ProtoReflect.Descriptor instead.
 func (*CollectorAck) Descriptor() ([]byte, []int) {
-	return file_ebpf_event_proto_rawDescGZIP(), []int{4}
+	return file_ebpf_event_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CollectorAck) GetStatus() string {
@@ -571,7 +679,7 @@ var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\xc7\x06\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\xec\x06\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -598,7 +706,8 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x15container_labels_json\x18\x13 \x03(\v2&.pb.EbpfEvent.ContainerLabelsJsonEntryR\x13containerLabelsJson\x12(\n" +
 	"\x05snoop\x18\x14 \x01(\v2\x10.pb.SnooperEventH\x00R\x05snoop\x12,\n" +
 	"\anetwork\x18\x15 \x01(\v2\x10.pb.NetworkEventH\x00R\anetwork\x12)\n" +
-	"\x06ptrace\x18' \x01(\v2\x0f.pb.PtraceEventH\x00R\x06ptrace\x1aF\n" +
+	"\x06ptrace\x18' \x01(\v2\x0f.pb.PtraceEventH\x00R\x06ptrace\x12#\n" +
+	"\x04mmap\x18/ \x01(\v2\r.pb.MmapEventH\x00R\x04mmap\x1aF\n" +
 	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\t\n" +
@@ -626,10 +735,19 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x04data\x18$ \x01(\x04R\x04data\x12\x1f\n" +
 	"\vreturn_code\x18% \x01(\x03R\n" +
 	"returnCode\x12!\n" +
-	"\frequest_name\x18& \x01(\tR\vrequestName\"@\n" +
+	"\frequest_name\x18& \x01(\tR\vrequestName\"\x9e\x01\n" +
+	"\tMmapEvent\x12\x12\n" +
+	"\x04addr\x18( \x01(\x04R\x04addr\x12\x10\n" +
+	"\x03len\x18) \x01(\x04R\x03len\x12\x12\n" +
+	"\x04prot\x18* \x01(\x04R\x04prot\x12\x14\n" +
+	"\x05flags\x18+ \x01(\x04R\x05flags\x12\x0e\n" +
+	"\x02fd\x18, \x01(\x04R\x02fd\x12\x10\n" +
+	"\x03off\x18- \x01(\x04R\x03off\x12\x1f\n" +
+	"\vreturn_code\x18. \x01(\x03R\n" +
+	"returnCode\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x18( \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18) \x01(\tR\amessage2A\n" +
+	"\x06status\x180 \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x181 \x01(\tR\amessage2A\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
@@ -646,27 +764,29 @@ func file_ebpf_event_proto_rawDescGZIP() []byte {
 	return file_ebpf_event_proto_rawDescData
 }
 
-var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_ebpf_event_proto_goTypes = []any{
 	(*EbpfEvent)(nil),    // 0: pb.EbpfEvent
 	(*SnooperEvent)(nil), // 1: pb.SnooperEvent
 	(*NetworkEvent)(nil), // 2: pb.NetworkEvent
 	(*PtraceEvent)(nil),  // 3: pb.PtraceEvent
-	(*CollectorAck)(nil), // 4: pb.CollectorAck
-	nil,                  // 5: pb.EbpfEvent.ContainerLabelsJsonEntry
+	(*MmapEvent)(nil),    // 4: pb.MmapEvent
+	(*CollectorAck)(nil), // 5: pb.CollectorAck
+	nil,                  // 6: pb.EbpfEvent.ContainerLabelsJsonEntry
 }
 var file_ebpf_event_proto_depIdxs = []int32{
-	5, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
+	6, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
 	1, // 1: pb.EbpfEvent.snoop:type_name -> pb.SnooperEvent
 	2, // 2: pb.EbpfEvent.network:type_name -> pb.NetworkEvent
 	3, // 3: pb.EbpfEvent.ptrace:type_name -> pb.PtraceEvent
-	0, // 4: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
-	4, // 5: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
-	5, // [5:6] is the sub-list for method output_type
-	4, // [4:5] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	4, // 4: pb.EbpfEvent.mmap:type_name -> pb.MmapEvent
+	0, // 5: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
+	5, // 6: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
+	6, // [6:7] is the sub-list for method output_type
+	5, // [5:6] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_ebpf_event_proto_init() }
@@ -678,6 +798,7 @@ func file_ebpf_event_proto_init() {
 		(*EbpfEvent_Snoop)(nil),
 		(*EbpfEvent_Network)(nil),
 		(*EbpfEvent_Ptrace)(nil),
+		(*EbpfEvent_Mmap)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -685,7 +806,7 @@ func file_ebpf_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ebpf_event_proto_rawDesc), len(file_ebpf_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
