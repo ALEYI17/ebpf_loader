@@ -17,5 +17,6 @@ const (
   LoaderConnect = "connect"
   LoaderAccept = "accept"
   LoaderPtrace = "ptrace"
+  LoaderMmap = "mmap"
 )
 
