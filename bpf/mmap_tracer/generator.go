@@ -35,6 +35,7 @@ func GenerateGrpcMessage(raw MmaptracerMmapEventT, nodeName string) *pb.EbpfEven
         Flags: raw.Flags,
         Fd: raw.Fd,
         Off: raw.Off,
+        ReturnCode: raw.Ret,
       },
     },
 	}

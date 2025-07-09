@@ -276,7 +276,7 @@ type EbpfEvent_Ptrace struct {
 }
 
 type EbpfEvent_Mmap struct {
-	Mmap *MmapEvent `protobuf:"bytes,46,opt,name=mmap,proto3,oneof"`
+	Mmap *MmapEvent `protobuf:"bytes,47,opt,name=mmap,proto3,oneof"`
 }
 
 func (*EbpfEvent_Snoop) isEbpfEvent_Payload() {}
@@ -539,6 +539,7 @@ type MmapEvent struct {
 	Flags         uint64                 `protobuf:"varint,43,opt,name=flags,proto3" json:"flags,omitempty"`
 	Fd            uint64                 `protobuf:"varint,44,opt,name=fd,proto3" json:"fd,omitempty"`
 	Off           uint64                 `protobuf:"varint,45,opt,name=off,proto3" json:"off,omitempty"`
+	ReturnCode    int64                  `protobuf:"varint,46,opt,name=return_code,json=returnCode,proto3" json:"return_code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -615,10 +616,17 @@ func (x *MmapEvent) GetOff() uint64 {
 	return 0
 }
 
+func (x *MmapEvent) GetReturnCode() int64 {
+	if x != nil {
+		return x.ReturnCode
+	}
+	return 0
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,47,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,48,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,48,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,49,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -699,7 +707,7 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x05snoop\x18\x14 \x01(\v2\x10.pb.SnooperEventH\x00R\x05snoop\x12,\n" +
 	"\anetwork\x18\x15 \x01(\v2\x10.pb.NetworkEventH\x00R\anetwork\x12)\n" +
 	"\x06ptrace\x18' \x01(\v2\x0f.pb.PtraceEventH\x00R\x06ptrace\x12#\n" +
-	"\x04mmap\x18. \x01(\v2\r.pb.MmapEventH\x00R\x04mmap\x1aF\n" +
+	"\x04mmap\x18/ \x01(\v2\r.pb.MmapEventH\x00R\x04mmap\x1aF\n" +
 	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\t\n" +
@@ -727,17 +735,19 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x04data\x18$ \x01(\x04R\x04data\x12\x1f\n" +
 	"\vreturn_code\x18% \x01(\x03R\n" +
 	"returnCode\x12!\n" +
-	"\frequest_name\x18& \x01(\tR\vrequestName\"}\n" +
+	"\frequest_name\x18& \x01(\tR\vrequestName\"\x9e\x01\n" +
 	"\tMmapEvent\x12\x12\n" +
 	"\x04addr\x18( \x01(\x04R\x04addr\x12\x10\n" +
 	"\x03len\x18) \x01(\x04R\x03len\x12\x12\n" +
 	"\x04prot\x18* \x01(\x04R\x04prot\x12\x14\n" +
 	"\x05flags\x18+ \x01(\x04R\x05flags\x12\x0e\n" +
 	"\x02fd\x18, \x01(\x04R\x02fd\x12\x10\n" +
-	"\x03off\x18- \x01(\x04R\x03off\"@\n" +
+	"\x03off\x18- \x01(\x04R\x03off\x12\x1f\n" +
+	"\vreturn_code\x18. \x01(\x03R\n" +
+	"returnCode\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x18/ \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x180 \x01(\tR\amessage2A\n" +
+	"\x06status\x180 \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x181 \x01(\tR\amessage2A\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"
