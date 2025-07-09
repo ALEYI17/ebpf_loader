@@ -29,6 +29,7 @@ message EbpfEvent {
     SnooperEvent snoop = 20;
     NetworkEvent network = 21;
     PtraceEvent ptrace = 39;
+    MmapEvent mmap = 46;
   }
 }
 
@@ -58,9 +59,18 @@ message PtraceEvent{
   string request_name = 38;
 }
 
+message MmapEvent{
+  uint64 addr = 40;
+  uint64 len = 41;
+  uint64 prot = 42;
+  uint64 flags = 43;
+  uint64 fd = 44;
+  uint64 off = 45;
+} 
+
 message CollectorAck {
-  string status = 40;
-  string message = 41;
+  string status = 47;
+  string message = 48;
 }
 
 service EventCollector {
