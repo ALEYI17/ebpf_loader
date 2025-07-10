@@ -30,6 +30,7 @@ message EbpfEvent {
     NetworkEvent network = 21;
     PtraceEvent ptrace = 39;
     MmapEvent mmap = 47;
+    MountEvent mount = 53;
   }
 }
 
@@ -69,9 +70,17 @@ message MmapEvent{
   int64 return_code = 46;
 } 
 
+message MountEvent{
+  string dev_name = 48;
+  string dir_name = 49;
+  string type = 50;
+  uint64 flags = 51;
+  int64 return_code = 52;
+}
+
 message CollectorAck {
-  string status = 48;
-  string message = 49;
+  string status = 54;
+  string message = 55;
 }
 
 service EventCollector {

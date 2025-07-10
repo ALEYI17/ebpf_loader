@@ -18,5 +18,6 @@ const (
   LoaderAccept = "accept"
   LoaderPtrace = "ptrace"
   LoaderMmap = "mmap"
+  LoaderMount = "mount"
 )
 

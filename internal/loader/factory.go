@@ -23,6 +23,8 @@ func NewEbpfLoader(program string) (programs.Load_tracer,error){
     return NewPtraceTracerLoader()
   case programs.LoaderMmap:
     return NewMmapTracerLoader()
+  case programs.LoaderMount:
+    return NewMountTracerLoader()
   default:
     return nil,errors.New("Unsuported or unknow program")
   }
