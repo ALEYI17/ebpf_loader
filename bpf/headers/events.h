@@ -6,6 +6,8 @@
 #define TASK_COMM_SIZE 150
 #endif
 
+#define MOUNT_STR_SIZE 128
+
 #ifndef PATH_MAX
 #define PATH_MAX 256
 #endif
@@ -110,6 +112,27 @@ struct mmap_event_t{
     unsigned long flags;
     unsigned long fd;
     unsigned long off;
+};
+
+struct mount_event_t{
+    u32 pid;
+    u32 uid;
+    u32 gid;
+    u64 cgroup_id;
+    u32 ppid;
+    u8 cgroup_name[TASK_COMM_SIZE];
+    u32 user_pid;
+    u32 user_ppid;
+    u8 comm[TASK_COMM_SIZE];
+    u64 timestamp_ns;
+    long ret;
+    u64 latency;
+    u64 timestamp_ns_exit;
+    // mount arguments
+    u8 dev_name[MOUNT_STR_SIZE];
+    u8 dir_name[MOUNT_STR_SIZE];
+    u8 type[MOUNT_STR_SIZE];
+    unsigned long flags;
 };
 
 #endif /* __EVENTS_H__ */
