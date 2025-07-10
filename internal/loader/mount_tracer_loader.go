@@ -117,7 +117,7 @@ func (mt *MountTracerLoader) Run(ctx context.Context, nodeName string) <-chan *p
 				}
 
 				event := mounttracer.GenerateGrpcMessage(events, nodeName)
-        metrics.EventsTotal.WithLabelValues("mmap").Inc()
+        metrics.EventsTotal.WithLabelValues("mount").Inc()
 
 				select {
 				case <-ctx.Done():

@@ -33,6 +33,7 @@ func GenerateGrpcMessage(raw MounttracerMountEventT, nodeName string) *pb.EbpfEv
         DirName: unix.ByteSliceToString(raw.DirName[:]),
         Type: unix.ByteSliceToString(raw.Type[:]),
         Flags: raw.Flags,
+        ReturnCode: raw.Ret,
 			},
 		},
 	}
