@@ -24,7 +24,7 @@ func GenerateGrpcMessage(raw UmounttracerMountEventT, nodeName string) *pb.EbpfE
 		TimestampNs:     raw.TimestampNs,
 		TimestampNsExit: raw.TimestampNsExit,
 		LatencyNs:       raw.Latency,
-		EventType:       "mount",
+		EventType:       "umount",
 		NodeName:        nodeName,
 		TimestampUnixMs: time.Now().UnixMilli(),
 		Payload: &pb.EbpfEvent_Mount{ 
