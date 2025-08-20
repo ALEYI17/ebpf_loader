@@ -20,7 +20,9 @@
 #define AF_INET6 10
 #endif
 
-
+#ifndef PAGE_SHIFT
+#define PAGE_SHIFT 12
+#endif
 
 struct trace_syscall_event {
     u32 pid;
@@ -133,6 +135,24 @@ struct mount_event_t{
     u8 dir_name[MOUNT_STR_SIZE];
     u8 type[MOUNT_STR_SIZE];
     unsigned long flags;
+};
+
+struct resource_event_t{
+    u32 pid;
+    u32 uid;
+    u32 gid;
+    u64 cgroup_id;
+    u32 ppid;
+    u8 cgroup_name[TASK_COMM_SIZE];
+    u32 user_pid;
+    u32 user_ppid;
+    u8 comm[TASK_COMM_SIZE];
+    u64 timestamp_ns;
+    u64 latency;
+    u64 timestamp_ns_exit;
+    u64 cpu_ns;
+    u64 rss_bytes;
+    u64 last_seen_ns;
 };
 
 #endif /* __EVENTS_H__ */
