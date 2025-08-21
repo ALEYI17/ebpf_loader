@@ -31,6 +31,7 @@ message EbpfEvent {
     PtraceEvent ptrace = 39;
     MmapEvent mmap = 47;
     MountEvent mount = 53;
+    ResourceEvent resource = 55;
   }
 }
 
@@ -78,9 +79,14 @@ message MountEvent{
   int64 return_code = 52;
 }
 
+message ResourceEvent{
+  uint64 CpuNs = 53;
+  uint64 RssBytes = 54;
+}
+
 message CollectorAck {
-  string status = 54;
-  string message = 55;
+  string status = 56;
+  string message = 57;
 }
 
 service EventCollector {

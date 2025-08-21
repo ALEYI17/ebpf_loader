@@ -20,5 +20,6 @@ const (
   LoaderMmap = "mmap"
   LoaderMount = "mount"
   LoadUmount = "umount"
+  LoadResource = "resource"
 )
 
