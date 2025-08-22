@@ -151,7 +151,8 @@ struct resource_event_t{
     u64 latency;
     u64 timestamp_ns_exit;
     u64 cpu_ns;
-    u64 rss_bytes;
+    u64 user_faults;
+    u64 kernel_faults;
     u64 last_seen_ns;
 };
 

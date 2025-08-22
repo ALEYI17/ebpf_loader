@@ -15,9 +15,12 @@ struct {
     __type(value, __u64);
 } run_start_ns SEC(".maps");
 
-struct {
-    __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
-} events SEC(".maps");
+struct{
+  __uint(type, BPF_MAP_TYPE_HASH);
+  __uint(max_entries, 65536);
+  __type(value,struct resource_event_t);
+  __type(key, __u32);
+} resource_table SEC(".maps");
 
 const struct resource_event_t *unused __attribute__((unused));
 
@@ -42,59 +45,30 @@ int BPF_KPROBE(handle_finish_task_switch, struct task_struct *prev){
     u32 prev_pid = task_tgid(prev);
 
     if (prev_pid > 0 ){
-      struct resource_event_t event = {};
-      
-      event.pid = prev_pid;
-      bpf_core_read_str(event.comm, sizeof(event.comm), &prev->comm);
-      // u64 uid_gid = bpf_get_current_uid_gid();
-      //event.uid = uid_gid >> 32;
-      //event.gid = uid_gid & 0xFFFFFFFF;
-      //event.cgroup_id = bpf_get_current_cgroup_id();
+      struct resource_event_t *eventp;
 
-      /*struct task_struct *task = (struct task_struct *)bpf_get_current_task();*/
-      /*event.ppid = BPF_CORE_READ(task, real_parent, tgid);*/
-      /**/
-      /*const char *cname = BPF_CORE_READ(task, cgroups, subsys[ memory_cgrp_id], cgroup, kn, name);*/
-      /*bpf_core_read_str(event.cgroup_name, sizeof(event.cgroup_name), cname);*/
-      /**/
-      /*struct task_struct *parent_task = BPF_CORE_READ(task, real_parent);*/
-      /*struct nsproxy *namespaceproxy = BPF_CORE_READ(task, nsproxy);*/
-      /*struct pid_namespace *pid_ns_children = BPF_CORE_READ(namespaceproxy, pid_ns_for_children);*/
-      /*unsigned int level = BPF_CORE_READ(pid_ns_children, level);*/
-      /*event.user_pid = BPF_CORE_READ(task, group_leader, thread_pid, numbers[level].nr);*/
-      /**/
-      /*struct nsproxy *parent_namespaceproxy = BPF_CORE_READ(parent_task, nsproxy);*/
-      /*struct pid_namespace *parent_pid_ns_children = BPF_CORE_READ(parent_namespaceproxy, pid_ns_for_children);*/
-      /*unsigned int parent_level = BPF_CORE_READ(parent_pid_ns_children, level);*/
-      /*event.user_ppid = BPF_CORE_READ(parent_task, group_leader, thread_pid, numbers[parent_level].nr);*/
-      /**/
-      /*bpf_get_current_comm(&event.comm, TASK_COMM_SIZE);*/
+      eventp = bpf_map_lookup_elem(&resource_table,&prev_pid);
+      if(!eventp){
+        struct resource_event_t new_event= {};
 
-      event.timestamp_ns = now;
-      u64 *startp = bpf_map_lookup_elem(&run_start_ns, &prev_pid);
-      if (startp) {
-          u64 delta = now - *startp;
-          event.cpu_ns = delta;
-          bpf_map_delete_elem(&run_start_ns, &prev_pid);
+        new_event.pid = prev_pid;
+        bpf_core_read_str(new_event.comm, sizeof(new_event.comm), &prev->comm);
+        bpf_map_update_elem(&resource_table, &prev_pid, &new_event, BPF_ANY);
+        eventp = bpf_map_lookup_elem(&resource_table, &prev_pid);
       }
 
-/*      struct mm_struct *mm = BPF_CORE_READ(prev, mm);*/
-/**/
-/*      if(mm){*/
-/*        long file = 0, anon = 0;*/
-/*#ifdef MM_FILEPAGES*/
-/*        file = BPF_CORE_READ(mm, rss_stat.count[MM_FILEPAGES].counter);*/
-/*        anon = BPF_CORE_READ(mm, rss_stat.count[MM_ANONPAGES].counter);*/
-/*#else */
-/*        file = BPF_CORE_READ(mm, rss_stat.count[1].counter);*/
-/*        anon = BPF_CORE_READ(mm, rss_stat.count[0].counter);*/
-/*#endif*/
-/*        event.rss_bytes = ((u64)(file + anon)) << PAGE_SHIFT;*/
-/*      }*/
-      event.last_seen_ns = now;
+      if (eventp){
+        eventp->timestamp_ns = now;
+        eventp->last_seen_ns = now;
 
+        u64 *startp = bpf_map_lookup_elem(&run_start_ns, &prev_pid);
+        if(startp){
+          u64 delta = now - *startp;
+          eventp->cpu_ns += delta;
+          bpf_map_delete_elem(&run_start_ns, &prev_pid);
+        }
+      }
       
-      bpf_perf_event_output(ctx,&events,BPF_F_CURRENT_CPU,&event,sizeof(event));
     }
   }
 
@@ -108,3 +82,56 @@ int BPF_KPROBE(handle_finish_task_switch, struct task_struct *prev){
   return 0;
 }
 
+SEC("tracepoint/exceptions/page_fault_user")
+int handle_page_fault_user( struct trace_event_raw_sys_enter *ctx){
+
+  u32 pid = bpf_get_current_pid_tgid() >> 32;
+
+  struct resource_event_t *eventp;
+
+  if (pid == 0)
+    return 0;
+
+  eventp = bpf_map_lookup_elem(&resource_table, &pid);
+
+  if(!eventp){
+    struct resource_event_t new_event = {};
+    new_event.pid = pid;
+    bpf_get_current_comm(&new_event.comm, sizeof(new_event.comm));
+    bpf_map_update_elem(&resource_table, &pid, &new_event, BPF_ANY);
+    eventp = bpf_map_lookup_elem(&resource_table, &pid);
+  }
+
+  if (eventp){
+    __sync_fetch_and_add(&eventp->user_faults, 1);
+    eventp->last_seen_ns = bpf_ktime_get_ns();
+  }
+  return 0;
+}
+
+SEC("tracepoint/exceptions/page_fault_kernel")
+int handle_page_fault_kernel( struct trace_event_raw_sys_enter *ctx){
+
+  u32 pid = bpf_get_current_pid_tgid() >> 32;
+
+  struct resource_event_t *eventp;
+
+  if (pid == 0)
+    return 0;
+
+  eventp = bpf_map_lookup_elem(&resource_table, &pid);
+
+  if(!eventp){
+    struct resource_event_t new_event = {};
+    new_event.pid = pid;
+    bpf_get_current_comm(&new_event.comm, sizeof(new_event.comm));
+    bpf_map_update_elem(&resource_table, &pid, &new_event, BPF_ANY);
+    eventp = bpf_map_lookup_elem(&resource_table, &pid);
+  }
+
+  if (eventp){
+    __sync_fetch_and_add(&eventp->kernel_faults, 1);
+    eventp->last_seen_ns = bpf_ktime_get_ns();
+  }
+  return 0;
+}

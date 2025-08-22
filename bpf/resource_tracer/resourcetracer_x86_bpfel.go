@@ -29,7 +29,8 @@ type ResourcetracerResourceEventT struct {
 	Latency         uint64
 	TimestampNsExit uint64
 	CpuNs           uint64
-	RssBytes        uint64
+	UserFaults      uint64
+	KernelFaults    uint64
 	LastSeenNs      uint64
 }
 
@@ -76,14 +77,16 @@ type ResourcetracerSpecs struct {
 // It can be passed ebpf.CollectionSpec.Assign.
 type ResourcetracerProgramSpecs struct {
 	HandleFinishTaskSwitch *ebpf.ProgramSpec `ebpf:"handle_finish_task_switch"`
+	HandlePageFaultKernel  *ebpf.ProgramSpec `ebpf:"handle_page_fault_kernel"`
+	HandlePageFaultUser    *ebpf.ProgramSpec `ebpf:"handle_page_fault_user"`
 }
 
 // ResourcetracerMapSpecs contains maps before they are loaded into the kernel.
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type ResourcetracerMapSpecs struct {
-	Events     *ebpf.MapSpec `ebpf:"events"`
-	RunStartNs *ebpf.MapSpec `ebpf:"run_start_ns"`
+	ResourceTable *ebpf.MapSpec `ebpf:"resource_table"`
+	RunStartNs    *ebpf.MapSpec `ebpf:"run_start_ns"`
 }
 
 // ResourcetracerVariableSpecs contains global variables before they are loaded into the kernel.
@@ -113,13 +116,13 @@ func (o *ResourcetracerObjects) Close() error {
 //
 // It can be passed to LoadResourcetracerObjects or ebpf.CollectionSpec.LoadAndAssign.
 type ResourcetracerMaps struct {
-	Events     *ebpf.Map `ebpf:"events"`
-	RunStartNs *ebpf.Map `ebpf:"run_start_ns"`
+	ResourceTable *ebpf.Map `ebpf:"resource_table"`
+	RunStartNs    *ebpf.Map `ebpf:"run_start_ns"`
 }
 
 func (m *ResourcetracerMaps) Close() error {
 	return _ResourcetracerClose(
-		m.Events,
+		m.ResourceTable,
 		m.RunStartNs,
 	)
 }
@@ -136,11 +139,15 @@ type ResourcetracerVariables struct {
 // It can be passed to LoadResourcetracerObjects or ebpf.CollectionSpec.LoadAndAssign.
 type ResourcetracerPrograms struct {
 	HandleFinishTaskSwitch *ebpf.Program `ebpf:"handle_finish_task_switch"`
+	HandlePageFaultKernel  *ebpf.Program `ebpf:"handle_page_fault_kernel"`
+	HandlePageFaultUser    *ebpf.Program `ebpf:"handle_page_fault_user"`
 }
 
 func (p *ResourcetracerPrograms) Close() error {
 	return _ResourcetracerClose(
 		p.HandleFinishTaskSwitch,
+		p.HandlePageFaultKernel,
+		p.HandlePageFaultUser,
 	)
 }
 
