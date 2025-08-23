@@ -255,3 +255,29 @@ int tp_exit_brk(struct trace_event_raw_sys_exit *ctx)
     }
     return 0;
 }
+
+SEC("tracepoint/syscalls/sys_exit_read")
+int trace_exit_read(struct trace_event_raw_sys_exit *ctx) {
+    int ret = ctx->ret;
+    if (ret > 0) {
+        u32 pid = bpf_get_current_pid_tgid() >> 32;
+        struct resource_event_t *eventp = get_or_init_event(pid);
+        if (eventp) {
+            __sync_fetch_and_add(&eventp->bytes_read, ret);
+        }
+    }
+    return 0;
+}
+
+SEC("tracepoint/syscalls/sys_exit_write")
+int trace_exit_write(struct trace_event_raw_sys_exit *ctx) {
+    int ret = ctx->ret;
+    if (ret > 0) {
+        u32 pid = bpf_get_current_pid_tgid() >> 32;
+        struct resource_event_t *eventp = get_or_init_event(pid);
+        if (eventp) {
+            __sync_fetch_and_add(&eventp->bytes_written, ret);
+        }
+    }
+    return 0;
+}
