@@ -22,6 +22,13 @@ struct{
   __type(key, __u32);
 } resource_table SEC(".maps");
 
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 65536);
+    __type(key, __u32);   // pid
+    __type(value, __u64); // len
+} pending_mmap_len SEC(".maps");
+
 const struct resource_event_t *unused __attribute__((unused));
 
 static __always_inline u32 task_tgid(struct task_struct *t)
@@ -34,6 +41,18 @@ static __always_inline u32 task_tgid(struct task_struct *t)
             tgid = BPF_CORE_READ(gl, tgid);
     }
     return tgid;
+}
+
+static __always_inline struct resource_event_t *get_or_init_event(__u32 pid){
+    struct resource_event_t *e = bpf_map_lookup_elem(&resource_table, &pid);
+    if (!e) {
+        struct resource_event_t ne = {};
+        ne.pid = pid;
+        bpf_get_current_comm(ne.comm, sizeof(ne.comm));
+        bpf_map_update_elem(&resource_table, &pid, &ne, BPF_ANY);
+        e = bpf_map_lookup_elem(&resource_table, &pid);
+    }
+    return e;
 }
 
 SEC("kprobe/finish_task_switch")
@@ -135,3 +154,35 @@ int handle_page_fault_kernel( struct trace_event_raw_sys_enter *ctx){
   }
   return 0;
 }
+
+SEC("tracepoint/syscall/sys_enter_mmap")
+int tp_enter_mmap(struct trace_event_raw_sys_enter *ctx){
+  
+  u32 pid = bpf_get_current_pid_tgid() >> 32;
+  long len = (long) ctx->args[1];
+  bpf_map_update_elem(&pending_mmap_len, &pid, &len, BPF_ANY);
+  return 0;
+}
+
+SEC("tracepoint/syscall/sys_enter_mmap")
+int tp_exit_mmap(struct trace_event_raw_sys_exit *ctx){
+
+  u32 pid = bpf_get_current_pid_tgid() >>32;
+  long ret = (long) ctx->ret; 
+  long *lenp = bpf_map_lookup_elem(&pending_mmap_len,&pid);
+
+  if(!lenp) return 0;
+
+  if (ret >= 0){
+    struct resource_event_t *e = get_or_init_event(pid);
+
+    if (e){
+      __sync_fetch_and_add(&e->vm_mmap_bytes, *lenp);
+      e->last_seen_ns = bpf_ktime_get_ns();
+    }
+  }
+
+  bpf_map_delete_elem(&pending_mmap_len, &pid);
+  return 0;
+}
+
