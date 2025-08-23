@@ -36,6 +36,12 @@ struct {
     __type(value, __u64);
 } pending_munmap_len SEC(".maps");
 
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 65536);
+    __type(key, __u32);
+    __type(value, __u64); 
+} last_brk_end SEC(".maps");
 
 const struct resource_event_t *unused __attribute__((unused));
 
@@ -167,7 +173,7 @@ SEC("tracepoint/syscall/sys_enter_mmap")
 int tp_enter_mmap(struct trace_event_raw_sys_enter *ctx){
   
   u32 pid = bpf_get_current_pid_tgid() >> 32;
-  long len = (long) ctx->args[1];
+  u64 len = (u64) ctx->args[1];
   bpf_map_update_elem(&pending_mmap_len, &pid, &len, BPF_ANY);
   return 0;
 }
@@ -207,7 +213,7 @@ SEC("tracepoint/syscalls/sys_exit_munmap")
 int tp_exit_munmap(struct trace_event_raw_sys_exit *ctx)
 {
     __u32 pid = bpf_get_current_pid_tgid() >> 32;
-    __s64 ret = ctx->ret;
+    long ret = (long) ctx->ret;
     __u64 *lenp = bpf_map_lookup_elem(&pending_munmap_len, &pid);
     if (!lenp) return 0;
 
@@ -219,5 +225,33 @@ int tp_exit_munmap(struct trace_event_raw_sys_exit *ctx)
         }
     }
     bpf_map_delete_elem(&pending_munmap_len, &pid);
+    return 0;
+}
+
+SEC("tracepoint/syscalls/sys_exit_brk")
+int tp_exit_brk(struct trace_event_raw_sys_exit *ctx)
+{
+    __u32 pid = bpf_get_current_pid_tgid() >> 32;
+    __u64 new_brk = (__u64)ctx->ret;
+
+    __u64 *prevp = bpf_map_lookup_elem(&last_brk_end, &pid);
+    if (!prevp) {
+        // initialize baseline
+        bpf_map_update_elem(&last_brk_end, &pid, &new_brk, BPF_ANY);
+        return 0;
+    }
+
+    if (new_brk != *prevp) {
+        struct resource_event_t *e = get_or_init_event(pid);
+        if (e) {
+            if (new_brk > *prevp) {
+                __sync_fetch_and_add(&e->vm_brk_grow_bytes, new_brk - *prevp);
+            } else {
+                __sync_fetch_and_add(&e->vm_brk_shrink_bytes, *prevp - new_brk);
+            }
+            e->last_seen_ns = bpf_ktime_get_ns();
+        }
+        bpf_map_update_elem(&last_brk_end, &pid, &new_brk, BPF_ANY);
+    }
     return 0;
 }

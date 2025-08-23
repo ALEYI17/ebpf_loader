@@ -155,6 +155,8 @@ struct resource_event_t{
     u64 kernel_faults;
     u64 vm_mmap_bytes;
     u64 vm_munmap_bytes;
+    u64 vm_brk_grow_bytes;
+    u64 vm_brk_shrink_bytes;
     u64 last_seen_ns;
 };
 
