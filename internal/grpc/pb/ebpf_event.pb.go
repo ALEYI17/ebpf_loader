@@ -304,7 +304,7 @@ type EbpfEvent_Mount struct {
 }
 
 type EbpfEvent_Resource struct {
-	Resource *ResourceEvent `protobuf:"bytes,55,opt,name=resource,proto3,oneof"`
+	Resource *ResourceEvent `protobuf:"bytes,62,opt,name=resource,proto3,oneof"`
 }
 
 func (*EbpfEvent_Snoop) isEbpfEvent_Payload() {}
@@ -732,11 +732,18 @@ func (x *MountEvent) GetReturnCode() int64 {
 }
 
 type ResourceEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CpuNs         uint64                 `protobuf:"varint,53,opt,name=CpuNs,proto3" json:"CpuNs,omitempty"`
-	RssBytes      uint64                 `protobuf:"varint,54,opt,name=RssBytes,proto3" json:"RssBytes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	CpuNs            uint64                 `protobuf:"varint,53,opt,name=CpuNs,proto3" json:"CpuNs,omitempty"`
+	UserFaults       uint64                 `protobuf:"varint,54,opt,name=UserFaults,proto3" json:"UserFaults,omitempty"`
+	KernelFaults     uint64                 `protobuf:"varint,55,opt,name=KernelFaults,proto3" json:"KernelFaults,omitempty"`
+	VmMmapBytes      uint64                 `protobuf:"varint,56,opt,name=VmMmapBytes,proto3" json:"VmMmapBytes,omitempty"`
+	VmMunmapBytes    uint64                 `protobuf:"varint,57,opt,name=VmMunmapBytes,proto3" json:"VmMunmapBytes,omitempty"`
+	VmBrkGrowBytes   uint64                 `protobuf:"varint,58,opt,name=VmBrkGrowBytes,proto3" json:"VmBrkGrowBytes,omitempty"`
+	VmBrkShrinkBytes uint64                 `protobuf:"varint,59,opt,name=VmBrkShrinkBytes,proto3" json:"VmBrkShrinkBytes,omitempty"`
+	BytesWritten     uint64                 `protobuf:"varint,60,opt,name=BytesWritten,proto3" json:"BytesWritten,omitempty"`
+	BytesRead        uint64                 `protobuf:"varint,61,opt,name=BytesRead,proto3" json:"BytesRead,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *ResourceEvent) Reset() {
@@ -776,17 +783,66 @@ func (x *ResourceEvent) GetCpuNs() uint64 {
 	return 0
 }
 
-func (x *ResourceEvent) GetRssBytes() uint64 {
+func (x *ResourceEvent) GetUserFaults() uint64 {
 	if x != nil {
-		return x.RssBytes
+		return x.UserFaults
+	}
+	return 0
+}
+
+func (x *ResourceEvent) GetKernelFaults() uint64 {
+	if x != nil {
+		return x.KernelFaults
+	}
+	return 0
+}
+
+func (x *ResourceEvent) GetVmMmapBytes() uint64 {
+	if x != nil {
+		return x.VmMmapBytes
+	}
+	return 0
+}
+
+func (x *ResourceEvent) GetVmMunmapBytes() uint64 {
+	if x != nil {
+		return x.VmMunmapBytes
+	}
+	return 0
+}
+
+func (x *ResourceEvent) GetVmBrkGrowBytes() uint64 {
+	if x != nil {
+		return x.VmBrkGrowBytes
+	}
+	return 0
+}
+
+func (x *ResourceEvent) GetVmBrkShrinkBytes() uint64 {
+	if x != nil {
+		return x.VmBrkShrinkBytes
+	}
+	return 0
+}
+
+func (x *ResourceEvent) GetBytesWritten() uint64 {
+	if x != nil {
+		return x.BytesWritten
+	}
+	return 0
+}
+
+func (x *ResourceEvent) GetBytesRead() uint64 {
+	if x != nil {
+		return x.BytesRead
 	}
 	return 0
 }
 
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,56,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,57,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,63,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,64,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -869,7 +925,7 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x06ptrace\x18' \x01(\v2\x0f.pb.PtraceEventH\x00R\x06ptrace\x12#\n" +
 	"\x04mmap\x18/ \x01(\v2\r.pb.MmapEventH\x00R\x04mmap\x12&\n" +
 	"\x05mount\x185 \x01(\v2\x0e.pb.MountEventH\x00R\x05mount\x12/\n" +
-	"\bresource\x187 \x01(\v2\x11.pb.ResourceEventH\x00R\bresource\x1aF\n" +
+	"\bresource\x18> \x01(\v2\x11.pb.ResourceEventH\x00R\bresource\x1aF\n" +
 	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\t\n" +
@@ -914,13 +970,22 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x04type\x182 \x01(\tR\x04type\x12\x14\n" +
 	"\x05flags\x183 \x01(\x04R\x05flags\x12\x1f\n" +
 	"\vreturn_code\x184 \x01(\x03R\n" +
-	"returnCode\"A\n" +
+	"returnCode\"\xc7\x02\n" +
 	"\rResourceEvent\x12\x14\n" +
-	"\x05CpuNs\x185 \x01(\x04R\x05CpuNs\x12\x1a\n" +
-	"\bRssBytes\x186 \x01(\x04R\bRssBytes\"@\n" +
+	"\x05CpuNs\x185 \x01(\x04R\x05CpuNs\x12\x1e\n" +
+	"\n" +
+	"UserFaults\x186 \x01(\x04R\n" +
+	"UserFaults\x12\"\n" +
+	"\fKernelFaults\x187 \x01(\x04R\fKernelFaults\x12 \n" +
+	"\vVmMmapBytes\x188 \x01(\x04R\vVmMmapBytes\x12$\n" +
+	"\rVmMunmapBytes\x189 \x01(\x04R\rVmMunmapBytes\x12&\n" +
+	"\x0eVmBrkGrowBytes\x18: \x01(\x04R\x0eVmBrkGrowBytes\x12*\n" +
+	"\x10VmBrkShrinkBytes\x18; \x01(\x04R\x10VmBrkShrinkBytes\x12\"\n" +
+	"\fBytesWritten\x18< \x01(\x04R\fBytesWritten\x12\x1c\n" +
+	"\tBytesRead\x18= \x01(\x04R\tBytesRead\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x188 \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x189 \x01(\tR\amessage2A\n" +
+	"\x06status\x18? \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x18@ \x01(\tR\amessage2A\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"

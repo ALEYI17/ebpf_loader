@@ -178,7 +178,7 @@ int tp_enter_mmap(struct trace_event_raw_sys_enter *ctx){
   return 0;
 }
 
-SEC("tracepoint/syscall/sys_enter_mmap")
+SEC("tracepoint/syscall/sys_exit_mmap")
 int tp_exit_mmap(struct trace_event_raw_sys_exit *ctx){
 
   u32 pid = bpf_get_current_pid_tgid() >>32;

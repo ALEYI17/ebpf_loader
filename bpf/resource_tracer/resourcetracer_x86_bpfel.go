@@ -13,25 +13,31 @@ import (
 )
 
 type ResourcetracerResourceEventT struct {
-	Pid             uint32
-	Uid             uint32
-	Gid             uint32
-	_               [4]byte
-	CgroupId        uint64
-	Ppid            uint32
-	CgroupName      [150]uint8
-	_               [2]byte
-	UserPid         uint32
-	UserPpid        uint32
-	Comm            [150]uint8
-	_               [6]byte
-	TimestampNs     uint64
-	Latency         uint64
-	TimestampNsExit uint64
-	CpuNs           uint64
-	UserFaults      uint64
-	KernelFaults    uint64
-	LastSeenNs      uint64
+	Pid              uint32
+	Uid              uint32
+	Gid              uint32
+	_                [4]byte
+	CgroupId         uint64
+	Ppid             uint32
+	CgroupName       [150]uint8
+	_                [2]byte
+	UserPid          uint32
+	UserPpid         uint32
+	Comm             [150]uint8
+	_                [6]byte
+	TimestampNs      uint64
+	Latency          uint64
+	TimestampNsExit  uint64
+	CpuNs            uint64
+	UserFaults       uint64
+	KernelFaults     uint64
+	VmMmapBytes      uint64
+	VmMunmapBytes    uint64
+	VmBrkGrowBytes   uint64
+	VmBrkShrinkBytes uint64
+	BytesWritten     uint64
+	BytesRead        uint64
+	LastSeenNs       uint64
 }
 
 // LoadResourcetracer returns the embedded CollectionSpec for Resourcetracer.
@@ -79,14 +85,24 @@ type ResourcetracerProgramSpecs struct {
 	HandleFinishTaskSwitch *ebpf.ProgramSpec `ebpf:"handle_finish_task_switch"`
 	HandlePageFaultKernel  *ebpf.ProgramSpec `ebpf:"handle_page_fault_kernel"`
 	HandlePageFaultUser    *ebpf.ProgramSpec `ebpf:"handle_page_fault_user"`
+	TpEnterMmap            *ebpf.ProgramSpec `ebpf:"tp_enter_mmap"`
+	TpEnterMunmap          *ebpf.ProgramSpec `ebpf:"tp_enter_munmap"`
+	TpExitBrk              *ebpf.ProgramSpec `ebpf:"tp_exit_brk"`
+	TpExitMmap             *ebpf.ProgramSpec `ebpf:"tp_exit_mmap"`
+	TpExitMunmap           *ebpf.ProgramSpec `ebpf:"tp_exit_munmap"`
+	TraceExitRead          *ebpf.ProgramSpec `ebpf:"trace_exit_read"`
+	TraceExitWrite         *ebpf.ProgramSpec `ebpf:"trace_exit_write"`
 }
 
 // ResourcetracerMapSpecs contains maps before they are loaded into the kernel.
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type ResourcetracerMapSpecs struct {
-	ResourceTable *ebpf.MapSpec `ebpf:"resource_table"`
-	RunStartNs    *ebpf.MapSpec `ebpf:"run_start_ns"`
+	LastBrkEnd       *ebpf.MapSpec `ebpf:"last_brk_end"`
+	PendingMmapLen   *ebpf.MapSpec `ebpf:"pending_mmap_len"`
+	PendingMunmapLen *ebpf.MapSpec `ebpf:"pending_munmap_len"`
+	ResourceTable    *ebpf.MapSpec `ebpf:"resource_table"`
+	RunStartNs       *ebpf.MapSpec `ebpf:"run_start_ns"`
 }
 
 // ResourcetracerVariableSpecs contains global variables before they are loaded into the kernel.
@@ -116,12 +132,18 @@ func (o *ResourcetracerObjects) Close() error {
 //
 // It can be passed to LoadResourcetracerObjects or ebpf.CollectionSpec.LoadAndAssign.
 type ResourcetracerMaps struct {
-	ResourceTable *ebpf.Map `ebpf:"resource_table"`
-	RunStartNs    *ebpf.Map `ebpf:"run_start_ns"`
+	LastBrkEnd       *ebpf.Map `ebpf:"last_brk_end"`
+	PendingMmapLen   *ebpf.Map `ebpf:"pending_mmap_len"`
+	PendingMunmapLen *ebpf.Map `ebpf:"pending_munmap_len"`
+	ResourceTable    *ebpf.Map `ebpf:"resource_table"`
+	RunStartNs       *ebpf.Map `ebpf:"run_start_ns"`
 }
 
 func (m *ResourcetracerMaps) Close() error {
 	return _ResourcetracerClose(
+		m.LastBrkEnd,
+		m.PendingMmapLen,
+		m.PendingMunmapLen,
 		m.ResourceTable,
 		m.RunStartNs,
 	)
@@ -141,6 +163,13 @@ type ResourcetracerPrograms struct {
 	HandleFinishTaskSwitch *ebpf.Program `ebpf:"handle_finish_task_switch"`
 	HandlePageFaultKernel  *ebpf.Program `ebpf:"handle_page_fault_kernel"`
 	HandlePageFaultUser    *ebpf.Program `ebpf:"handle_page_fault_user"`
+	TpEnterMmap            *ebpf.Program `ebpf:"tp_enter_mmap"`
+	TpEnterMunmap          *ebpf.Program `ebpf:"tp_enter_munmap"`
+	TpExitBrk              *ebpf.Program `ebpf:"tp_exit_brk"`
+	TpExitMmap             *ebpf.Program `ebpf:"tp_exit_mmap"`
+	TpExitMunmap           *ebpf.Program `ebpf:"tp_exit_munmap"`
+	TraceExitRead          *ebpf.Program `ebpf:"trace_exit_read"`
+	TraceExitWrite         *ebpf.Program `ebpf:"trace_exit_write"`
 }
 
 func (p *ResourcetracerPrograms) Close() error {
@@ -148,6 +177,13 @@ func (p *ResourcetracerPrograms) Close() error {
 		p.HandleFinishTaskSwitch,
 		p.HandlePageFaultKernel,
 		p.HandlePageFaultUser,
+		p.TpEnterMmap,
+		p.TpEnterMunmap,
+		p.TpExitBrk,
+		p.TpExitMmap,
+		p.TpExitMunmap,
+		p.TraceExitRead,
+		p.TraceExitWrite,
 	)
 }
 
