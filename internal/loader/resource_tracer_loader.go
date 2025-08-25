@@ -109,7 +109,7 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
   go func (){
     defer close(c)
 
-    interval := 15 * time.Second
+    interval := 1 * time.Second
     
     ticker := time.NewTicker(interval)
     for {
@@ -133,9 +133,8 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
           case c <- event:
           }
 
-          var zero resourcetracer.ResourcetracerResourceEventT
-					if err := rt.resourceTable.Update(&key, &zero, ebpf.UpdateAny); err != nil {
-						logger.Error("failed to reset resource_table entry" , zap.Uint32("key", key), zap.Error(err))
+					if err := rt.resourceTable.Delete(&key); err != nil {
+						logger.Error("failed to delete resource_table entry" , zap.Uint32("key", key), zap.Error(err))
 					}
 
           if err := iter.Err(); err != nil {

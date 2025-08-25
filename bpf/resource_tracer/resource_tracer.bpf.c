@@ -69,18 +69,38 @@ static __always_inline struct resource_event_t *get_or_init_event(__u32 pid){
     return e;
 }
 
+static __always_inline struct resource_event_t *get_or_init_event_switch(__u32 pid, struct task_struct *p){
+    struct resource_event_t *e = bpf_map_lookup_elem(&resource_table, &pid);
+    if (!e) {
+        struct resource_event_t ne = {};
+        ne.pid = pid;
+        BPF_CORE_READ_STR_INTO(&ne.comm, p, comm);
+        bpf_map_update_elem(&resource_table, &pid, &ne, BPF_ANY);
+        e = bpf_map_lookup_elem(&resource_table, &pid);
+    }
+    return e;
+}
+
+
 SEC("kprobe/finish_task_switch")
 int BPF_KPROBE(handle_finish_task_switch, struct task_struct *prev){
 
   u64 now = bpf_ktime_get_ns();
 
+  struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+  if (!BPF_CORE_READ(task, mm)) {
+      // This is a kernel thread -> skip
+      return 0;
+  }
+
   if (prev){
     u32 prev_pid = task_tgid(prev);
+    if (!BPF_CORE_READ(prev, mm)) return 0;
 
     if (prev_pid > 0 ){
       struct resource_event_t *eventp;
 
-      eventp = bpf_map_lookup_elem(&resource_table,&prev_pid);
+      eventp = get_or_init_event_switch(prev_pid,prev);
       if(!eventp){
         struct resource_event_t new_event= {};
 
@@ -89,7 +109,7 @@ int BPF_KPROBE(handle_finish_task_switch, struct task_struct *prev){
         bpf_map_update_elem(&resource_table, &prev_pid, &new_event, BPF_ANY);
         eventp = bpf_map_lookup_elem(&resource_table, &prev_pid);
       }
-
+      
       if (eventp){
         eventp->timestamp_ns = now;
         eventp->last_seen_ns = now;
@@ -125,16 +145,8 @@ int handle_page_fault_user( struct trace_event_raw_sys_enter *ctx){
   if (pid == 0)
     return 0;
 
-  eventp = bpf_map_lookup_elem(&resource_table, &pid);
-
-  if(!eventp){
-    struct resource_event_t new_event = {};
-    new_event.pid = pid;
-    bpf_get_current_comm(&new_event.comm, sizeof(new_event.comm));
-    bpf_map_update_elem(&resource_table, &pid, &new_event, BPF_ANY);
-    eventp = bpf_map_lookup_elem(&resource_table, &pid);
-  }
-
+  eventp = get_or_init_event(pid);
+  
   if (eventp){
     __sync_fetch_and_add(&eventp->user_faults, 1);
     eventp->last_seen_ns = bpf_ktime_get_ns();
@@ -152,15 +164,7 @@ int handle_page_fault_kernel( struct trace_event_raw_sys_enter *ctx){
   if (pid == 0)
     return 0;
 
-  eventp = bpf_map_lookup_elem(&resource_table, &pid);
-
-  if(!eventp){
-    struct resource_event_t new_event = {};
-    new_event.pid = pid;
-    bpf_get_current_comm(&new_event.comm, sizeof(new_event.comm));
-    bpf_map_update_elem(&resource_table, &pid, &new_event, BPF_ANY);
-    eventp = bpf_map_lookup_elem(&resource_table, &pid);
-  }
+  eventp = get_or_init_event(pid);
 
   if (eventp){
     __sync_fetch_and_add(&eventp->kernel_faults, 1);
