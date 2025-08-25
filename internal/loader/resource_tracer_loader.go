@@ -109,7 +109,7 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
   go func (){
     defer close(c)
 
-    interval := 1 * time.Second
+    interval := 15 * time.Second
     
     ticker := time.NewTicker(interval)
     for {
