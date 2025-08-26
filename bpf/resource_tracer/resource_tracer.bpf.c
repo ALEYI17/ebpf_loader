@@ -62,7 +62,30 @@ static __always_inline struct resource_event_t *get_or_init_event(__u32 pid){
     if (!e) {
         struct resource_event_t ne = {};
         ne.pid = pid;
+
+        u64 uid_gid = bpf_get_current_uid_gid();
+        ne.uid = uid_gid >> 32;
+        ne.gid = uid_gid & 0xFFFFFFFF;
+        ne.cgroup_id = bpf_get_current_cgroup_id();
+        struct task_struct *task = (struct task_struct *)bpf_get_current_task();
+        ne.ppid = BPF_CORE_READ(task, real_parent, tgid);
+        const char *cname = BPF_CORE_READ(task, cgroups, subsys[ memory_cgrp_id], cgroup, kn, name);
+        bpf_core_read_str(ne.cgroup_name, sizeof(ne.cgroup_name), cname);
+
+        struct task_struct *parent_task = BPF_CORE_READ(task, real_parent);
+        struct nsproxy *namespaceproxy = BPF_CORE_READ(task, nsproxy);
+        struct pid_namespace *pid_ns_children = BPF_CORE_READ(namespaceproxy, pid_ns_for_children);
+        unsigned int level = BPF_CORE_READ(pid_ns_children, level);
+        ne.user_pid = BPF_CORE_READ(task, group_leader, thread_pid, numbers[level].nr);
+
+        struct nsproxy *parent_namespaceproxy = BPF_CORE_READ(parent_task, nsproxy);
+        struct pid_namespace *parent_pid_ns_children = BPF_CORE_READ(parent_namespaceproxy, pid_ns_for_children);
+        unsigned int parent_level = BPF_CORE_READ(parent_pid_ns_children, level);
+        ne.user_ppid = BPF_CORE_READ(parent_task, group_leader, thread_pid, numbers[parent_level].nr);
+
+
         bpf_get_current_comm(ne.comm, sizeof(ne.comm));
+
         bpf_map_update_elem(&resource_table, &pid, &ne, BPF_ANY);
         e = bpf_map_lookup_elem(&resource_table, &pid);
     }
@@ -75,6 +98,23 @@ static __always_inline struct resource_event_t *get_or_init_event_switch(__u32 p
         struct resource_event_t ne = {};
         ne.pid = pid;
         BPF_CORE_READ_STR_INTO(&ne.comm, p, comm);
+
+        ne.uid = BPF_CORE_READ(p, real_cred, uid.val);
+        ne.gid = BPF_CORE_READ(p, real_cred, gid.val);
+        
+        ne.ppid = BPF_CORE_READ(p, real_parent, tgid);
+        
+        ne.cgroup_id = BPF_CORE_READ(p, cgroups, dfl_cgrp, kn, id);
+        const char *cname = BPF_CORE_READ(p, cgroups, dfl_cgrp, kn, name);
+        bpf_core_read_str(ne.cgroup_name, sizeof(ne.cgroup_name), cname);
+
+        struct task_struct *parent_task = BPF_CORE_READ(p, real_parent);
+        struct nsproxy *namespaceproxy = BPF_CORE_READ(p, nsproxy);
+        struct pid_namespace *pid_ns_children = BPF_CORE_READ(namespaceproxy, pid_ns_for_children);
+        unsigned int level = BPF_CORE_READ(pid_ns_children, level);
+        ne.user_pid = BPF_CORE_READ(p, group_leader, thread_pid, numbers[level].nr);
+
+
         bpf_map_update_elem(&resource_table, &pid, &ne, BPF_ANY);
         e = bpf_map_lookup_elem(&resource_table, &pid);
     }
@@ -111,7 +151,6 @@ int BPF_KPROBE(handle_finish_task_switch, struct task_struct *prev){
       }
       
       if (eventp){
-        eventp->timestamp_ns = now;
         eventp->last_seen_ns = now;
 
         u64 *startp = bpf_map_lookup_elem(&run_start_ns, &prev_pid);

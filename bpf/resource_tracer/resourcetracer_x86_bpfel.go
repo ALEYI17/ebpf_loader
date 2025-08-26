@@ -25,9 +25,6 @@ type ResourcetracerResourceEventT struct {
 	UserPpid         uint32
 	Comm             [150]uint8
 	_                [6]byte
-	TimestampNs      uint64
-	Latency          uint64
-	TimestampNsExit  uint64
 	CpuNs            uint64
 	UserFaults       uint64
 	KernelFaults     uint64

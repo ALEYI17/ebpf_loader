@@ -147,9 +147,6 @@ struct resource_event_t{
     u32 user_pid;
     u32 user_ppid;
     u8 comm[TASK_COMM_SIZE];
-    u64 timestamp_ns;
-    u64 latency;
-    u64 timestamp_ns_exit;
     u64 cpu_ns;
     u64 user_faults;
     u64 kernel_faults;
