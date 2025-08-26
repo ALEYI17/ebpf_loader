@@ -127,50 +127,50 @@ int BPF_KPROBE(handle_finish_task_switch, struct task_struct *prev){
 
   u64 now = bpf_ktime_get_ns();
 
-  struct task_struct *task = (struct task_struct *)bpf_get_current_task();
-  if (!BPF_CORE_READ(task, mm)) {
-      // This is a kernel thread -> skip
-      return 0;
-  }
-
   if (prev){
+    if (BPF_CORE_READ(prev, mm)){
     u32 prev_pid = task_tgid(prev);
-    if (!BPF_CORE_READ(prev, mm)) return 0;
 
-    if (prev_pid > 0 ){
-      struct resource_event_t *eventp;
+      if (prev_pid > 0 ){
+        struct resource_event_t *eventp;
 
-      eventp = get_or_init_event_switch(prev_pid,prev);
-      if(!eventp){
-        struct resource_event_t new_event= {};
+        eventp = get_or_init_event_switch(prev_pid,prev);
+        if(!eventp){
+          struct resource_event_t new_event= {};
 
-        new_event.pid = prev_pid;
-        bpf_core_read_str(new_event.comm, sizeof(new_event.comm), &prev->comm);
-        bpf_map_update_elem(&resource_table, &prev_pid, &new_event, BPF_ANY);
-        eventp = bpf_map_lookup_elem(&resource_table, &prev_pid);
-      }
-      
-      if (eventp){
-        eventp->last_seen_ns = now;
-
-        u64 *startp = bpf_map_lookup_elem(&run_start_ns, &prev_pid);
-        if(startp){
-          u64 delta = now - *startp;
-          eventp->cpu_ns += delta;
-          bpf_map_delete_elem(&run_start_ns, &prev_pid);
+          new_event.pid = prev_pid;
+          bpf_core_read_str(new_event.comm, sizeof(new_event.comm), &prev->comm);
+          bpf_map_update_elem(&resource_table, &prev_pid, &new_event, BPF_ANY);
+          eventp = bpf_map_lookup_elem(&resource_table, &prev_pid);
         }
+        
+        if (eventp){
+          eventp->last_seen_ns = now;
+
+          u64 *startp = bpf_map_lookup_elem(&run_start_ns, &prev_pid);
+          if(startp){
+            u64 delta = now - *startp;
+             __sync_fetch_and_add(&eventp->cpu_ns, delta);
+            bpf_map_delete_elem(&run_start_ns, &prev_pid);
+          }
+        }
+        
       }
-      
+
     }
   }
 
-  u64 pid_tgid = bpf_get_current_pid_tgid();
-  u32 cur_pid = pid_tgid >> 32;
+  struct task_struct *curr = (struct task_struct *)bpf_get_current_task();
+  if (curr && BPF_CORE_READ(curr, mm)){
+    u64 pid_tgid = bpf_get_current_pid_tgid();
+    u32 cur_pid = pid_tgid >> 32;
 
-  if (cur_pid > 0) {
-        bpf_map_update_elem(&run_start_ns, &cur_pid, &now, BPF_ANY);
+    if (cur_pid > 0) {
+      bpf_map_update_elem(&run_start_ns, &cur_pid, &now, BPF_ANY);
+    }
+
   }
-
+  
   return 0;
 }
 

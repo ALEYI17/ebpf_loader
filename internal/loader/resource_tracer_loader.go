@@ -109,7 +109,7 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
   go func (){
     defer close(c)
 
-    interval := 1 * time.Second
+    interval := 10 * time.Second
     
     ticker := time.NewTicker(interval)
     for {
@@ -133,7 +133,17 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
           case c <- event:
           }
 
-					if err := rt.resourceTable.Delete(&key); err != nil {
+          value.CpuNs = 0
+          value.UserFaults = 0
+          value.KernelFaults = 0 
+          value.VmMmapBytes = 0
+          value.VmMunmapBytes = 0
+          value.VmBrkGrowBytes = 0 
+          value.VmBrkShrinkBytes = 0
+          value.BytesRead = 0
+          value.BytesWritten =0 
+
+					if err := rt.resourceTable.Update(&key,&value,ebpf.UpdateAny); err != nil {
 						logger.Error("failed to delete resource_table entry" , zap.Uint32("key", key), zap.Error(err))
 					}
 
