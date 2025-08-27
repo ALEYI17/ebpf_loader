@@ -31,7 +31,7 @@ message EbpfEvent {
     PtraceEvent ptrace = 39;
     MmapEvent mmap = 47;
     MountEvent mount = 53;
-    ResourceEvent resource = 62;
+    ResourceEvent resource = 63;
   }
 }
 
@@ -89,11 +89,12 @@ message ResourceEvent{
   uint64 VmBrkShrinkBytes = 59;
   uint64 BytesWritten = 60;
   uint64 BytesRead =61;
+  uint32  isActive = 62;
 }
 
 message CollectorAck {
-  string status = 63;
-  string message = 64;
+  string status = 64;
+  string message = 65;
 }
 
 service EventCollector {

@@ -82,6 +82,7 @@ type ResourcetracerProgramSpecs struct {
 	HandleFinishTaskSwitch *ebpf.ProgramSpec `ebpf:"handle_finish_task_switch"`
 	HandlePageFaultKernel  *ebpf.ProgramSpec `ebpf:"handle_page_fault_kernel"`
 	HandlePageFaultUser    *ebpf.ProgramSpec `ebpf:"handle_page_fault_user"`
+	HandleSchedProcessExit *ebpf.ProgramSpec `ebpf:"handle_sched_process_exit"`
 	TpEnterMmap            *ebpf.ProgramSpec `ebpf:"tp_enter_mmap"`
 	TpEnterMunmap          *ebpf.ProgramSpec `ebpf:"tp_enter_munmap"`
 	TpExitBrk              *ebpf.ProgramSpec `ebpf:"tp_exit_brk"`
@@ -160,6 +161,7 @@ type ResourcetracerPrograms struct {
 	HandleFinishTaskSwitch *ebpf.Program `ebpf:"handle_finish_task_switch"`
 	HandlePageFaultKernel  *ebpf.Program `ebpf:"handle_page_fault_kernel"`
 	HandlePageFaultUser    *ebpf.Program `ebpf:"handle_page_fault_user"`
+	HandleSchedProcessExit *ebpf.Program `ebpf:"handle_sched_process_exit"`
 	TpEnterMmap            *ebpf.Program `ebpf:"tp_enter_mmap"`
 	TpEnterMunmap          *ebpf.Program `ebpf:"tp_enter_munmap"`
 	TpExitBrk              *ebpf.Program `ebpf:"tp_exit_brk"`
@@ -174,6 +176,7 @@ func (p *ResourcetracerPrograms) Close() error {
 		p.HandleFinishTaskSwitch,
 		p.HandlePageFaultKernel,
 		p.HandlePageFaultUser,
+		p.HandleSchedProcessExit,
 		p.TpEnterMmap,
 		p.TpEnterMunmap,
 		p.TpExitBrk,

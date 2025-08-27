@@ -304,7 +304,7 @@ type EbpfEvent_Mount struct {
 }
 
 type EbpfEvent_Resource struct {
-	Resource *ResourceEvent `protobuf:"bytes,62,opt,name=resource,proto3,oneof"`
+	Resource *ResourceEvent `protobuf:"bytes,63,opt,name=resource,proto3,oneof"`
 }
 
 func (*EbpfEvent_Snoop) isEbpfEvent_Payload() {}
@@ -742,6 +742,7 @@ type ResourceEvent struct {
 	VmBrkShrinkBytes uint64                 `protobuf:"varint,59,opt,name=VmBrkShrinkBytes,proto3" json:"VmBrkShrinkBytes,omitempty"`
 	BytesWritten     uint64                 `protobuf:"varint,60,opt,name=BytesWritten,proto3" json:"BytesWritten,omitempty"`
 	BytesRead        uint64                 `protobuf:"varint,61,opt,name=BytesRead,proto3" json:"BytesRead,omitempty"`
+	IsActive         uint32                 `protobuf:"varint,62,opt,name=isActive,proto3" json:"isActive,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -839,10 +840,17 @@ func (x *ResourceEvent) GetBytesRead() uint64 {
 	return 0
 }
 
+func (x *ResourceEvent) GetIsActive() uint32 {
+	if x != nil {
+		return x.IsActive
+	}
+	return 0
+}
+
 type CollectorAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        string                 `protobuf:"bytes,63,opt,name=status,proto3" json:"status,omitempty"`
-	Message       string                 `protobuf:"bytes,64,opt,name=message,proto3" json:"message,omitempty"`
+	Status        string                 `protobuf:"bytes,64,opt,name=status,proto3" json:"status,omitempty"`
+	Message       string                 `protobuf:"bytes,65,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -925,7 +933,7 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x06ptrace\x18' \x01(\v2\x0f.pb.PtraceEventH\x00R\x06ptrace\x12#\n" +
 	"\x04mmap\x18/ \x01(\v2\r.pb.MmapEventH\x00R\x04mmap\x12&\n" +
 	"\x05mount\x185 \x01(\v2\x0e.pb.MountEventH\x00R\x05mount\x12/\n" +
-	"\bresource\x18> \x01(\v2\x11.pb.ResourceEventH\x00R\bresource\x1aF\n" +
+	"\bresource\x18? \x01(\v2\x11.pb.ResourceEventH\x00R\bresource\x1aF\n" +
 	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\t\n" +
@@ -970,7 +978,7 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x04type\x182 \x01(\tR\x04type\x12\x14\n" +
 	"\x05flags\x183 \x01(\x04R\x05flags\x12\x1f\n" +
 	"\vreturn_code\x184 \x01(\x03R\n" +
-	"returnCode\"\xc7\x02\n" +
+	"returnCode\"\xe3\x02\n" +
 	"\rResourceEvent\x12\x14\n" +
 	"\x05CpuNs\x185 \x01(\x04R\x05CpuNs\x12\x1e\n" +
 	"\n" +
@@ -982,10 +990,11 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x0eVmBrkGrowBytes\x18: \x01(\x04R\x0eVmBrkGrowBytes\x12*\n" +
 	"\x10VmBrkShrinkBytes\x18; \x01(\x04R\x10VmBrkShrinkBytes\x12\"\n" +
 	"\fBytesWritten\x18< \x01(\x04R\fBytesWritten\x12\x1c\n" +
-	"\tBytesRead\x18= \x01(\x04R\tBytesRead\"@\n" +
+	"\tBytesRead\x18= \x01(\x04R\tBytesRead\x12\x1a\n" +
+	"\bisActive\x18> \x01(\rR\bisActive\"@\n" +
 	"\fCollectorAck\x12\x16\n" +
-	"\x06status\x18? \x01(\tR\x06status\x12\x18\n" +
-	"\amessage\x18@ \x01(\tR\amessage2A\n" +
+	"\x06status\x18@ \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x18A \x01(\tR\amessage2A\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01B!Z\x1febpf_loader/internal/grpc/pb;pbb\x06proto3"

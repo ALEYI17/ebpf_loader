@@ -11,24 +11,15 @@ import (
 
 func GenerateGrpcMessage(raw ResourcetracerResourceEventT, nodeName string) *pb.EbpfEvent{
 
-  // fmt.Printf(
-  //       "comm: %s, pid: %d, cpu_ns: %d, user_faults: %d, kernel_faults: %d, "+
-  //           "vm_mmap_bytes: %d, vm_munmap_bytes: %d, vm_brk_grow_bytes: %d, "+
-  //           "vm_brk_shrink_bytes: %d, bytes_written: %d, bytes_read: %d, last_seen_ns: %d\n",
-  //       unix.ByteSliceToString(raw.Comm[:]),
-  //       raw.Pid,
-  //       raw.CpuNs,
-  //       raw.UserFaults,
-  //       raw.KernelFaults,
-  //       raw.VmMmapBytes,
-  //       raw.VmMunmapBytes,
-  //       raw.VmBrkGrowBytes,
-  //       raw.VmBrkShrinkBytes,
-  //       raw.BytesWritten,
-  //       raw.BytesRead,
-  //       raw.LastSeenNs,
-  //   )
+  var isActive uint32
 
+  if raw.CpuNs > 0 || raw.UserFaults > 0|| raw.KernelFaults > 0 ||
+      raw.VmMmapBytes > 0 || raw.VmMunmapBytes > 0 || raw.VmBrkGrowBytes >0 ||
+      raw.VmBrkShrinkBytes > 0 || raw.BytesRead > 0 || raw.BytesWritten > 0 {
+    isActive = 1
+  }else{
+    isActive = 0
+  }
   return &pb.EbpfEvent{
     Pid:             raw.Pid,
 		Uid:             raw.Uid,
@@ -53,6 +44,7 @@ func GenerateGrpcMessage(raw ResourcetracerResourceEventT, nodeName string) *pb.
           VmBrkShrinkBytes: raw.VmBrkShrinkBytes,
           BytesWritten:     raw.BytesWritten,
           BytesRead:        raw.BytesRead,
+          IsActive: isActive,
       },
     },
   }
