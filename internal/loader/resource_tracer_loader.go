@@ -64,6 +64,9 @@ func NewResourceTrtacerLoader() (*ResourceTracerLoader,error){
       "page_fault_kernel": objs.HandlePageFaultKernel,
       "page_fault_user": objs.HandlePageFaultUser,
 		},
+    "sched": {
+      "sched_process_exit": objs.HandleSchedProcessExit,
+    },
 	}
 
   for category, events := range tracepoints{

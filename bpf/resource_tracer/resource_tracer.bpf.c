@@ -324,3 +324,11 @@ int trace_exit_write(struct trace_event_raw_sys_exit *ctx) {
     }
     return 0;
 }
+
+SEC("tracepoint/sched/sched_process_exit")
+int handle_sched_process_exit(struct trace_event_raw_sched_process_template *ctx){
+  u32 pid = bpf_get_current_pid_tgid() >> 32; 
+  bpf_map_delete_elem(&resource_table, &pid);
+  return 0;
+}
+
