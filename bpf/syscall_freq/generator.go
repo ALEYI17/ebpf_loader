@@ -2,7 +2,7 @@ package syscallfreq
 
 import (
 	"ebpf_loader/internal/grpc/pb"
-	"fmt"
+	//"fmt"
 	"time"
 )
 
@@ -10,7 +10,7 @@ import (
 
 func GenerateGrpcMessage(raw SysFreqtracerSyscallKey,count uint64, nodeName string) *pb.EbpfEvent{
 
-  fmt.Printf("pid: %d , sys_nr: %d , count: %d", raw.Pid,raw.SyscallNr,count)
+  //fmt.Printf("pid: %d , sys_nr: %d , count: %d", raw.Pid,raw.SyscallNr,count)
 
   return &pb.EbpfEvent{
     Pid: raw.Pid,
