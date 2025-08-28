@@ -29,6 +29,8 @@ func NewEbpfLoader(program string) (programs.Load_tracer,error){
     return NewUmountTracerLoader()
   case programs.LoadResource:
     return NewResourceTrtacerLoader()
+  case programs.LoadSyscallFreq:
+    return NewSyscallFreqTracerLoader()
   default:
     return nil,errors.New("Unsuported or unknow program")
   }

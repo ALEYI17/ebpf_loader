@@ -37,7 +37,7 @@ func NewSyscallFreqTracerLoader() (*SyscallFreqTracerLoader,error){
     freqTable: objs.SyscountMap,
   }
 
-  tc,err := link.Tracepoint("raw_syscall", "sys_enter", objs.TraceSysEnter, nil)
+  tc,err := link.Tracepoint("raw_syscalls", "sys_enter", objs.TraceSysEnter, nil)
 
   if err!=nil{
     sft.Close()
@@ -69,7 +69,7 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
   go func() {
 
     defer close(c)
-    interval := 10 * time.Second
+    interval := 2 * time.Second
     ticker := time.NewTicker(interval)
     defer ticker.Stop()
 

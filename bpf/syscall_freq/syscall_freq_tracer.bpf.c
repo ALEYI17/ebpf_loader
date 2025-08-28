@@ -18,7 +18,7 @@ struct {
 const struct syscall_key *unused __attribute__((unused));
 
 
-SEC("tracepoint/syscalls/sys_enter_ptrace")
+SEC("tracepoint/raw_syscalls/sys_enter")
 int trace_sys_enter(struct trace_event_raw_sys_enter *ctx){
 
   struct syscall_key key = {};
