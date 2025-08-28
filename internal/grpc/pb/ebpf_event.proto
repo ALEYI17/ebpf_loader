@@ -31,7 +31,8 @@ message EbpfEvent {
     PtraceEvent ptrace = 39;
     MmapEvent mmap = 47;
     MountEvent mount = 53;
-    ResourceEvent resource = 63;
+    ResourceEvent resource = 64;
+    SysFreqEvent sys_freq = 67;
   }
 }
 
@@ -80,21 +81,26 @@ message MountEvent{
 }
 
 message ResourceEvent{
-  uint64 CpuNs = 53;
-  uint64 UserFaults = 54;
-  uint64 KernelFaults =55;
-  uint64 VmMmapBytes = 56;
-  uint64 VmMunmapBytes =57;
-  uint64 VmBrkGrowBytes = 58;
-  uint64 VmBrkShrinkBytes = 59;
-  uint64 BytesWritten = 60;
-  uint64 BytesRead =61;
-  uint32  isActive = 62;
+  uint64 CpuNs = 54;
+  uint64 UserFaults = 55;
+  uint64 KernelFaults =56;
+  uint64 VmMmapBytes = 57;
+  uint64 VmMunmapBytes =58;
+  uint64 VmBrkGrowBytes = 59;
+  uint64 VmBrkShrinkBytes = 60;
+  uint64 BytesWritten = 61;
+  uint64 BytesRead =62;
+  uint32  isActive = 63;
+}
+
+message SysFreqEvent{
+  uint32 syscall_id = 65;
+  uint64 count = 66;
 }
 
 message CollectorAck {
-  string status = 64;
-  string message = 65;
+  string status = 68;
+  string message = 69;
 }
 
 service EventCollector {

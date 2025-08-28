@@ -21,5 +21,6 @@ const (
   LoaderMount = "mount"
   LoadUmount = "umount"
   LoadResource = "resource"
+  LoadSyscallFreq = "syscallFreq"
 )
 
