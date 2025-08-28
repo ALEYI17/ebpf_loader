@@ -159,5 +159,12 @@ struct resource_event_t{
     u64 last_seen_ns;
 };
 
+struct syscall_key {
+    __u32 pid;         // tgid (process id)
+    __u32 syscall_nr;  // syscall number
+};
+
+
+
 #endif /* __EVENTS_H__ */
 
