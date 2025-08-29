@@ -17,7 +17,9 @@ import (
 type SyscallFreqTracerLoader struct{
   Objs *syscallfreq.SysFreqtracerObjects
   Tc link.Link
+  Tcexit link.Link
   freqTable *ebpf.Map
+  metadataTable *ebpf.Map
 }
 
 func NewSyscallFreqTracerLoader() (*SyscallFreqTracerLoader,error){
@@ -35,6 +37,7 @@ func NewSyscallFreqTracerLoader() (*SyscallFreqTracerLoader,error){
   sft := &SyscallFreqTracerLoader{
     Objs: &objs,
     freqTable: objs.SyscountMap,
+    metadataTable: objs.MetaCache,
   }
 
   tc,err := link.Tracepoint("raw_syscalls", "sys_enter", objs.TraceSysEnter, nil)
@@ -43,8 +46,15 @@ func NewSyscallFreqTracerLoader() (*SyscallFreqTracerLoader,error){
     sft.Close()
     return nil, err
   }
-
   sft.Tc = tc
+
+  tce,err := link.Tracepoint("sched", "sched_process_exit", objs.HandleSchedProcessExit, nil)
+  if err !=nil{
+    sft.Close()
+    return nil,err
+  }
+  sft.Tcexit = tce
+
   return sft,nil
 
 }
@@ -53,6 +63,10 @@ func (sft *SyscallFreqTracerLoader) Close(){
   if sft.Tc != nil {
 		sft.Tc.Close()
 	}
+
+  if sft.Tcexit !=nil{
+    sft.Tcexit.Close()
+  }
 
 	if sft.Objs != nil {
 		sft.Objs.Close()
@@ -85,7 +99,18 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
         var value uint64
 
         for iter.Next(&key, &value){
-          event := syscallfreq.GenerateGrpcMessage(key, value, nodeName)
+          var meta syscallfreq.SysFreqtracerProcessMetadataT
+          err :=sft.metadataTable.Lookup(&key.Pid, &meta)
+          if err !=nil{
+            if err := sft.freqTable.Delete(&key);err !=nil{
+              logger.Warn("failed to delete stale syscount_map entry",
+                zap.Uint32("pid", key.Pid),
+                zap.Uint32("syscall", key.SyscallNr),
+                zap.Error(err))
+            }
+            continue
+          }
+          event := syscallfreq.GenerateGrpcMessage(key, value, &meta,nodeName)
           metrics.EventsTotal.WithLabelValues("syscall_freq").Inc()
 
           select{
@@ -103,10 +128,11 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
                             zap.Error(err))
           }
 
-          if err := iter.Err(); err !=nil{
-            metrics.ErrorsTotal.WithLabelValues("syscall_freq", "decode").Inc()
-            logger.Error("failed to iterate syscall_freq table", zap.Error(err))
-          }
+        }
+        
+        if err := iter.Err(); err !=nil{
+          metrics.ErrorsTotal.WithLabelValues("syscall_freq", "decode").Inc()
+          logger.Error("failed to iterate syscall_freq table", zap.Error(err))
         }
       }
     }

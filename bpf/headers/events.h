@@ -164,7 +164,17 @@ struct syscall_key {
     __u32 syscall_nr;  // syscall number
 };
 
-
+struct process_metadata_t{
+  u32 pid;
+  u32 uid;
+  u32 gid;
+  u64 cgroup_id;
+  u32 ppid;
+  u8 cgroup_name[TASK_COMM_SIZE];
+  u32 user_pid;
+  u32 user_ppid;
+  u8 comm[TASK_COMM_SIZE];
+};
 
 #endif /* __EVENTS_H__ */
 

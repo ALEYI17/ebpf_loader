@@ -12,6 +12,21 @@ import (
 	"github.com/cilium/ebpf"
 )
 
+type SysFreqtracerProcessMetadataT struct {
+	Pid        uint32
+	Uid        uint32
+	Gid        uint32
+	_          [4]byte
+	CgroupId   uint64
+	Ppid       uint32
+	CgroupName [150]uint8
+	_          [2]byte
+	UserPid    uint32
+	UserPpid   uint32
+	Comm       [150]uint8
+	_          [6]byte
+}
+
 type SysFreqtracerSyscallKey struct {
 	Pid       uint32
 	SyscallNr uint32
@@ -59,13 +74,15 @@ type SysFreqtracerSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type SysFreqtracerProgramSpecs struct {
-	TraceSysEnter *ebpf.ProgramSpec `ebpf:"trace_sys_enter"`
+	HandleSchedProcessExit *ebpf.ProgramSpec `ebpf:"handle_sched_process_exit"`
+	TraceSysEnter          *ebpf.ProgramSpec `ebpf:"trace_sys_enter"`
 }
 
 // SysFreqtracerMapSpecs contains maps before they are loaded into the kernel.
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type SysFreqtracerMapSpecs struct {
+	MetaCache   *ebpf.MapSpec `ebpf:"meta_cache"`
 	SyscountMap *ebpf.MapSpec `ebpf:"syscount_map"`
 }
 
@@ -73,7 +90,8 @@ type SysFreqtracerMapSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type SysFreqtracerVariableSpecs struct {
-	Unused *ebpf.VariableSpec `ebpf:"unused"`
+	Unused  *ebpf.VariableSpec `ebpf:"unused"`
+	Unused2 *ebpf.VariableSpec `ebpf:"unused2"`
 }
 
 // SysFreqtracerObjects contains all objects after they have been loaded into the kernel.
@@ -96,11 +114,13 @@ func (o *SysFreqtracerObjects) Close() error {
 //
 // It can be passed to LoadSysFreqtracerObjects or ebpf.CollectionSpec.LoadAndAssign.
 type SysFreqtracerMaps struct {
+	MetaCache   *ebpf.Map `ebpf:"meta_cache"`
 	SyscountMap *ebpf.Map `ebpf:"syscount_map"`
 }
 
 func (m *SysFreqtracerMaps) Close() error {
 	return _SysFreqtracerClose(
+		m.MetaCache,
 		m.SyscountMap,
 	)
 }
@@ -109,18 +129,21 @@ func (m *SysFreqtracerMaps) Close() error {
 //
 // It can be passed to LoadSysFreqtracerObjects or ebpf.CollectionSpec.LoadAndAssign.
 type SysFreqtracerVariables struct {
-	Unused *ebpf.Variable `ebpf:"unused"`
+	Unused  *ebpf.Variable `ebpf:"unused"`
+	Unused2 *ebpf.Variable `ebpf:"unused2"`
 }
 
 // SysFreqtracerPrograms contains all programs after they have been loaded into the kernel.
 //
 // It can be passed to LoadSysFreqtracerObjects or ebpf.CollectionSpec.LoadAndAssign.
 type SysFreqtracerPrograms struct {
-	TraceSysEnter *ebpf.Program `ebpf:"trace_sys_enter"`
+	HandleSchedProcessExit *ebpf.Program `ebpf:"handle_sched_process_exit"`
+	TraceSysEnter          *ebpf.Program `ebpf:"trace_sys_enter"`
 }
 
 func (p *SysFreqtracerPrograms) Close() error {
 	return _SysFreqtracerClose(
+		p.HandleSchedProcessExit,
 		p.TraceSysEnter,
 	)
 }
