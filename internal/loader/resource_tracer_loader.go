@@ -26,7 +26,7 @@ func (rt *ResourceTracerLoader) add(l link.Link) {
 	}
 }
 
-func NewResourceTrtacerLoader() (*ResourceTracerLoader,error){
+func NewResourceTracerLoader() (*ResourceTracerLoader,error){
   
   if err := rlimit.RemoveMemlock(); err != nil {
 		return nil, err
@@ -103,10 +103,10 @@ func (rt *ResourceTracerLoader) Close(){
 }
 
 
-func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan *pb.EbpfEvent {
+func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan []*pb.EbpfEvent {
   
 
-  c := make(chan *pb.EbpfEvent)
+  c := make(chan []*pb.EbpfEvent)
   logger := logutil.GetLogger()
 
   go func (){
@@ -125,16 +125,11 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
         var key uint32
         var value resourcetracer.ResourcetracerResourceEventT
 
+        var batch []*pb.EbpfEvent
         for iter.Next(&key, &value){
           event := resourcetracer.GenerateGrpcMessage(value,nodeName)
           metrics.EventsTotal.WithLabelValues("resource").Inc()
-
-          select {
-          case <-ctx.Done():
-            logger.Info("Context cancelled while sending event...")
-            return
-          case c <- event:
-          }
+          batch = append(batch, event)
 
           value.CpuNs = 0
           value.UserFaults = 0
@@ -150,13 +145,22 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
 						logger.Error("failed to delete resource_table entry" , zap.Uint32("key", key), zap.Error(err))
 					}
 
-          if err := iter.Err(); err != nil {
+        }
+
+        if err := iter.Err(); err != nil {
             metrics.ErrorsTotal.WithLabelValues("resource","decode").Inc()
 					  logger.Error("failed to iterate resource_table", zap.Error(err))
-				  }
+				}
+
+        if len(batch)>0{
+          select{
+          case <-ctx.Done():
+            logger.Info("Context cancelled while sending batch...")
+            return
+          case c <- batch:
+          }
         }
-        
-        
+
       }
     }
 

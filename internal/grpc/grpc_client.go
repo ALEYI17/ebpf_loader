@@ -22,10 +22,12 @@ import (
 type Client struct {
 	conn   *grpc.ClientConn
 	client pb.EventCollectorClient
+  streamLoaders []programs.Load_tracer
+  batchLoaders []programs.Load_tracer_batch
   enricher enrichers.Enricher
 }
 
-func NewClient(address string, port string,enricher enrichers.Enricher) (*Client, error) {
+func NewClient(address string, port string,streamLoaders []programs.Load_tracer,batchLoaders []programs.Load_tracer_batch,enricher enrichers.Enricher) (*Client, error) {
   serverAdress := fmt.Sprintf("%s:%s", address,port)
 	conn, err := grpc.NewClient(serverAdress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -34,7 +36,12 @@ func NewClient(address string, port string,enricher enrichers.Enricher) (*Client
 
 	client := pb.NewEventCollectorClient(conn)
 
-	return &Client{conn: conn, client: client,enricher: enricher}, nil
+	return &Client{
+    conn: conn, 
+    client: client,
+    streamLoaders: streamLoaders,
+    batchLoaders: batchLoaders,
+    enricher: enricher}, nil
 }
 
 func (c *Client) Close() error {
@@ -71,7 +78,7 @@ func (c *Client) SendEventMessage(ctx context.Context, stream grpc.ClientStreami
 	return nil
 }
 
-func (c *Client) Run(ctx context.Context, loaders []programs.Load_tracer, nodeName string) error {
+func (c *Client) Run(ctx context.Context,  nodeName string) error {
   logger := logutil.GetLogger()
 
 	stream, err := c.client.SendEvents(ctx)
@@ -82,7 +89,7 @@ func (c *Client) Run(ctx context.Context, loaders []programs.Load_tracer, nodeNa
 
 	eventCh := make(chan *pb.EbpfEvent, 500)
 
-	for _, loader := range loaders {
+	for _, loader := range c.streamLoaders {
 
 		go func(l programs.Load_tracer) {
 			tracerChannel := l.Run(ctx, nodeName)

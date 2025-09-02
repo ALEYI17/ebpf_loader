@@ -103,6 +103,16 @@ message CollectorAck {
   string message = 69;
 }
 
+message ResourceBatch{
+  repeated EbpfEvent batch = 70;
+}
+message SysFreqBatch{
+  repeated EbpfEvent batch = 71;
+}
+
+
 service EventCollector {
   rpc SendEvents(stream EbpfEvent) returns (CollectorAck);
+  rpc SendResourceBatch(ResourceBatch) returns (CollectorAck);
+  rpc SendSysFreqBatch(SysFreqBatch) returns (CollectorAck);
 }

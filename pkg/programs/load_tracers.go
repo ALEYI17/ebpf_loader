@@ -10,6 +10,12 @@ type Load_tracer interface {
 	Run(context.Context, string) <-chan *pb.EbpfEvent
 }
 
+type Load_tracer_batch interface {
+	Close()
+	Run(context.Context, string) <-chan []*pb.EbpfEvent
+}
+
+
 const (
 	LoaderOpen     = "open"
 	Loaderexecve = "execve"

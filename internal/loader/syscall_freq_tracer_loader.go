@@ -75,9 +75,9 @@ func (sft *SyscallFreqTracerLoader) Close(){
 }
 
 
-func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-chan *pb.EbpfEvent{
+func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-chan []*pb.EbpfEvent{
 
-  c := make(chan *pb.EbpfEvent)
+  c := make(chan []*pb.EbpfEvent)
   logger := logutil.GetLogger()
 
   go func() {
@@ -98,6 +98,7 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
         var key syscallfreq.SysFreqtracerSyscallKey // struct { Pid uint32; SyscallNr uint32 }
         var value uint64
 
+        var batch []*pb.EbpfEvent
         for iter.Next(&key, &value){
           var meta syscallfreq.SysFreqtracerProcessMetadataT
           err :=sft.metadataTable.Lookup(&key.Pid, &meta)
@@ -112,13 +113,7 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
           }
           event := syscallfreq.GenerateGrpcMessage(key, value, &meta,nodeName)
           metrics.EventsTotal.WithLabelValues("syscall_freq").Inc()
-
-          select{
-          case <- ctx.Done():
-            logger.Info("Context cancelled while sending syscall freq event...")
-            return
-          case c <- event: 
-          }
+          batch = append(batch, event)
 
           zero := uint64(0)
           if err := sft.freqTable.Update(&key, &zero, ebpf.UpdateAny);err !=nil{
@@ -133,6 +128,15 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
         if err := iter.Err(); err !=nil{
           metrics.ErrorsTotal.WithLabelValues("syscall_freq", "decode").Inc()
           logger.Error("failed to iterate syscall_freq table", zap.Error(err))
+        }
+
+        if len(batch) >0{
+          select{
+          case <- ctx.Done():
+            logger.Info("Context cancelled while sending syscall freq batch...")
+            return
+          case c <- batch:
+          }
         }
       }
     }
