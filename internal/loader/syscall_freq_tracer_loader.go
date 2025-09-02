@@ -6,6 +6,7 @@ import (
 	"ebpf_loader/internal/grpc/pb"
 	"ebpf_loader/internal/metrics"
 	"ebpf_loader/pkg/logutil"
+	"ebpf_loader/pkg/programs"
 	"time"
 
 	"github.com/cilium/ebpf"
@@ -75,9 +76,9 @@ func (sft *SyscallFreqTracerLoader) Close(){
 }
 
 
-func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-chan []*pb.EbpfEvent{
+func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-chan *pb.Batch{
 
-  c := make(chan []*pb.EbpfEvent)
+  c := make(chan *pb.Batch)
   logger := logutil.GetLogger()
 
   go func() {
@@ -131,11 +132,15 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
         }
 
         if len(batch) >0{
+          batchMessage := &pb.Batch{
+            Batch: batch,
+            Type: programs.LoadSyscallFreq,
+          }
           select{
           case <- ctx.Done():
             logger.Info("Context cancelled while sending syscall freq batch...")
             return
-          case c <- batch:
+          case c <- batchMessage:
           }
         }
       }

@@ -78,6 +78,19 @@ func (c *Client) SendEventMessage(ctx context.Context, stream grpc.ClientStreami
 	return nil
 }
 
+func (c *Client) SendResourceBatch(ctx context.Context, batch *pb.Batch) (*pb.CollectorAck,error){
+  logger := logutil.GetLogger()
+  for _,e := range batch.Batch{
+    err := c.enricher.Enrich(ctx, e)
+    if err != nil{
+      logger.Warn("Failed to enrich event", zap.Error(err))
+    }
+
+  }
+  return c.client.SendBatch(ctx, batch, nil)
+  
+}
+
 func (c *Client) Run(ctx context.Context,  nodeName string) error {
   logger := logutil.GetLogger()
 
@@ -88,6 +101,7 @@ func (c *Client) Run(ctx context.Context,  nodeName string) error {
 	}
 
 	eventCh := make(chan *pb.EbpfEvent, 500)
+  eventChBatch := make(chan *pb.Batch, 500)
 
 	for _, loader := range c.streamLoaders {
 
@@ -103,6 +117,22 @@ func (c *Client) Run(ctx context.Context,  nodeName string) error {
 			}
 		}(loader)
 	}
+
+  for _, loader := range c.batchLoaders {
+
+		go func(l programs.Load_tracer_batch) {
+			tracerChannel := l.Run(ctx, nodeName)
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case event := <-tracerChannel:
+					eventChBatch <- event
+				}
+			}
+		}(loader)
+	}
+
 
 	for {
 		select {
@@ -132,6 +162,18 @@ func (c *Client) Run(ctx context.Context,  nodeName string) error {
         }
 			}
 			//logger.Info("Event sent successfully", zap.String("event", fmt.Sprintf("%v", event)))
+    case event := <-eventChBatch:
+      _,err:= c.SendResourceBatch(ctx, event)
+      if err !=nil{
+        logger.Error("Error from sending", zap.Error(err))
+        status,ok := status.FromError(err)
+        if ok && (status.Code()== codes.Unavailable || status.Code()== codes.Canceled){
+          logger.Warn("Server unavailable. Shutting down client.")
+          return err
+        }
+
+      }
+    
 		}
 	}
 

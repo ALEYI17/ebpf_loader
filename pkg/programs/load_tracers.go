@@ -12,7 +12,7 @@ type Load_tracer interface {
 
 type Load_tracer_batch interface {
 	Close()
-	Run(context.Context, string) <-chan []*pb.EbpfEvent
+	Run(context.Context, string) <-chan *pb.Batch
 }
 
 
