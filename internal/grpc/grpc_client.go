@@ -87,7 +87,7 @@ func (c *Client) SendResourceBatch(ctx context.Context, batch *pb.Batch) (*pb.Co
     }
 
   }
-  return c.client.SendBatch(ctx, batch, nil)
+  return c.client.SendBatch(ctx, batch)
   
 }
 
