@@ -10,6 +10,12 @@ type Load_tracer interface {
 	Run(context.Context, string) <-chan *pb.EbpfEvent
 }
 
+type Load_tracer_batch interface {
+	Close()
+	Run(context.Context, string) <-chan *pb.Batch
+}
+
+
 const (
 	LoaderOpen     = "open"
 	Loaderexecve = "execve"
@@ -20,5 +26,7 @@ const (
   LoaderMmap = "mmap"
   LoaderMount = "mount"
   LoadUmount = "umount"
+  LoadResource = "resource"
+  LoadSyscallFreq = "syscallFreq"
 )
 

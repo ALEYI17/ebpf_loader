@@ -32,3 +32,14 @@ func NewEbpfLoader(program string) (programs.Load_tracer,error){
   }
 
 }
+
+func NewEbpfBatchLoader(program string) (programs.Load_tracer_batch, error) {
+    switch program {
+    case programs.LoadResource:
+        return NewResourceTracerLoader()
+    case programs.LoadSyscallFreq:
+        return NewSyscallFreqTracerLoader()
+    default:
+        return nil, errors.New("Unsupported or unknown batch program")
+    }
+}

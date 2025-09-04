@@ -72,16 +72,43 @@ func main() {
 
 	
 
-	var loaders []programs.Load_tracer
+	var( 
+    loaders []programs.Load_tracer
+    batchLoaders []programs.Load_tracer_batch
+  )
 	for _, program := range conf.EnableProbes {
-    loaderInstance , err := loader.NewEbpfLoader(program)
-    if err != nil {
-      logger.Warn("Unsupported or unknown program", zap.String("program", program), zap.Error(err))
-      continue
+
+    switch program{
+      case programs.LoadResource:
+        if batchLoaderInstance, err := loader.NewEbpfBatchLoader(program);err==nil{
+          logger.Info("Loaded tracer:", zap.String("Loader", program))
+          defer batchLoaderInstance.Close()
+          batchLoaders =append(batchLoaders, batchLoaderInstance)
+          continue
+        }else{
+          logger.Error("error to load tracer", zap.String("program", program),zap.Error(err))
+        } 
+      case programs.LoadSyscallFreq:
+        if batchLoaderInstance, err := loader.NewEbpfBatchLoader(program);err==nil{
+          logger.Info("Loaded tracer:", zap.String("Loader", program))
+          defer batchLoaderInstance.Close()
+          batchLoaders =append(batchLoaders, batchLoaderInstance)
+          continue
+        }else{
+          logger.Error("error to load tracer", zap.String("program", program),zap.Error(err))
+        }
+      default:
+        if loaderInstance , err := loader.NewEbpfLoader(program); err == nil{
+          logger.Info("Loaded tracer:", zap.String("Loader", program))
+          defer loaderInstance.Close()
+          loaders = append(loaders, loaderInstance)
+          continue
+        }else{
+          logger.Error("error to load tracer", zap.String("program", program),zap.Error(err))
+        }
     }
+    
     logger.Info("Load successfully loader:", zap.String("Loader", program))
-    defer loaderInstance.Close()
-    loaders = append(loaders, loaderInstance)
   }
   
   logger.Info("Loader(s) created successfully")
@@ -100,7 +127,7 @@ func main() {
 
   enricher := enrichers.NewMultiEnricher(containerEnricher,userEnricher,dnsEnricher)
 
-  client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport,enricher)
+  client, err := grpc.NewClient(conf.ServerAdress,conf.Serverport,loaders,batchLoaders,enricher)
 	if err != nil {
     logger.Fatal("Error creating the client", zap.Error(err))
 	}
@@ -108,7 +135,7 @@ func main() {
   logger.Info(" gRPC Client created successfully")
 
   defer client.Close()
-	if err := client.Run(ctx, loaders, conf.Nodename); err != nil {
+	if err := client.Run(ctx , conf.Nodename); err != nil {
     logger.Error("Error running client", zap.Error(err))
     return
 	}

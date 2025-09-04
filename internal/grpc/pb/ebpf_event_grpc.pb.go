@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	EventCollector_SendEvents_FullMethodName = "/pb.EventCollector/SendEvents"
+	EventCollector_SendBatch_FullMethodName  = "/pb.EventCollector/SendBatch"
 )
 
 // EventCollectorClient is the client API for EventCollector service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EventCollectorClient interface {
 	SendEvents(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[EbpfEvent, CollectorAck], error)
+	SendBatch(ctx context.Context, in *Batch, opts ...grpc.CallOption) (*CollectorAck, error)
 }
 
 type eventCollectorClient struct {
@@ -50,11 +52,22 @@ func (c *eventCollectorClient) SendEvents(ctx context.Context, opts ...grpc.Call
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type EventCollector_SendEventsClient = grpc.ClientStreamingClient[EbpfEvent, CollectorAck]
 
+func (c *eventCollectorClient) SendBatch(ctx context.Context, in *Batch, opts ...grpc.CallOption) (*CollectorAck, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CollectorAck)
+	err := c.cc.Invoke(ctx, EventCollector_SendBatch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EventCollectorServer is the server API for EventCollector service.
 // All implementations must embed UnimplementedEventCollectorServer
 // for forward compatibility.
 type EventCollectorServer interface {
 	SendEvents(grpc.ClientStreamingServer[EbpfEvent, CollectorAck]) error
+	SendBatch(context.Context, *Batch) (*CollectorAck, error)
 	mustEmbedUnimplementedEventCollectorServer()
 }
 
@@ -67,6 +80,9 @@ type UnimplementedEventCollectorServer struct{}
 
 func (UnimplementedEventCollectorServer) SendEvents(grpc.ClientStreamingServer[EbpfEvent, CollectorAck]) error {
 	return status.Errorf(codes.Unimplemented, "method SendEvents not implemented")
+}
+func (UnimplementedEventCollectorServer) SendBatch(context.Context, *Batch) (*CollectorAck, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendBatch not implemented")
 }
 func (UnimplementedEventCollectorServer) mustEmbedUnimplementedEventCollectorServer() {}
 func (UnimplementedEventCollectorServer) testEmbeddedByValue()                        {}
@@ -96,13 +112,36 @@ func _EventCollector_SendEvents_Handler(srv interface{}, stream grpc.ServerStrea
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type EventCollector_SendEventsServer = grpc.ClientStreamingServer[EbpfEvent, CollectorAck]
 
+func _EventCollector_SendBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Batch)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventCollectorServer).SendBatch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EventCollector_SendBatch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventCollectorServer).SendBatch(ctx, req.(*Batch))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EventCollector_ServiceDesc is the grpc.ServiceDesc for EventCollector service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var EventCollector_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.EventCollector",
 	HandlerType: (*EventCollectorServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SendBatch",
+			Handler:    _EventCollector_SendBatch_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "SendEvents",
