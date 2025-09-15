@@ -749,15 +749,15 @@ func (x *MountEvent) GetReturnCode() int64 {
 
 type ResourceEvent struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
-	CpuNs            uint64                 `protobuf:"varint,54,opt,name=CpuNs,proto3" json:"CpuNs,omitempty"`
+	CpuNs            float64                `protobuf:"fixed64,54,opt,name=CpuNs,proto3" json:"CpuNs,omitempty"`
 	UserFaults       uint64                 `protobuf:"varint,55,opt,name=UserFaults,proto3" json:"UserFaults,omitempty"`
 	KernelFaults     uint64                 `protobuf:"varint,56,opt,name=KernelFaults,proto3" json:"KernelFaults,omitempty"`
-	VmMmapBytes      uint64                 `protobuf:"varint,57,opt,name=VmMmapBytes,proto3" json:"VmMmapBytes,omitempty"`
-	VmMunmapBytes    uint64                 `protobuf:"varint,58,opt,name=VmMunmapBytes,proto3" json:"VmMunmapBytes,omitempty"`
-	VmBrkGrowBytes   uint64                 `protobuf:"varint,59,opt,name=VmBrkGrowBytes,proto3" json:"VmBrkGrowBytes,omitempty"`
-	VmBrkShrinkBytes uint64                 `protobuf:"varint,60,opt,name=VmBrkShrinkBytes,proto3" json:"VmBrkShrinkBytes,omitempty"`
-	BytesWritten     uint64                 `protobuf:"varint,61,opt,name=BytesWritten,proto3" json:"BytesWritten,omitempty"`
-	BytesRead        uint64                 `protobuf:"varint,62,opt,name=BytesRead,proto3" json:"BytesRead,omitempty"`
+	VmMmapBytes      float64                `protobuf:"fixed64,57,opt,name=VmMmapBytes,proto3" json:"VmMmapBytes,omitempty"`
+	VmMunmapBytes    float64                `protobuf:"fixed64,58,opt,name=VmMunmapBytes,proto3" json:"VmMunmapBytes,omitempty"`
+	VmBrkGrowBytes   float64                `protobuf:"fixed64,59,opt,name=VmBrkGrowBytes,proto3" json:"VmBrkGrowBytes,omitempty"`
+	VmBrkShrinkBytes float64                `protobuf:"fixed64,60,opt,name=VmBrkShrinkBytes,proto3" json:"VmBrkShrinkBytes,omitempty"`
+	BytesWritten     float64                `protobuf:"fixed64,61,opt,name=BytesWritten,proto3" json:"BytesWritten,omitempty"`
+	BytesRead        float64                `protobuf:"fixed64,62,opt,name=BytesRead,proto3" json:"BytesRead,omitempty"`
 	IsActive         uint32                 `protobuf:"varint,63,opt,name=isActive,proto3" json:"isActive,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
@@ -793,7 +793,7 @@ func (*ResourceEvent) Descriptor() ([]byte, []int) {
 	return file_ebpf_event_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ResourceEvent) GetCpuNs() uint64 {
+func (x *ResourceEvent) GetCpuNs() float64 {
 	if x != nil {
 		return x.CpuNs
 	}
@@ -814,42 +814,42 @@ func (x *ResourceEvent) GetKernelFaults() uint64 {
 	return 0
 }
 
-func (x *ResourceEvent) GetVmMmapBytes() uint64 {
+func (x *ResourceEvent) GetVmMmapBytes() float64 {
 	if x != nil {
 		return x.VmMmapBytes
 	}
 	return 0
 }
 
-func (x *ResourceEvent) GetVmMunmapBytes() uint64 {
+func (x *ResourceEvent) GetVmMunmapBytes() float64 {
 	if x != nil {
 		return x.VmMunmapBytes
 	}
 	return 0
 }
 
-func (x *ResourceEvent) GetVmBrkGrowBytes() uint64 {
+func (x *ResourceEvent) GetVmBrkGrowBytes() float64 {
 	if x != nil {
 		return x.VmBrkGrowBytes
 	}
 	return 0
 }
 
-func (x *ResourceEvent) GetVmBrkShrinkBytes() uint64 {
+func (x *ResourceEvent) GetVmBrkShrinkBytes() float64 {
 	if x != nil {
 		return x.VmBrkShrinkBytes
 	}
 	return 0
 }
 
-func (x *ResourceEvent) GetBytesWritten() uint64 {
+func (x *ResourceEvent) GetBytesWritten() float64 {
 	if x != nil {
 		return x.BytesWritten
 	}
 	return 0
 }
 
-func (x *ResourceEvent) GetBytesRead() uint64 {
+func (x *ResourceEvent) GetBytesRead() float64 {
 	if x != nil {
 		return x.BytesRead
 	}
@@ -1101,17 +1101,17 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\vreturn_code\x184 \x01(\x03R\n" +
 	"returnCode\"\xe3\x02\n" +
 	"\rResourceEvent\x12\x14\n" +
-	"\x05CpuNs\x186 \x01(\x04R\x05CpuNs\x12\x1e\n" +
+	"\x05CpuNs\x186 \x01(\x01R\x05CpuNs\x12\x1e\n" +
 	"\n" +
 	"UserFaults\x187 \x01(\x04R\n" +
 	"UserFaults\x12\"\n" +
 	"\fKernelFaults\x188 \x01(\x04R\fKernelFaults\x12 \n" +
-	"\vVmMmapBytes\x189 \x01(\x04R\vVmMmapBytes\x12$\n" +
-	"\rVmMunmapBytes\x18: \x01(\x04R\rVmMunmapBytes\x12&\n" +
-	"\x0eVmBrkGrowBytes\x18; \x01(\x04R\x0eVmBrkGrowBytes\x12*\n" +
-	"\x10VmBrkShrinkBytes\x18< \x01(\x04R\x10VmBrkShrinkBytes\x12\"\n" +
-	"\fBytesWritten\x18= \x01(\x04R\fBytesWritten\x12\x1c\n" +
-	"\tBytesRead\x18> \x01(\x04R\tBytesRead\x12\x1a\n" +
+	"\vVmMmapBytes\x189 \x01(\x01R\vVmMmapBytes\x12$\n" +
+	"\rVmMunmapBytes\x18: \x01(\x01R\rVmMunmapBytes\x12&\n" +
+	"\x0eVmBrkGrowBytes\x18; \x01(\x01R\x0eVmBrkGrowBytes\x12*\n" +
+	"\x10VmBrkShrinkBytes\x18< \x01(\x01R\x10VmBrkShrinkBytes\x12\"\n" +
+	"\fBytesWritten\x18= \x01(\x01R\fBytesWritten\x12\x1c\n" +
+	"\tBytesRead\x18> \x01(\x01R\tBytesRead\x12\x1a\n" +
 	"\bisActive\x18? \x01(\rR\bisActive\"C\n" +
 	"\fSysFreqEvent\x12\x1d\n" +
 	"\n" +
