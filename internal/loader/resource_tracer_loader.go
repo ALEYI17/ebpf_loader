@@ -19,6 +19,7 @@ type ResourceTracerLoader struct{
   Objs *resourcetracer.ResourcetracerObjects
   links []link.Link
   resourceTable *ebpf.Map
+  interval int
 }
 
 func (rt *ResourceTracerLoader) add(l link.Link) {
@@ -42,6 +43,7 @@ func NewResourceTracerLoader() (*ResourceTracerLoader,error){
   rt := &ResourceTracerLoader{
     Objs: &objs,
     resourceTable: objs.ResourceTable,
+    interval: 10 ,
   }
 
   kp,err := link.Kprobe("finish_task_switch.isra.0",objs.HandleFinishTaskSwitch,nil )
@@ -113,7 +115,7 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
   go func (){
     defer close(c)
 
-    interval := 10 * time.Second
+    interval := time.Duration(rt.interval) * time.Second
     
     ticker := time.NewTicker(interval)
     for {
@@ -128,7 +130,7 @@ func (rt *ResourceTracerLoader) Run(ctx context.Context, nodeName string) <-chan
 
         var batch []*pb.EbpfEvent
         for iter.Next(&key, &value){
-          event := resourcetracer.GenerateGrpcMessage(value,nodeName)
+          event := resourcetracer.GenerateGrpcMessage(value,nodeName,rt.interval)
           metrics.EventsTotal.WithLabelValues("resource").Inc()
           batch = append(batch, event)
 

@@ -81,15 +81,15 @@ message MountEvent{
 }
 
 message ResourceEvent{
-  uint64 CpuNs = 54;
+  double CpuNs = 54;
   uint64 UserFaults = 55;
   uint64 KernelFaults =56;
-  uint64 VmMmapBytes = 57;
-  uint64 VmMunmapBytes =58;
-  uint64 VmBrkGrowBytes = 59;
-  uint64 VmBrkShrinkBytes = 60;
-  uint64 BytesWritten = 61;
-  uint64 BytesRead =62;
+  double VmMmapBytes = 57;
+  double VmMunmapBytes =58;
+  double VmBrkGrowBytes = 59;
+  double VmBrkShrinkBytes = 60;
+  double BytesWritten = 61;
+  double BytesRead =62;
   uint32  isActive = 63;
 }
 
