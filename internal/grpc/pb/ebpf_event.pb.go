@@ -51,6 +51,7 @@ type EbpfEvent struct {
 	//	*EbpfEvent_Mount
 	//	*EbpfEvent_Resource
 	//	*EbpfEvent_SysFreq
+	//	*EbpfEvent_SyscallFreqAgg
 	Payload       isEbpfEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -289,6 +290,15 @@ func (x *EbpfEvent) GetSysFreq() *SysFreqEvent {
 	return nil
 }
 
+func (x *EbpfEvent) GetSyscallFreqAgg() *SyscallFreqAgg {
+	if x != nil {
+		if x, ok := x.Payload.(*EbpfEvent_SyscallFreqAgg); ok {
+			return x.SyscallFreqAgg
+		}
+	}
+	return nil
+}
+
 type isEbpfEvent_Payload interface {
 	isEbpfEvent_Payload()
 }
@@ -321,6 +331,10 @@ type EbpfEvent_SysFreq struct {
 	SysFreq *SysFreqEvent `protobuf:"bytes,67,opt,name=sys_freq,json=sysFreq,proto3,oneof"`
 }
 
+type EbpfEvent_SyscallFreqAgg struct {
+	SyscallFreqAgg *SyscallFreqAgg `protobuf:"bytes,73,opt,name=syscall_freq_agg,json=syscallFreqAgg,proto3,oneof"`
+}
+
 func (*EbpfEvent_Snoop) isEbpfEvent_Payload() {}
 
 func (*EbpfEvent_Network) isEbpfEvent_Payload() {}
@@ -334,6 +348,8 @@ func (*EbpfEvent_Mount) isEbpfEvent_Payload() {}
 func (*EbpfEvent_Resource) isEbpfEvent_Payload() {}
 
 func (*EbpfEvent_SysFreq) isEbpfEvent_Payload() {}
+
+func (*EbpfEvent_SyscallFreqAgg) isEbpfEvent_Payload() {}
 
 type SnooperEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1019,11 +1035,55 @@ func (x *Batch) GetBatch() []*EbpfEvent {
 	return nil
 }
 
+type SyscallFreqAgg struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VectorJson    string                 `protobuf:"bytes,72,opt,name=vector_json,json=vectorJson,proto3" json:"vector_json,omitempty"` // e.g. {"0":10,"1":5,"60":7}
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SyscallFreqAgg) Reset() {
+	*x = SyscallFreqAgg{}
+	mi := &file_ebpf_event_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SyscallFreqAgg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyscallFreqAgg) ProtoMessage() {}
+
+func (x *SyscallFreqAgg) ProtoReflect() protoreflect.Message {
+	mi := &file_ebpf_event_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyscallFreqAgg.ProtoReflect.Descriptor instead.
+func (*SyscallFreqAgg) Descriptor() ([]byte, []int) {
+	return file_ebpf_event_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SyscallFreqAgg) GetVectorJson() string {
+	if x != nil {
+		return x.VectorJson
+	}
+	return ""
+}
+
 var File_ebpf_event_proto protoreflect.FileDescriptor
 
 const file_ebpf_event_proto_rawDesc = "" +
 	"\n" +
-	"\x10ebpf_event.proto\x12\x02pb\"\xf4\a\n" +
+	"\x10ebpf_event.proto\x12\x02pb\"\xb4\b\n" +
 	"\tEbpfEvent\x12\x10\n" +
 	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x10\n" +
 	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x12\n" +
@@ -1054,7 +1114,8 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\x04mmap\x18/ \x01(\v2\r.pb.MmapEventH\x00R\x04mmap\x12&\n" +
 	"\x05mount\x185 \x01(\v2\x0e.pb.MountEventH\x00R\x05mount\x12/\n" +
 	"\bresource\x18@ \x01(\v2\x11.pb.ResourceEventH\x00R\bresource\x12-\n" +
-	"\bsys_freq\x18C \x01(\v2\x10.pb.SysFreqEventH\x00R\asysFreq\x1aF\n" +
+	"\bsys_freq\x18C \x01(\v2\x10.pb.SysFreqEventH\x00R\asysFreq\x12>\n" +
+	"\x10syscall_freq_agg\x18I \x01(\v2\x12.pb.SyscallFreqAggH\x00R\x0esyscallFreqAgg\x1aF\n" +
 	"\x18ContainerLabelsJsonEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\t\n" +
@@ -1122,7 +1183,10 @@ const file_ebpf_event_proto_rawDesc = "" +
 	"\amessage\x18E \x01(\tR\amessage\"@\n" +
 	"\x05Batch\x12\x12\n" +
 	"\x04type\x18F \x01(\tR\x04type\x12#\n" +
-	"\x05batch\x18G \x03(\v2\r.pb.EbpfEventR\x05batch2k\n" +
+	"\x05batch\x18G \x03(\v2\r.pb.EbpfEventR\x05batch\"1\n" +
+	"\x0eSyscallFreqAgg\x12\x1f\n" +
+	"\vvector_json\x18H \x01(\tR\n" +
+	"vectorJson2k\n" +
 	"\x0eEventCollector\x12/\n" +
 	"\n" +
 	"SendEvents\x12\r.pb.EbpfEvent\x1a\x10.pb.CollectorAck(\x01\x12(\n" +
@@ -1140,22 +1204,23 @@ func file_ebpf_event_proto_rawDescGZIP() []byte {
 	return file_ebpf_event_proto_rawDescData
 }
 
-var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_ebpf_event_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_ebpf_event_proto_goTypes = []any{
-	(*EbpfEvent)(nil),     // 0: pb.EbpfEvent
-	(*SnooperEvent)(nil),  // 1: pb.SnooperEvent
-	(*NetworkEvent)(nil),  // 2: pb.NetworkEvent
-	(*PtraceEvent)(nil),   // 3: pb.PtraceEvent
-	(*MmapEvent)(nil),     // 4: pb.MmapEvent
-	(*MountEvent)(nil),    // 5: pb.MountEvent
-	(*ResourceEvent)(nil), // 6: pb.ResourceEvent
-	(*SysFreqEvent)(nil),  // 7: pb.SysFreqEvent
-	(*CollectorAck)(nil),  // 8: pb.CollectorAck
-	(*Batch)(nil),         // 9: pb.Batch
-	nil,                   // 10: pb.EbpfEvent.ContainerLabelsJsonEntry
+	(*EbpfEvent)(nil),      // 0: pb.EbpfEvent
+	(*SnooperEvent)(nil),   // 1: pb.SnooperEvent
+	(*NetworkEvent)(nil),   // 2: pb.NetworkEvent
+	(*PtraceEvent)(nil),    // 3: pb.PtraceEvent
+	(*MmapEvent)(nil),      // 4: pb.MmapEvent
+	(*MountEvent)(nil),     // 5: pb.MountEvent
+	(*ResourceEvent)(nil),  // 6: pb.ResourceEvent
+	(*SysFreqEvent)(nil),   // 7: pb.SysFreqEvent
+	(*CollectorAck)(nil),   // 8: pb.CollectorAck
+	(*Batch)(nil),          // 9: pb.Batch
+	(*SyscallFreqAgg)(nil), // 10: pb.SyscallFreqAgg
+	nil,                    // 11: pb.EbpfEvent.ContainerLabelsJsonEntry
 }
 var file_ebpf_event_proto_depIdxs = []int32{
-	10, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
+	11, // 0: pb.EbpfEvent.container_labels_json:type_name -> pb.EbpfEvent.ContainerLabelsJsonEntry
 	1,  // 1: pb.EbpfEvent.snoop:type_name -> pb.SnooperEvent
 	2,  // 2: pb.EbpfEvent.network:type_name -> pb.NetworkEvent
 	3,  // 3: pb.EbpfEvent.ptrace:type_name -> pb.PtraceEvent
@@ -1163,16 +1228,17 @@ var file_ebpf_event_proto_depIdxs = []int32{
 	5,  // 5: pb.EbpfEvent.mount:type_name -> pb.MountEvent
 	6,  // 6: pb.EbpfEvent.resource:type_name -> pb.ResourceEvent
 	7,  // 7: pb.EbpfEvent.sys_freq:type_name -> pb.SysFreqEvent
-	0,  // 8: pb.Batch.batch:type_name -> pb.EbpfEvent
-	0,  // 9: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
-	9,  // 10: pb.EventCollector.SendBatch:input_type -> pb.Batch
-	8,  // 11: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
-	8,  // 12: pb.EventCollector.SendBatch:output_type -> pb.CollectorAck
-	11, // [11:13] is the sub-list for method output_type
-	9,  // [9:11] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	10, // 8: pb.EbpfEvent.syscall_freq_agg:type_name -> pb.SyscallFreqAgg
+	0,  // 9: pb.Batch.batch:type_name -> pb.EbpfEvent
+	0,  // 10: pb.EventCollector.SendEvents:input_type -> pb.EbpfEvent
+	9,  // 11: pb.EventCollector.SendBatch:input_type -> pb.Batch
+	8,  // 12: pb.EventCollector.SendEvents:output_type -> pb.CollectorAck
+	8,  // 13: pb.EventCollector.SendBatch:output_type -> pb.CollectorAck
+	12, // [12:14] is the sub-list for method output_type
+	10, // [10:12] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_ebpf_event_proto_init() }
@@ -1188,6 +1254,7 @@ func file_ebpf_event_proto_init() {
 		(*EbpfEvent_Mount)(nil),
 		(*EbpfEvent_Resource)(nil),
 		(*EbpfEvent_SysFreq)(nil),
+		(*EbpfEvent_SyscallFreqAgg)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1195,7 +1262,7 @@ func file_ebpf_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ebpf_event_proto_rawDesc), len(file_ebpf_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

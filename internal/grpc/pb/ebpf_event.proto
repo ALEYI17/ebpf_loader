@@ -33,6 +33,7 @@ message EbpfEvent {
     MountEvent mount = 53;
     ResourceEvent resource = 64;
     SysFreqEvent sys_freq = 67;
+    SyscallFreqAgg syscall_freq_agg = 73;
   }
 }
 
@@ -106,6 +107,10 @@ message CollectorAck {
 message Batch{
   string type = 70;
   repeated EbpfEvent batch = 71;
+}
+
+message SyscallFreqAgg {
+  string vector_json = 72; // e.g. {"0":10,"1":5,"60":7}
 }
 
 

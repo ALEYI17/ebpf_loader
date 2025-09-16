@@ -7,12 +7,14 @@ import (
 	"ebpf_loader/internal/metrics"
 	"ebpf_loader/pkg/logutil"
 	"ebpf_loader/pkg/programs"
+	"encoding/json"
 	"time"
 
 	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/rlimit"
 	"go.uber.org/zap"
+	"golang.org/x/sys/unix"
 )
 
 type SyscallFreqTracerLoader struct{
@@ -21,6 +23,7 @@ type SyscallFreqTracerLoader struct{
   Tcexit link.Link
   freqTable *ebpf.Map
   metadataTable *ebpf.Map
+  inteval int
 }
 
 func NewSyscallFreqTracerLoader() (*SyscallFreqTracerLoader,error){
@@ -39,6 +42,7 @@ func NewSyscallFreqTracerLoader() (*SyscallFreqTracerLoader,error){
     Objs: &objs,
     freqTable: objs.SyscountMap,
     metadataTable: objs.MetaCache,
+    inteval: 10,
   }
 
   tc,err := link.Tracepoint("raw_syscalls", "sys_enter", objs.TraceSysEnter, nil)
@@ -84,7 +88,7 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
   go func() {
 
     defer close(c)
-    interval := 2 * time.Second
+    interval := time.Duration(sft.inteval) * time.Second
     ticker := time.NewTicker(interval)
     defer ticker.Stop()
 
@@ -98,39 +102,95 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
         iter := sft.freqTable.Iterate()
         var key syscallfreq.SysFreqtracerSyscallKey // struct { Pid uint32; SyscallNr uint32 }
         var value uint64
-
-        var batch []*pb.EbpfEvent
+        var entries []struct {
+					Key   syscallfreq.SysFreqtracerSyscallKey
+					Value uint64
+				}
         for iter.Next(&key, &value){
-          var meta syscallfreq.SysFreqtracerProcessMetadataT
-          err :=sft.metadataTable.Lookup(&key.Pid, &meta)
-          if err !=nil{
-            if err := sft.freqTable.Delete(&key);err !=nil{
-              logger.Warn("failed to delete stale syscount_map entry",
-                zap.Uint32("pid", key.Pid),
-                zap.Uint32("syscall", key.SyscallNr),
-                zap.Error(err))
-            }
-            continue
+          k := key
+					entries = append(entries, struct {
+						Key   syscallfreq.SysFreqtracerSyscallKey
+						Value uint64
+					}{Key: k, Value: value})
+        }
+        if err := iter.Err(); err != nil {
+					metrics.ErrorsTotal.WithLabelValues("syscall_freq", "decode").Inc()
+					logger.Error("failed to iterate syscall_freq table", zap.Error(err))
+					continue
+				}
+        pidMap := make(map[uint32]map[uint32]uint64)
+        metaMap := make(map[uint32]*syscallfreq.SysFreqtracerProcessMetadataT)
+
+        for _,e := range entries{
+          pid := e.Key.Pid
+          syscall := e.Key.SyscallNr
+          if _,ok := pidMap[pid]; !ok{
+            pidMap[pid] = make(map[uint32]uint64)
           }
-          event := syscallfreq.GenerateGrpcMessage(key, value, &meta,nodeName)
+
+          if _,ok := metaMap[pid];!ok{
+            var meta syscallfreq.SysFreqtracerProcessMetadataT
+            err :=sft.metadataTable.Lookup(&pid, &meta)
+            if err !=nil{
+              if err := sft.freqTable.Delete(&e.Key);err !=nil{
+                logger.Warn("failed to delete stale syscount_map entry",
+                  zap.Uint32("pid", e.Key.Pid),
+                  zap.Uint32("syscall", e.Key.SyscallNr),
+                  zap.Error(err))
+              }
+              continue
+            }
+            m := meta
+            metaMap[pid] = &m
+          }
+          
+          pidMap[pid][syscall] += e.Value
           metrics.EventsTotal.WithLabelValues("syscall_freq").Inc()
-          batch = append(batch, event)
 
           zero := uint64(0)
-          if err := sft.freqTable.Update(&key, &zero, ebpf.UpdateAny);err !=nil{
+          if err := sft.freqTable.Update(&e.Key, &zero, ebpf.UpdateAny);err !=nil{
             logger.Error("failed to reset syscall_freq entry",
-                            zap.Uint32("pid", key.Pid),
-                            zap.Uint32("syscall", key.SyscallNr),
+                            zap.Uint32("pid", e.Key.Pid),
+                            zap.Uint32("syscall", e.Key.SyscallNr),
                             zap.Error(err))
           }
 
         }
         
-        if err := iter.Err(); err !=nil{
-          metrics.ErrorsTotal.WithLabelValues("syscall_freq", "decode").Inc()
-          logger.Error("failed to iterate syscall_freq table", zap.Error(err))
-        }
+        now := time.Now().UnixMilli()
+        var batch []*pb.EbpfEvent
+        for pid, counts := range pidMap{
+          jsonBytes, err := json.Marshal(counts)
+          if err != nil {
+            logger.Error("failed to marshal counts map", zap.Error(err))
+            continue
+          }
+          ev := &pb.EbpfEvent{
+              Pid:             pid,
+              TimestampUnixMs: now,
+              EventType:       "syscall_freq_agg",
+              NodeName:        nodeName,
+              Payload: &pb.EbpfEvent_SyscallFreqAgg{
+                  SyscallFreqAgg: &pb.SyscallFreqAgg{
+                      VectorJson: string(jsonBytes),
+                  },
+              },
+          }
 
+          if meta,ok := metaMap[pid];ok{
+            ev.Uid = meta.Uid
+            ev.Gid = meta.Gid
+            ev.Ppid = meta.Ppid
+            ev.UserPid = meta.UserPid
+            ev.UserPpid = meta.UserPpid
+            ev.CgroupId = meta.CgroupId
+            ev.CgroupName = unix.ByteSliceToString(meta.CgroupName[:])
+            ev.Comm = unix.ByteSliceToString(meta.Comm[:])
+
+          }
+
+          batch = append(batch, ev)
+        }
         if len(batch) >0{
           batchMessage := &pb.Batch{
             Batch: batch,
