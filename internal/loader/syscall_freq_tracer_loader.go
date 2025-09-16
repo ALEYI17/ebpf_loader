@@ -21,6 +21,7 @@ type SyscallFreqTracerLoader struct{
   Tcexit link.Link
   freqTable *ebpf.Map
   metadataTable *ebpf.Map
+  inteval int
 }
 
 func NewSyscallFreqTracerLoader() (*SyscallFreqTracerLoader,error){
@@ -39,6 +40,7 @@ func NewSyscallFreqTracerLoader() (*SyscallFreqTracerLoader,error){
     Objs: &objs,
     freqTable: objs.SyscountMap,
     metadataTable: objs.MetaCache,
+    inteval: 10,
   }
 
   tc,err := link.Tracepoint("raw_syscalls", "sys_enter", objs.TraceSysEnter, nil)
@@ -84,7 +86,7 @@ func (sft *SyscallFreqTracerLoader) Run(ctx context.Context, nodeName string)<-c
   go func() {
 
     defer close(c)
-    interval := 2 * time.Second
+    interval := time.Duration(sft.inteval) * time.Second
     ticker := time.NewTicker(interval)
     defer ticker.Stop()
 
